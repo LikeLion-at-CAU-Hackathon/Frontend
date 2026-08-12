@@ -1,20 +1,4 @@
-import { useEffect } from "react";
-import axiosInstance from "./api/axiosInstance";
-
 function App() {
-  useEffect(() => {
-    const checkBackend = async () => {
-      try {
-        const response = await axiosInstance.get("/hello/");
-        console.log("백엔드 연결 성공:", response.data);
-      } catch (error) {
-        console.error("백엔드 연결 실패:", error);
-      }
-    };
-
-    checkBackend();
-  }, []);
-
   return (
     <main>
       <h1>2026 멋사 해커톤</h1>
