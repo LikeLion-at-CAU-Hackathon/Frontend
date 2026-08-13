@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { BottomNav } from "./components/common";
+import ErrorPage from "./pages/common/ErrorPage";
 import NfcFailedPage from "./pages/nfc/NfcFailedPage";
 import NfcLoadingPage from "./pages/nfc/NfcLoadingPage";
 import ProductExploreMorePage from "./pages/nfc/ProductExploreMorePage";
@@ -42,6 +43,7 @@ function AppContent() {
           <Route path="/product/explore-more" element={<ProductExploreMorePage />} />
           <Route path="/product/size-compare" element={<ProductSizeComparePage />} />
           <Route path="/product/size-compare/result" element={<ProductSizeCompareResultPage />} />
+          <Route path="/error" element={<ErrorPage />} />
           <Route path="/nfc/loading" element={<NfcLoadingPage />} />
           <Route path="/nfc/failed" element={<NfcFailedPage />} />
           <Route path="/nfc/staff-called" element={<NfcFailedPage isStaffCalled />} />
