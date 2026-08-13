@@ -8,7 +8,7 @@ function ErrorModal({ isOpen, onClose, title, description, buttonText }) {
 
   return (
     <div
-      className="fixed inset-y-0 left-1/2 z-[70] flex w-full max-w-[393px] -translate-x-1/2 items-center justify-center bg-[rgba(10,9,8,0.42)]"
+      className="fixed inset-y-0 left-1/2 z-[70] flex w-full max-w-[440px] -translate-x-1/2 items-center justify-center overflow-hidden bg-[rgba(10,9,8,0.42)]"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
