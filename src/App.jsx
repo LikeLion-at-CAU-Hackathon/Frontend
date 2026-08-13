@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { BottomNav } from "./components/common";
 import NfcFailedPage from "./pages/nfc/NfcFailedPage";
 import NfcLoadingPage from "./pages/nfc/NfcLoadingPage";
@@ -24,12 +24,12 @@ function PlaceholderPage({ title }) {
   );
 }
 
-function App() {
+function AppContent() {
   const { pathname } = useLocation();
   const isNfcTaggingPage = ["/nfc/loading", "/nfc/failed", "/nfc/staff-called"].includes(pathname);
 
   return (
-    <div className="mx-auto flex h-dvh w-full max-w-[393px] flex-col overflow-hidden bg-[#f8f6f3]">
+    <div className="mx-auto flex h-dvh w-full max-w-[440px] flex-col overflow-hidden bg-[#f8f6f3]">
       <div
         className={`min-h-0 flex-1 overflow-y-auto ${
           isNfcTaggingPage ? "" : "pb-[calc(62px+env(safe-area-inset-bottom))]"
@@ -54,8 +54,16 @@ function App() {
           ))}
         </Routes>
       </div>
-      {!isNfcTaggingPage && <BottomNav className="!max-w-[393px]" />}
+      {!isNfcTaggingPage && <BottomNav className="max-w-[440px]" />}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }
 

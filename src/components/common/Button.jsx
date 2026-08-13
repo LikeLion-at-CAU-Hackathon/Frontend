@@ -1,7 +1,6 @@
-import { Link } from "react-router-dom";
-
 const variants = {
   primary: "bg-[#0a0908] text-white",
+  brown: "bg-[#251a0f] text-white",
   outline: "border border-[#e5e0da] bg-[#faf8f5] text-[#0a0908]",
   outlineWhite: "border border-[#ccc6be] bg-white text-[#0a0908]",
   disabled: "bg-[#ececeb] text-[#939393]",
@@ -31,9 +30,9 @@ function Button({
 
   if (to && !disabled) {
     return (
-      <Link to={to} className={buttonClassName} {...props}>
+      <a href={to} className={buttonClassName} {...props}>
         {children}
-      </Link>
+      </a>
     );
   }
 

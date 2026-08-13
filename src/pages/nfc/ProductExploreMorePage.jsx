@@ -1,10 +1,12 @@
+import { useState } from "react";
 import exploreCaseIcon from "../../assets/images/figma/product-detail/explore-case.svg";
 import exploreDotIcon from "../../assets/images/figma/product-detail/explore-dot.svg";
 import exploreHero from "../../assets/images/figma/product-detail/explore-hero.png";
 import exploreStep1 from "../../assets/images/figma/product-detail/explore-step-1.png";
 import exploreStep2 from "../../assets/images/figma/product-detail/explore-step-2.png";
 import exploreStep3 from "../../assets/images/figma/product-detail/explore-step-3.png";
-import { AdvisorButton } from "../../components/common";
+import { AdvisorButton, AdvisorSheet } from "../../components/common";
+import { products } from "../../mocks/products";
 
 const steps = [
   {
@@ -27,6 +29,8 @@ const steps = [
   },
 ];
 
+const product = products.find((item) => item.id === 8);
+
 function GuideStep({ number, image, imageClassName, text }) {
   return (
     <li className="flex items-center gap-[15px]">
@@ -44,6 +48,8 @@ function GuideStep({ number, image, imageClassName, text }) {
 }
 
 function ProductExploreMorePage() {
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+
   return (
     <main className="relative min-h-[calc(100dvh_-_62px_-_env(safe-area-inset-bottom))] overflow-x-hidden bg-[#faf8f5] pb-8">
       <section className="flex flex-col items-center pt-[51px]">
@@ -86,7 +92,12 @@ function ProductExploreMorePage() {
         </ul>
       </section>
 
-      <AdvisorButton />
+      <AdvisorButton onClick={() => setIsAdvisorOpen(true)} />
+      <AdvisorSheet
+        isOpen={isAdvisorOpen}
+        product={product}
+        onClose={() => setIsAdvisorOpen(false)}
+      />
     </main>
   );
 }

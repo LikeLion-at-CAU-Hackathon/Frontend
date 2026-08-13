@@ -60,7 +60,7 @@ function Tag({ children }) {
 
 function ProductDetailPage() {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#faf8f5]">
+    <main className="overflow-x-hidden bg-[#faf8f5]">
       <section className="relative">
         <div className="h-[52px] bg-[#faf8f5]">
           <button
