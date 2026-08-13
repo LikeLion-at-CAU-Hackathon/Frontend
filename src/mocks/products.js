@@ -5,6 +5,7 @@ import sneakersImage from "../assets/images/products/sneakers.webp";
 import sunglassesImage from "../assets/images/products/sunglasses.webp";
 import tshirtImage from "../assets/images/products/tshirt.webp";
 import walletImage from "../assets/images/products/wallet.webp";
+import hoboBagImage from "../assets/images/products/hobobag.webp";
 
 export const products = [
   {
@@ -22,12 +23,12 @@ export const products = [
     image: walletImage,
     images: [walletImage],
     specs: [
-      { label: "DIMENSIONS", value: "3 × 12 × 9 cm" },
+      { label: "DIMENSIONS", value: "3 x 12 x 9 cm" },
       { label: "MATERIAL", value: "Visetos Monogram Canvas" },
       { label: "TRIM", value: "Natural Nappa Leather" },
       { label: "CLOSURE", value: "Snap Closure" },
       { label: "CARD SLOTS", value: "6" },
-      { label: "STORAGE", value: "Bill Sleeve · Zip Compartment" },
+      { label: "STORAGE", value: "Bill Sleeve / Zip Compartment" },
     ],
   },
   {
@@ -45,7 +46,7 @@ export const products = [
     image: scarfImage,
     images: [scarfImage],
     specs: [
-      { label: "DIMENSIONS", value: "8 × 120 cm" },
+      { label: "DIMENSIONS", value: "8 x 120 cm" },
       { label: "MATERIAL", value: "100% Organic Silk" },
       { label: "DESIGN", value: "Reversible" },
       { label: "PATTERN", value: "Visetos Monogram" },
@@ -114,11 +115,11 @@ export const products = [
     image: eauDeParfumImage,
     images: [eauDeParfumImage],
     specs: [
-      { label: "TYPE", value: "Eau de Parfum · Unisex" },
+      { label: "TYPE", value: "Eau de Parfum / Unisex" },
       { label: "VOLUME", value: "75 ml" },
-      { label: "TOP NOTES", value: "Raspberry · Apricot" },
-      { label: "MIDDLE NOTES", value: "Jasmine · White Peony · Violet Leaf" },
-      { label: "BASE NOTES", value: "White Moss · Vanilla · Sandalwood · Ambrox" },
+      { label: "TOP NOTES", value: "Raspberry / Apricot" },
+      { label: "MIDDLE NOTES", value: "Jasmine / White Peony / Violet Leaf" },
+      { label: "BASE NOTES", value: "White Moss / Vanilla / Sandalwood / Ambrox" },
       { label: "MADE IN", value: "France" },
     ],
   },
@@ -164,8 +165,39 @@ export const products = [
       { label: "UPPER", value: "Italian Calf Leather" },
       { label: "PATTERN", value: "Embossed Visetos Monogram" },
       { label: "LINING", value: "Mesh-infused Calf Leather" },
-      { label: "INSOLE", value: "OrthoLite®" },
+      { label: "INSOLE", value: "OrthoLite" },
       { label: "DETAIL", value: "Bavarian Diamond Heel Patch" },
+    ],
+  },
+  {
+    id: 8,
+    category: "BAG",
+    collection: "VISETOS",
+    collectionName: "VISETOS",
+    groupId: 1,
+    groupName: "Aren Hobo",
+    name: "Aren Hobo In Visetos",
+    price: 1290000,
+    color: "Cognac",
+    colors: ["Cognac"],
+    size: "Small",
+    sizes: ["Mini", "Small", "Medium"],
+    stock: 3,
+    stocks: [
+      {
+        branch_name: "MCM 신세계 본점",
+        quantity: 3,
+      },
+    ],
+    styleNo: "MWHESSTA01CO001",
+    image: hoboBagImage,
+    images: [hoboBagImage],
+    specs: [
+      { label: "STYLE NO.", value: "MWHESSTA01CO001" },
+      { label: "DIMENSIONS", value: "10 x 26 x 19 cm" },
+      { label: "CLOSURE", value: "Zip Closure" },
+      { label: "STRAP", value: "Adjustable Leather Shoulder Strap, 125-133 cm" },
+      { label: "STORAGE", value: "Tablet / Mobile Phone / AirPods / AirPods Max" },
     ],
   },
 ];
