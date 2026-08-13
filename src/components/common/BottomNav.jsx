@@ -21,6 +21,7 @@ const navItems = [
 
 const cx = (...classes) => classes.filter(Boolean).join(" ");
 
+// SVG 아이콘 코드를 화면에 보여주는 기능
 function SvgIcon({ svg, className = "" }) {
   return (
     <span
@@ -31,6 +32,7 @@ function SvgIcon({ svg, className = "" }) {
   );
 }
 
+// 하단 네비게이션의 탭 버튼 하나
 function BottomNavItem({ item }) {
   if (item.isCenter) {
     return (
@@ -97,6 +99,7 @@ function BottomNavItem({ item }) {
   );
 }
 
+// 화면 아래에 고정되는 하단 네비게이션 바
 function BottomNav({ className = "" }) {
   return (
     <nav

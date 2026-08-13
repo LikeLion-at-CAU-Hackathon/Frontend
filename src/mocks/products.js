@@ -181,7 +181,7 @@ export const products = [
     color: "Cognac",
     colors: ["Cognac"],
     size: "Small",
-    sizes: ["Mini", "Small", "Medium"],
+    sizes: ["Small", "Large"],
     stock: 3,
     stocks: [
       {

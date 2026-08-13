@@ -1,4 +1,5 @@
 import hoboBagImage from "../assets/images/products/hobobag.webp";
+import hoboBagLargeImage from "../assets/images/products/hobobag_large.webp";
 
 export const productSizes = [
   {
@@ -24,7 +25,7 @@ export const productSizes = [
     name: "Large Aren Hobo In Visetos",
     color: "Cognac",
     size: "Large",
-    image: hoboBagImage,
+    image: hoboBagLargeImage,
     isCurrent: false,
     dimensions: "11 x 34 x 33 cm",
     strap: "92.5cm ~ 116.5cm",
