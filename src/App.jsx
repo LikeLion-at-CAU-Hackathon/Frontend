@@ -1,5 +1,7 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { BottomNav } from "./components/common";
+import NfcFailedPage from "./pages/nfc/NfcFailedPage";
+import NfcLoadingPage from "./pages/nfc/NfcLoadingPage";
 import ProductExploreMorePage from "./pages/nfc/ProductExploreMorePage";
 import ProductDetailPage from "./pages/product/ProductDetailPage";
 import ProductSizeComparePage from "./pages/size/ProductSizeComparePage";
@@ -23,9 +25,16 @@ function PlaceholderPage({ title }) {
 }
 
 function App() {
+  const { pathname } = useLocation();
+  const isNfcTaggingPage = ["/nfc/loading", "/nfc/failed", "/nfc/staff-called"].includes(pathname);
+
   return (
     <div className="mx-auto flex h-dvh w-full max-w-[393px] flex-col overflow-hidden bg-[#f8f6f3]">
-      <div className="min-h-0 flex-1 overflow-y-auto pb-[calc(62px+env(safe-area-inset-bottom))]">
+      <div
+        className={`min-h-0 flex-1 overflow-y-auto ${
+          isNfcTaggingPage ? "" : "pb-[calc(62px+env(safe-area-inset-bottom))]"
+        }`}
+      >
         <Routes>
           <Route path="/" element={<Navigate to="/product" replace />} />
           <Route path="/product" element={<ProductDetailPage />} />
@@ -33,6 +42,9 @@ function App() {
           <Route path="/product/explore-more" element={<ProductExploreMorePage />} />
           <Route path="/product/size-compare" element={<ProductSizeComparePage />} />
           <Route path="/product/size-compare/result" element={<ProductSizeCompareResultPage />} />
+          <Route path="/nfc/loading" element={<NfcLoadingPage />} />
+          <Route path="/nfc/failed" element={<NfcFailedPage />} />
+          <Route path="/nfc/staff-called" element={<NfcFailedPage isStaffCalled />} />
           {pages.map((page) => (
             <Route
               key={page.path}
@@ -42,7 +54,7 @@ function App() {
           ))}
         </Routes>
       </div>
-      <BottomNav className="!max-w-[393px]" />
+      {!isNfcTaggingPage && <BottomNav className="!max-w-[393px]" />}
     </div>
   );
 }
