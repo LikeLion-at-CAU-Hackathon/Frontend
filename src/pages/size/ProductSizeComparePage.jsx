@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AdvisorButton, Button, TopBar } from "../../components/common";
+import { AdvisorButton, AdvisorSheet, Button, TopBar } from "../../components/common";
 import { ProductImage, SizeOption } from "../../components/product";
 import { products } from "../../mocks/products";
 import { getProductSizesByGroupId } from "../../mocks/productSizes";
@@ -25,6 +25,7 @@ const collectionLabel = `${product.collectionName ?? product.collection} COLLECT
 function ProductSizeComparePage() {
   const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState("");
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const canCompare = Boolean(selectedSize);
 
   return (
@@ -80,7 +81,12 @@ function ProductSizeComparePage() {
         </div>
       </section>
 
-      <AdvisorButton />
+      <AdvisorButton onClick={() => setIsAdvisorOpen(true)} />
+      <AdvisorSheet
+        isOpen={isAdvisorOpen}
+        product={product}
+        onClose={() => setIsAdvisorOpen(false)}
+      />
     </main>
   );
 }
