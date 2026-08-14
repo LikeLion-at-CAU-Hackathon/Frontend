@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AdvisorButton, AdvisorSheet } from "../../components/common";
 import { StoryTabBar } from "../../components/story";
-import { productStory } from "../../mocks/productStories";
+import { aiDocentFaqs, productStory } from "../../mocks/productStories";
+import StoryAiDocentPage from "./ai-docent/StoryAiDocentPage";
 import StoryCarePage from "./care/StoryCarePage";
 import StoryDesignPage from "./design/StoryDesignPage";
 import StoryMaterialsPage from "./materials/StoryMaterialsPage";
@@ -15,6 +16,7 @@ function ProductStoryPage() {
     design: <StoryDesignPage story={design} />,
     materials: <StoryMaterialsPage story={materials} />,
     care: <StoryCarePage story={care} />,
+    "ai-docent": <StoryAiDocentPage faqs={aiDocentFaqs} />,
   };
 
   return (
@@ -23,7 +25,14 @@ function ProductStoryPage() {
 
       {storyPages[activeTab] ?? <StoryDesignPage story={design} />}
 
-      <AdvisorButton onClick={() => setIsAdvisorOpen(true)} />
+      <AdvisorButton
+        onClick={() => setIsAdvisorOpen(true)}
+        positionClassName={
+          activeTab === "ai-docent"
+            ? "bottom-[139px] right-[max(16px,calc((100vw_-_393px)/2_+_16px))]"
+            : undefined
+        }
+      />
       <AdvisorSheet isOpen={isAdvisorOpen} onClose={() => setIsAdvisorOpen(false)} />
     </main>
   );

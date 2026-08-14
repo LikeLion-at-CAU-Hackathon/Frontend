@@ -1,80 +1,175 @@
 import hoboBagImage from "../assets/images/products/hobobag.webp";
 import materialCanvasImage from "../assets/images/figma/story/story-material-raw-1.png";
 
+export const storyResponse = {
+  sections: [
+    {
+      title: "Collection",
+      content: "Visetos Collection",
+    },
+    {
+      title: "Design",
+      content: "클래식한 실루엣과 MCM의 시그니처 모노그램을 현대적으로 재해석한 디자인입니다.",
+    },
+    {
+      title: "Signature",
+      content: "Leather Hang Tag",
+    },
+    {
+      title: "Heritage",
+      content: "MCM Luggage",
+    },
+  ],
+};
+
+export const materialsResponse = [
+  {
+    id: 1,
+    name: "Visetos Pattern",
+    location: "Body",
+    description: "MCM의 시그니처 Visetos 모노그램 캔버스를 바디에 사용했습니다.",
+    image: null,
+    order: 1,
+  },
+  {
+    id: 2,
+    name: "Natural Nappa Leather",
+    location: "Trim",
+    description: "천연 나파 가죽을 트림에 사용해 부드러운 질감과 고급스러운 마감을 더했습니다.",
+    image: null,
+    order: 2,
+  },
+  {
+    id: 3,
+    name: "24K Gold-Plated Brass",
+    location: "Hardware",
+    description: "브라스 하드웨어에 24K 골드 도금을 적용했습니다.",
+    image: null,
+    order: 3,
+  },
+  {
+    id: 4,
+    name: "Suede-Finish Microfiber",
+    location: "Lining",
+    description: "가방 내부에 스웨이드 마이크로파이버 안감을 사용했습니다.",
+    image: null,
+    order: 4,
+  },
+];
+
+export const careGuideResponse = {
+  contents: [
+    {
+      title: "일상 관리",
+      content: "지속적인 마찰을 피하고 거친 표면에 제품이 닿지 않도록 주의해주세요.",
+    },
+    {
+      title: "보관",
+      content: "제품을 보관할 때는 직사광선과 높은 습도를 피해 서늘하고 건조한 곳에 보관해주세요.",
+    },
+    {
+      title: "가죽 관리",
+      content: "가죽 제품이 젖거나 얼룩이 생긴 경우 부드러운 천으로 가볍게 닦아주세요.",
+    },
+    {
+      title: "주의사항",
+      content: "비누 또는 솔벤트를 사용하지 마세요. 거친 표면과의 마찰을 피해주세요.",
+    },
+  ],
+};
+
+export const aiDocentRequest = {
+  question: "이 가방은 어떤 소재로 만들어졌어?",
+};
+
+export const aiDocentResponse = {
+  id: 1,
+  question: aiDocentRequest.question,
+  answer: "제품 정보를 확인했습니다.",
+  created_at: "2026-08-12T07:48:38.865078Z",
+};
+
+export const aiDocentFaqs = [
+  {
+    question: "Visetos 소재는 무엇인가요?",
+    answer:
+      "Visetos는 MCM의 시그니처 모노그램 캔버스입니다. 이 제품에서는 바디에 사용되어 클래식한 패턴과 견고한 인상을 만들어 줍니다.",
+  },
+  {
+    question: "비가 오는 날 사용해도 되나요?",
+    answer:
+      "가벼운 생활 습기에는 주의해서 사용할 수 있지만, 비에 장시간 노출되는 것은 피해주세요. 젖었을 때는 부드러운 천으로 가볍게 닦고 그늘에서 말려주세요.",
+  },
+  {
+    question: "이 가방에는 무엇이 들어가나요?",
+    answer:
+      "Mini 사이즈에는 스마트폰, 태블릿, AirPods, AirPods Max 등의 소지품을 수납할 수 있습니다. 노트북은 수납하기 어렵습니다. 가벼운 외출이나 일상적인 약속에 적합한 사이즈입니다. 더 많은 수납이 필요하다면 Large 사이즈도 비교해 보세요.",
+  },
+  {
+    question: "어떻게 관리하나요?",
+    answer:
+      "지속적인 마찰과 거친 표면 접촉을 피하고, 보관할 때는 직사광선과 높은 습도를 피해 서늘하고 건조한 곳에 두는 것이 좋습니다.",
+  },
+];
+
+export const aiDocentProductContext = {
+  name: "Aren Hobo In Visetos",
+  color: "Cognac",
+  size: "Small",
+  specs: ["10 x 26 x 19 cm", "125-133 cm 스트랩", "Tablet / Mobile Phone / AirPods Max"],
+  story: storyResponse.sections,
+  materials: materialsResponse.map(({ name, location, description }) => ({
+    name,
+    location,
+    description,
+  })),
+  care_guide: careGuideResponse.contents,
+};
+
+const sectionValue = (title) =>
+  storyResponse.sections.find((section) => section.title === title)?.content ?? "";
+
 export const productStory = {
   productId: 8,
+  product: {
+    name: aiDocentProductContext.name,
+    color: aiDocentProductContext.color,
+    size: aiDocentProductContext.size,
+    price: "₩1,290,000",
+    specs: aiDocentProductContext.specs,
+  },
   design: {
     eyebrow: "DESIGN & HERITAGE",
-    title: "Aren Hobo In Visetos",
+    title: aiDocentProductContext.name,
     image: hoboBagImage,
     paragraphs: [
-      "클래식한 슬로치드 실루엣을 현대적으로 재해석한 Aren Hobo는 부드러움과 구조감의 이상적인 균형을 보여줍니다.",
-      "MCM 헤리티지 러기지에서 가져온 디자인 요소인 탈부착 가능한 가죽 행택과 로고가 각인된 패드락이 더해져 Aren Hobo만의 디자인을 완성합니다.",
-      "또한 조절 가능한 가죽 스트랩이 적용된 비세토스 호보백으로, 클래식한 실루엣과 MCM의 헤리티지 러기지 디테일을 현대적으로 담아낸 디자인입니다.",
+      sectionValue("Design"),
+      `${sectionValue("Collection")}의 대표적인 무드와 ${sectionValue(
+        "Heritage",
+      )}에서 이어진 헤리티지를 함께 담았습니다.`,
+      `${sectionValue("Signature")} 디테일이 더해져 MCM 특유의 아이덴티티를 완성합니다.`,
     ],
-    highlights: [
-      { label: "COLLECTION", value: "Visetos Collection" },
-      { label: "DESIGN", value: "Softness & Structure" },
-      { label: "SIGNATURE", value: "Leather Hang Tag" },
-      { label: "HERITAGE", value: "MCM Luggage" },
-    ],
+    highlights: storyResponse.sections.map((section) => ({
+      label: section.title.toUpperCase(),
+      value: section.content,
+    })),
   },
   materials: {
     eyebrow: "MATERIALS & CRAFT",
     title: "Visetos Monogram Canvas",
     image: materialCanvasImage,
-    sections: [
-      {
-        title: "Visetos 패턴",
-        description:
-          "MCM의 시그니처 Visetos 모노그램 캔버스를 바디에 사용했습니다. 제품의 주요 소재로, 클래식한 모노그램 패턴이 Aren Hobo의 전체적인 디자인을 완성합니다.",
-      },
-      {
-        title: "Natural Nappa Leather",
-        description:
-          "천연 나파 가죽을 트림에 사용했습니다. 가죽 행택과 패드락 주변의 디테일에도 가죽 소재가 적용됩니다.",
-      },
-      {
-        title: "24K Gold-Plated Brass",
-        description:
-          "브라스 하드웨어에 24K 골드 도금을 적용했습니다. 패드락과 지퍼 등의 금속 장식에 사용됩니다.",
-      },
-      {
-        title: "Suede-Finish Microfiber",
-        description:
-          "가방 내부에는 스웨이드 마감 마이크로파이버 안감을 사용했습니다. 부드러운 스웨이드 질감의 마감으로 내부를 구성합니다.",
-      },
-    ],
+    sections: materialsResponse.map((material) => ({
+      title: material.name,
+      description: material.description,
+      location: material.location,
+    })),
   },
   care: {
     eyebrow: "CARE GUIDE",
     title: "제품 관리 가이드",
-    guides: [
-      {
-        title: "일상 관리",
-        description:
-          "지속적인 마찰을 피하고, 거친 표면에 제품이 긁히거나 마찰되지 않도록 주의해 주세요.",
-      },
-      {
-        title: "보관",
-        description:
-          "제품을 보호용 더스트 백에 넣어 직사광선과 밝은 빛을 피해 서늘하고 건조한 곳에 보관해 주세요.",
-      },
-      {
-        title: "가죽 관리",
-        description:
-          "가죽 제품이 젖거나 얼룩지지 않도록 주의하세요. 표면이 젖거나 오염되었을 경우, 보풀이 없는 밝은 색상의 흡수성 천으로 닦아 말려주세요.",
-      },
-      {
-        title: "주의사항",
-        description:
-          "비누 또는 솔벤트는 사용하지 마세요. 거친 표면과의 마찰을 피하고, 제품이 긁히지 않도록 주의하세요. 적절히 관리하면 시간이 지나면서 가죽에 자연스러운 멋이 더해집니다.",
-      },
-      {
-        title: "제품 문의",
-        description:
-          "제품에 대한 문의 사항이 있으시면 MCM 매장이나 고객 서비스 팀에 언제든지 연락해 주세요.",
-      },
-    ],
+    guides: careGuideResponse.contents.map((guide) => ({
+      title: guide.title,
+      description: guide.content,
+    })),
   },
 };

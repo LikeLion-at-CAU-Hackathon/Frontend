@@ -7,6 +7,27 @@ import tshirtImage from "../assets/images/products/tshirt.webp";
 import walletImage from "../assets/images/products/wallet.webp";
 import hoboBagImage from "../assets/images/products/hobobag.webp";
 
+export const productStockResponse = [
+  {
+    branch_name: "MCM 신세계 본점",
+    quantity: 3,
+  },
+];
+
+export const productDetailResponse = {
+  id: 8,
+  name: "Aren Hobo In Visetos",
+  price: 1290000,
+  color: "Cognac",
+  size: "Small",
+  specs: [],
+  collection_name: "VISETOS",
+  group_name: "Aren Hobo",
+  group_id: 1,
+  images: [],
+  stocks: productStockResponse,
+};
+
 export const products = [
   {
     id: 1,
@@ -170,25 +191,23 @@ export const products = [
     ],
   },
   {
-    id: 8,
+    id: productDetailResponse.id,
     category: "BAG",
-    collection: "VISETOS",
-    collectionName: "VISETOS",
-    groupId: 1,
-    groupName: "Aren Hobo",
-    name: "Aren Hobo In Visetos",
-    price: 1290000,
-    color: "Cognac",
+    collection: productDetailResponse.collection_name,
+    collectionName: productDetailResponse.collection_name,
+    collection_name: productDetailResponse.collection_name,
+    groupId: productDetailResponse.group_id,
+    group_id: productDetailResponse.group_id,
+    groupName: productDetailResponse.group_name,
+    group_name: productDetailResponse.group_name,
+    name: productDetailResponse.name,
+    price: productDetailResponse.price,
+    color: productDetailResponse.color,
     colors: ["Cognac"],
-    size: "Small",
+    size: productDetailResponse.size,
     sizes: ["Small", "Large"],
-    stock: 3,
-    stocks: [
-      {
-        branch_name: "MCM 신세계 본점",
-        quantity: 3,
-      },
-    ],
+    stock: productStockResponse[0].quantity,
+    stocks: productStockResponse,
     styleNo: "MWHESSTA01CO001",
     image: hoboBagImage,
     images: [hoboBagImage],
