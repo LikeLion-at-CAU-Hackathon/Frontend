@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Button } from "../../components/common";
+import { AdvisorSheet, Button } from "../../components/common";
 import { products } from "../../mocks/products";
 import { getProductSizesByGroupId } from "../../mocks/productSizes";
 
@@ -133,6 +133,7 @@ function ProductSizeCompareResultPage() {
     : initialCompareProduct.size;
   const [compareSize, setCompareSize] = useState(defaultCompareSize);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const compareProduct = sizeInfoBySize[compareSize] ?? initialCompareProduct;
 
   return (
@@ -183,11 +184,17 @@ function ProductSizeCompareResultPage() {
       </section>
 
       <section className="mt-[29px] flex flex-col gap-[9px] pb-6">
-        <Button>{labels.request}</Button>
+        <Button onClick={() => setIsAdvisorOpen(true)}>{labels.request}</Button>
         <Button to="/product" variant="outline" className="font-normal tracking-[0px]">
           {labels.backToProduct}
         </Button>
       </section>
+
+      <AdvisorSheet
+        isOpen={isAdvisorOpen}
+        product={product}
+        onClose={() => setIsAdvisorOpen(false)}
+      />
     </main>
   );
 }
