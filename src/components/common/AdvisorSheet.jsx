@@ -9,14 +9,21 @@ const defaultProduct = products.find((item) => item.id === 8);
 // Advisor 버튼을 눌렀을 때 뜨는 상담 요청창
 function AdvisorSheet({ isOpen, onClose, product = defaultProduct }) {
   const [selectedOption, setSelectedOption] = useState("");
+  const [requestText, setRequestText] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   if (!isOpen) {
     return null;
   }
 
+  const submittedRequest =
+    requestText.trim() && (!selectedOption || selectedOption === "기타")
+      ? requestText.trim()
+      : selectedOption || requestText.trim() || "재고 문의";
+
   const handleClose = () => {
     setSelectedOption("");
+    setRequestText("");
     setIsSubmitted(false);
     onClose();
   };
@@ -39,11 +46,13 @@ function AdvisorSheet({ isOpen, onClose, product = defaultProduct }) {
         </div>
 
         {isSubmitted ? (
-          <SubmittedContent onClose={handleClose} selectedOption={selectedOption || "재고 문의"} />
+          <SubmittedContent onClose={handleClose} selectedOption={submittedRequest} />
         ) : (
           <RequestContent
             product={product}
+            requestText={requestText}
             selectedOption={selectedOption}
+            onRequestTextChange={setRequestText}
             onSelect={setSelectedOption}
             onSubmit={() => setIsSubmitted(true)}
           />
@@ -53,7 +62,14 @@ function AdvisorSheet({ isOpen, onClose, product = defaultProduct }) {
   );
 }
 
-function RequestContent({ product, selectedOption, onSelect, onSubmit }) {
+function RequestContent({
+  product,
+  requestText,
+  selectedOption,
+  onRequestTextChange,
+  onSelect,
+  onSubmit,
+}) {
   return (
     <div className="px-5 pb-7 pt-4">
       <p className="ml-2 text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#251a0f]">
@@ -64,9 +80,13 @@ function RequestContent({ product, selectedOption, onSelect, onSubmit }) {
       </h2>
 
       <div className="mt-[18px] flex h-[66px] items-center overflow-hidden rounded-[3px]">
-        <div className="h-[55px] w-[66px] shrink-0 rounded-[5px] bg-[#d9d9d9]">
+        <div className="h-[55px] w-[66px] shrink-0 overflow-hidden rounded-[5px] bg-[#d9d9d9]">
           {product?.image && (
-            <img src={product.image} alt="" className="size-full rounded-[5px] object-contain" />
+            <img
+              src={product.image}
+              alt=""
+              className="size-full scale-[1.4] -translate-y-[10px] rounded-[5px] object-contain"
+            />
           )}
         </div>
         <div className="ml-[13px] min-w-0">
@@ -81,11 +101,11 @@ function RequestContent({ product, selectedOption, onSelect, onSubmit }) {
 
       <div className="mt-[14px] h-px bg-[#e5e0da]" />
 
-      <div className="mt-[39px]">
+      <div className="mt-[30px]">
         <p className="text-[15px] font-medium leading-[31.5px] text-black">
           어떤 도움이 필요하신가요?
         </p>
-        <div className="mt-[6px] flex justify-between gap-[10px]">
+        <div className="mt-[8.5px] mb-[15px] grid grid-cols-4 gap-[10px]">
           {options.map((option) => {
             const isSelected = selectedOption === option;
 
@@ -94,7 +114,7 @@ function RequestContent({ product, selectedOption, onSelect, onSubmit }) {
                 key={option}
                 type="button"
                 onClick={() => onSelect(option)}
-                className={`flex h-10 w-20 items-center justify-center rounded-[5px] border-[1.5px] px-[10px] text-[15px] leading-[31.5px] text-black ${
+                className={`flex h-10 w-full min-w-0 items-center justify-center rounded-[5px] border-[1.5px] px-[10px] text-[15px] leading-[31.5px] text-black ${
                   isSelected
                     ? "border-[#a88f78] bg-[#e6dac9]"
                     : "border-[#bcbab6] bg-transparent"
@@ -111,6 +131,8 @@ function RequestContent({ product, selectedOption, onSelect, onSubmit }) {
         <span className="sr-only">추가 요청사항</span>
         <input
           type="text"
+          value={requestText}
+          onChange={(event) => onRequestTextChange(event.target.value)}
           className="w-full bg-transparent text-[15px] leading-[31.5px] text-[#0a0908] outline-none placeholder:text-[#bcbab6]"
           placeholder="추가 요청사항을 입력해주세요. (선택)"
         />
