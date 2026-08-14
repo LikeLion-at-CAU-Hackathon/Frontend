@@ -1,13 +1,18 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
+import { DEFAULT_PRODUCT_ID } from "../../mocks/products";
 import productIcon from "../../assets/images/figma/navigation/nav-product.svg?raw";
 import storyIcon from "../../assets/images/figma/navigation/nav-story.svg?raw";
 import nfcIcon from "../../assets/images/figma/navigation/nav-nfc.svg?raw";
 import aiIcon from "../../assets/images/figma/navigation/nav-ai.svg?raw";
 import myIcon from "../../assets/images/figma/navigation/nav-my.svg?raw";
 
-const navItems = [
-  { key: "product", label: "Product", path: "/product", icon: productIcon },
-  { key: "story", label: "Story", path: "/story", icon: storyIcon },
+const getCurrentProductId = (pathname) => {
+  return pathname.match(/^\/product\/([^/]+)/)?.[1] ?? DEFAULT_PRODUCT_ID;
+};
+
+const createNavItems = (productId) => [
+  { key: "product", label: "Product", path: `/product/${productId}`, icon: productIcon },
+  { key: "story", label: "Story", path: `/product/${productId}/story`, icon: storyIcon },
   {
     key: "nfc",
     label: "NFC",
@@ -27,6 +32,29 @@ const navItems = [
 
 const cx = (...classes) => classes.filter(Boolean).join(" ");
 
+const isProductPathActive = (pathname, productId) => {
+  const productBasePath = `/product/${productId}`;
+
+  return (
+    pathname === productBasePath ||
+    pathname.startsWith(`${productBasePath}/stock`) ||
+    pathname.startsWith(`${productBasePath}/size-compare`) ||
+    pathname.startsWith(`${productBasePath}/explore-more`)
+  );
+};
+
+const isItemActive = (item, pathname, productId) => {
+  if (item.key === "product") {
+    return isProductPathActive(pathname, productId);
+  }
+
+  if (item.key === "story") {
+    return pathname.startsWith(`/product/${productId}/story`);
+  }
+
+  return pathname === item.path || pathname.startsWith(`${item.path}/`);
+};
+
 // SVG 아이콘 코드를 화면에 보여주는 기능
 function SvgIcon({ svg, className = "" }) {
   return (
@@ -39,19 +67,19 @@ function SvgIcon({ svg, className = "" }) {
 }
 
 // 하단 네비게이션의 탭 버튼 하나
-function BottomNavItem({ item }) {
+function BottomNavItem({ item, isActive }) {
   return (
     <NavLink
       to={item.path}
       aria-label={item.label}
-      className={({ isActive }) =>
+      className={() =>
         cx(
           "flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-[3px] border-t-2 no-underline",
           isActive ? "border-black text-[#0a0908]" : "border-transparent text-[#8a8078]",
         )
       }
     >
-      {({ isActive }) => (
+      {() => (
         <>
           <span className="flex h-[18px] w-[24px] shrink-0 items-center justify-center">
             <SvgIcon
@@ -78,6 +106,10 @@ function BottomNavItem({ item }) {
 
 // 화면 아래에 고정되는 하단 네비게이션 바
 function BottomNav({ className = "" }) {
+  const { pathname } = useLocation();
+  const productId = getCurrentProductId(pathname);
+  const navItems = createNavItems(productId);
+
   return (
     <nav
       aria-label="Main navigation"
@@ -87,7 +119,11 @@ function BottomNav({ className = "" }) {
       )}
     >
       {navItems.map((item) => (
-        <BottomNavItem key={item.key} item={item} />
+        <BottomNavItem
+          key={item.key}
+          item={item}
+          isActive={isItemActive(item, pathname, productId)}
+        />
       ))}
     </nav>
   );

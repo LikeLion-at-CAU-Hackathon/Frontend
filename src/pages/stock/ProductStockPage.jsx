@@ -1,16 +1,9 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import Button from "../../components/common/Button";
 import TopBar from "../../components/common/TopBar";
-import { productStockResponse, products } from "../../mocks/products";
-
-const product = products.find((item) => item.id === 8);
-const currentStoreStocks = productStockResponse.map((stock) => ({
-  name: product.name,
-  color: product.color,
-  stock: `${stock.quantity}개`,
-  available: stock.quantity > 0,
-}));
+import { getMockProductById, getMockProductStocks } from "../../mocks/products";
 
 const nearbyStores = [
   { name: "MCM 롯데백화점 본점", distance: "0.6km", stock: "재고 있음" },
@@ -68,18 +61,27 @@ function NearbyStoreRow({ name, distance, stock }) {
 }
 
 function ProductStockPage() {
+  const { productId } = useParams();
+  const product = getMockProductById(productId);
+  const productStocks = getMockProductStocks(product.id);
+  const currentStoreStocks = productStocks.map((stock) => ({
+    name: product.name,
+    color: product.color,
+    stock: `${stock.quantity}개`,
+    available: stock.quantity > 0,
+  }));
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
 
   return (
     <main className="min-h-[719px] overflow-x-hidden bg-[#faf8f5]">
-      <TopBar />
+      <TopBar backTo={`/product/${product.id}`} />
 
       <section className="bg-[#faf8f5] px-[22px] pt-4">
         <p className="text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#8a8078]">
           재고 확인
         </p>
         <h1 className="pt-[10px] text-[18px] font-medium leading-[27px] text-[#0a0908]">
-          {productStockResponse[0]?.branch_name ?? "MCM 신세계 본점"}
+          {productStocks[0]?.branch_name ?? "MCM 신세계 본점"}
         </h1>
       </section>
 

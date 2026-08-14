@@ -1,10 +1,10 @@
 import { useState } from "react";
 import advisorCheckIcon from "../../assets/images/figma/product-detail/advisor-check.svg";
-import { products } from "../../mocks/products";
+import { DEFAULT_PRODUCT_ID, getMockProductById } from "../../mocks/products";
 import Button from "./Button";
 
 const options = ["다른 옵션", "착용 상담", "스타일링", "기타"];
-const defaultProduct = products.find((item) => item.id === 8);
+const defaultProduct = getMockProductById(DEFAULT_PRODUCT_ID);
 
 // Advisor 버튼을 눌렀을 때 뜨는 상담 요청창
 function AdvisorSheet({ isOpen, onClose, product = defaultProduct }) {
@@ -91,7 +91,7 @@ function RequestContent({
         </div>
         <div className="ml-[13px] min-w-0">
           <p className="font-playfair truncate text-[20px] leading-[31.5px] text-black">
-            Aren Hobo Mini
+            {product?.name ?? "제품"}
           </p>
           <p className="truncate text-[15px] leading-[31.5px] text-[#251a0f]">
             이 제품에 대한 정보가 함께 전달됩니다

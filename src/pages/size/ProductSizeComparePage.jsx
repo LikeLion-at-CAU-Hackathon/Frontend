@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import Button from "../../components/common/Button";
 import TopBar from "../../components/common/TopBar";
 import ProductImage from "../../components/product/ProductImage";
 import SizeOption from "../../components/product/SizeOption";
-import { products } from "../../mocks/products";
-import { getProductSizesByGroupId } from "../../mocks/productSizes";
+import { getMockProductById, getProductSizesForProduct } from "../../mocks/products";
 
 const labels = {
   sizeCompare: "사이즈 비교",
@@ -15,29 +14,32 @@ const labels = {
   compare: "비교하기",
 };
 
-const product = products.find((item) => item.id === 8);
-const productSizes = getProductSizesByGroupId(product.groupId);
-const currentSize = productSizes.find((item) => item.isCurrent) ?? productSizes[0];
-
-const compareSizes = productSizes
-  .filter((item) => item.size !== currentSize.size)
-  .map((item) => item.size);
-
 const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
-const collectionLabel = `${product.collectionName ?? product.collection} COLLECTION`;
 
 function ProductSizeComparePage() {
+  const { productId } = useParams();
   const navigate = useNavigate();
+  const product = getMockProductById(productId);
+  const productSizes = getProductSizesForProduct(product);
+  const currentSize = productSizes.find((item) => item.isCurrent) ?? productSizes[0];
+  const compareSizes = productSizes
+    .filter((item) => item.size !== currentSize.size)
+    .map((item) => item.size);
+  const collectionLabel = `${product.collectionName ?? product.collection} COLLECTION`;
   const [selectedSize, setSelectedSize] = useState("");
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const canCompare = Boolean(selectedSize);
 
   return (
     <main className="min-h-[734px] overflow-x-hidden bg-[#faf8f5]">
-      <TopBar centerTitle={labels.sizeCompare} className="bg-white" />
+      <TopBar
+        backTo={`/product/${product.id}`}
+        centerTitle={labels.sizeCompare}
+        className="bg-white"
+      />
 
       <section className="px-[22px] pt-4">
-        <ProductImage image={product.image} alt={product.name} />
+        <ProductImage image={product.image} alt={product.name} imageView={product.imageView} />
 
         <div className="px-[22px] pt-[9px]">
           <p className="text-[10px] leading-[15px] tracking-[1.4px] text-[#8a8078]">
@@ -75,7 +77,7 @@ function ProductSizeComparePage() {
             font="playfair"
             onClick={() => {
               if (canCompare) {
-                navigate(`/product/size-compare/result?size=${selectedSize}`);
+                navigate(`/product/${product.id}/size-compare/result?size=${selectedSize}`);
               }
             }}
             className="mt-3"

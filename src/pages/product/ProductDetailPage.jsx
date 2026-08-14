@@ -1,9 +1,9 @@
+import { useParams } from "react-router-dom";
 import bookmarkIcon from "../../assets/images/figma/product-detail/bookmark.svg";
 import Button from "../../components/common/Button";
 import ActionButton from "../../components/product/ActionButton";
 import ProductImage from "../../components/product/ProductImage";
-import { products } from "../../mocks/products";
-import { getProductSizesByGroupId } from "../../mocks/productSizes";
+import { getMockProductById, getProductSizesForProduct } from "../../mocks/products";
 
 const labels = {
   bookmark: "북마크",
@@ -17,26 +17,21 @@ const labels = {
   addSelection: "My Selection에 담기",
 };
 
-const product = products.find((item) => item.id === 8);
-const productSizes = getProductSizesByGroupId(product.groupId);
-const currentSize = productSizes.find((item) => item.isCurrent) ?? productSizes[0];
-
-const colorOptions = ["#aa5a23", "#0a0908", "#d7a3a4"];
-
-const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
-const collectionLabel = `${product.collectionName ?? product.collection} COLLECTION`;
-
-const getSpecValue = (label) => {
-  return product.specs.find((spec) => spec.label === label)?.value ?? "";
+const colorPalette = {
+  Black: "#0a0908",
+  "Black / Silver": "linear-gradient(135deg, #f8f8f6 0 28%, #0a0908 28% 72%, #f8f8f6 72% 100%)",
+  "Black / Matte Black": "#050505",
+  Cognac: "#aa5a23",
+  "Cognac / Gold": "linear-gradient(135deg, #aa5a23 0 70%, #d5a856 70% 100%)",
+  "Dark Brown / Black": "linear-gradient(135deg, #241614 0 62%, #050505 62% 100%)",
+  Egret: "#efebe4",
+  "Misty Gray / Silver": "linear-gradient(135deg, #b8b6b0 0 70%, #ececea 70% 100%)",
+  Pink: "#d7a3a4",
+  "Powder Pink": "#dbaaaa",
 };
 
-const productInfo = [
-  { label: "STYLE NO.", value: `# ${product.styleNo}` },
-  { label: "DIMENSIONS", value: getSpecValue("DIMENSIONS").replaceAll(" x ", " × ") },
-  { label: "CLOSURE", value: getSpecValue("CLOSURE") },
-  { label: "STRAP", value: getSpecValue("STRAP").replace(", ", ",\n") },
-  { label: "STORAGE", value: getSpecValue("STORAGE").replaceAll(" / ", " · ") },
-].filter((item) => item.value);
+const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
+const formatSpecValue = (value) => value.replaceAll(" x ", " × ").replaceAll(" / ", " · ");
 
 function InfoRow({ label, value }) {
   return (
@@ -60,6 +55,25 @@ function Tag({ children }) {
 }
 
 function ProductDetailPage() {
+  const { productId } = useParams();
+  const product = getMockProductById(productId);
+  const productSizes = getProductSizesForProduct(product);
+  const currentSize = productSizes.find((item) => item.isCurrent) ?? productSizes[0];
+  const sizeLabels = [...new Set(productSizes.map((item) => item.size))];
+  const canCompareSizes = sizeLabels.length > 1;
+  const collectionLabel = `${product.collectionName ?? product.collection} COLLECTION`;
+  const productInfo = [
+    { label: "STYLE NO.", value: `# ${product.styleNo}` },
+    ...(product.specs ?? [])
+      .filter((spec) => spec.label !== "STYLE NO.")
+      .map((spec) => ({
+        label: spec.label,
+        value: formatSpecValue(spec.value),
+      })),
+  ].filter((item) => item.value);
+  const colorOptions = product.colors?.length ? product.colors : [product.color];
+  const getColorSwatch = (color) => colorPalette[color] ?? colorPalette[product.color] ?? "#d9d9d9";
+
   return (
     <main className="overflow-x-hidden bg-[#faf8f5]">
       <section className="relative">
@@ -73,7 +87,7 @@ function ProductDetailPage() {
           </button>
         </div>
 
-        <ProductImage image={product.image} alt={product.name} />
+        <ProductImage image={product.image} alt={product.name} imageView={product.imageView} />
 
         <div className="relative bg-[#faf8f5] px-[clamp(16px,5.6vw,22px)] pb-[14px] pt-[18px]">
           <p className="text-[10px] leading-[15px] tracking-[1.4px] text-[#8a8078]">
@@ -93,7 +107,7 @@ function ProductDetailPage() {
               <span
                 key={color}
                 className="size-[18px] rounded-full border border-[#0e0d0d]"
-                style={{ backgroundColor: color }}
+                style={{ background: getColorSwatch(color) }}
               />
             ))}
           </div>
@@ -127,18 +141,19 @@ function ProductDetailPage() {
           <ActionButton
             title={labels.stockCheck}
             description={labels.liveStock}
-            to="/product/stock"
+            to={`/product/${product.id}/stock`}
           />
           <ActionButton
             title={labels.sizeCompare}
-            description="Small vs Large"
-            to="/product/size-compare"
+            description={canCompareSizes ? sizeLabels.join(" vs ") : "비교 가능한 사이즈 없음"}
+            to={`/product/${product.id}/size-compare`}
+            disabled={!canCompareSizes}
           />
         </div>
       </section>
 
       <section className="flex flex-col gap-[9px] bg-[#faf8f5] px-[clamp(16px,5.6vw,22px)] pb-[14px] pt-[18px]">
-        <Button to="/product/explore-more" variant="outline" className="font-normal tracking-[0px]">
+        <Button to={`/product/${product.id}/explore-more`} variant="outline" className="font-normal tracking-[0px]">
           Explore More
         </Button>
         <Button className="text-[12px] leading-[18px] tracking-[0.72px]">

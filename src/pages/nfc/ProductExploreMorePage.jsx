@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import exploreCaseIcon from "../../assets/images/figma/product-detail/explore-case.svg";
 import exploreDotIcon from "../../assets/images/figma/product-detail/explore-dot.svg";
 import exploreHero from "../../assets/images/figma/product-detail/explore-hero.png";
@@ -7,7 +8,7 @@ import exploreStep2 from "../../assets/images/figma/product-detail/explore-step-
 import exploreStep3 from "../../assets/images/figma/product-detail/explore-step-3.png";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
-import { products } from "../../mocks/products";
+import { getMockProductById } from "../../mocks/products";
 
 const steps = [
   {
@@ -30,8 +31,6 @@ const steps = [
   },
 ];
 
-const product = products.find((item) => item.id === 8);
-
 function GuideStep({ number, image, imageClassName, text }) {
   return (
     <li className="flex items-center gap-[15px]">
@@ -49,6 +48,8 @@ function GuideStep({ number, image, imageClassName, text }) {
 }
 
 function ProductExploreMorePage() {
+  const { productId } = useParams();
+  const product = getMockProductById(productId);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
 
   return (
