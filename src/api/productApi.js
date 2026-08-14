@@ -1,9 +1,11 @@
-import { productDetailResponse, products, productStockResponse } from "../mocks/products";
-import { productSizesResponse } from "../mocks/productSizes";
+import { getMockProductById, products, productStockResponse } from "../mocks/products";
+import { getProductSizesForProduct, productSizesResponse } from "../mocks/productSizes";
 import {
   aiDocentFaqs,
   aiDocentResponse,
   careGuideResponse,
+  getAiDocentFaqsForProduct,
+  getProductStoryForProduct,
   materialsResponse,
   storyResponse,
 } from "../mocks/productStories";
@@ -16,12 +18,14 @@ export const getProductById = async (productId) => {
   return products.find((product) => product.id === Number(productId));
 };
 
-export const getProductDetail = async () => {
-  return productDetailResponse;
+export const getProductDetail = async (productId) => {
+  return getMockProductById(productId);
 };
 
-export const getProductStory = async () => {
-  return storyResponse;
+export const getProductStory = async (productId) => {
+  const product = getMockProductById(productId);
+
+  return productId ? getProductStoryForProduct(product) : storyResponse;
 };
 
 export const getProductMaterials = async () => {
@@ -32,16 +36,26 @@ export const getProductCareGuide = async () => {
   return careGuideResponse;
 };
 
-export const getProductStock = async () => {
-  return productStockResponse;
+export const getProductStock = async (productId) => {
+  const product = getMockProductById(productId);
+
+  return productId
+    ? product.stocks ?? [{ branch_name: "MCM 신세계 본점", quantity: product.stock }]
+    : productStockResponse;
 };
 
-export const getProductSizes = async () => {
-  return productSizesResponse;
+export const getProductSizes = async (productId) => {
+  const product = getMockProductById(productId);
+
+  return productId ? getProductSizesForProduct(product) : productSizesResponse;
 };
 
-export const askAiDocent = async (question) => {
-  const faq = aiDocentFaqs.find((item) => item.question === question);
+export const askAiDocent = async (productIdOrQuestion, maybeQuestion) => {
+  const hasProductId = maybeQuestion !== undefined;
+  const product = hasProductId ? getMockProductById(productIdOrQuestion) : null;
+  const question = hasProductId ? maybeQuestion : productIdOrQuestion;
+  const faqSource = product ? getAiDocentFaqsForProduct(product) : aiDocentFaqs;
+  const faq = faqSource.find((item) => item.question === question);
 
   return {
     ...aiDocentResponse,

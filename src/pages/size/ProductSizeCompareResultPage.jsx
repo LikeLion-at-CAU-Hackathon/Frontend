@@ -1,19 +1,13 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import Button from "../../components/common/Button";
-import { products } from "../../mocks/products";
-import { getProductSizesByGroupId } from "../../mocks/productSizes";
-
-const product = products.find((item) => item.id === 8);
-const productSizes = getProductSizesByGroupId(product.groupId);
-const currentProduct = productSizes.find((item) => item.isCurrent) ?? productSizes[0];
-const initialCompareProduct = productSizes.find((item) => item.size === "Large") ?? productSizes[1];
+import { getMockProductById } from "../../mocks/products";
+import { getProductSizesForProduct } from "../../mocks/productSizes";
 
 const labels = {
   compareSizes: "Compare Sizes",
   current: "현재 선택",
-  color: "Cognac",
   dimension: "크기",
   strap: "스트랩",
   storage: "수납",
@@ -23,18 +17,17 @@ const labels = {
   backToProduct: "제품으로 돌아가기",
 };
 
-const selectableSizes = productSizes.map((item) => item.size);
-const sizeInfoBySize = Object.fromEntries(productSizes.map((item) => [item.size, item]));
-
 const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
 const formatStorage = (value) => value.replaceAll(" / ", " · ");
 
 function ProductCard({
+  productName,
   productSize,
   isCurrent = false,
   isDropdownOpen,
   onToggleDropdown,
   onSelectSize,
+  selectableSizes,
 }) {
   return (
     <article
@@ -44,7 +37,7 @@ function ProductCard({
     >
       <div className="relative z-10">
         <p className="text-[11px] font-semibold leading-[16.5px] text-[#0a0908]">
-          {product.name}
+          {productName}
         </p>
         {isCurrent ? (
           <>
@@ -84,7 +77,7 @@ function ProductCard({
               )}
             </div>
             <p className="mt-[2px] text-[10px] leading-[15px] text-[#8a8078]">
-              {labels.color}
+              {productSize.color}
             </p>
           </>
         )}
@@ -92,7 +85,7 @@ function ProductCard({
       <div className="absolute bottom-0 left-0 h-[64%] w-full overflow-hidden bg-[#f7f5f2]">
         <img
           src={productSize.image}
-          alt={`${product.name} ${productSize.size}`}
+          alt={`${productName} ${productSize.size}`}
           className="size-full object-contain"
         />
       </div>
@@ -127,7 +120,15 @@ function CompareRow({ label, currentValue, compareValue }) {
 }
 
 function ProductSizeCompareResultPage() {
+  const { productId } = useParams();
   const [searchParams] = useSearchParams();
+  const product = getMockProductById(productId);
+  const productSizes = getProductSizesForProduct(product);
+  const currentProduct = productSizes.find((item) => item.isCurrent) ?? productSizes[0];
+  const initialCompareProduct =
+    productSizes.find((item) => item.size !== currentProduct.size) ?? currentProduct;
+  const selectableSizes = productSizes.map((item) => item.size);
+  const sizeInfoBySize = Object.fromEntries(productSizes.map((item) => [item.size, item]));
   const requestedSize = searchParams.get("size");
   const defaultCompareSize = selectableSizes.includes(requestedSize)
     ? requestedSize
@@ -144,9 +145,16 @@ function ProductSizeCompareResultPage() {
       </p>
 
       <section className="mt-[49px] grid grid-cols-2 gap-5">
-        <ProductCard productSize={currentProduct} isCurrent />
         <ProductCard
+          productName={product.name}
+          productSize={currentProduct}
+          selectableSizes={selectableSizes}
+          isCurrent
+        />
+        <ProductCard
+          productName={product.name}
           productSize={compareProduct}
+          selectableSizes={selectableSizes}
           isDropdownOpen={isDropdownOpen}
           onToggleDropdown={() => setIsDropdownOpen((prev) => !prev)}
           onSelectSize={(size) => {
@@ -186,7 +194,7 @@ function ProductSizeCompareResultPage() {
 
       <section className="mt-[29px] flex flex-col gap-[9px] pb-6">
         <Button onClick={() => setIsAdvisorOpen(true)}>{labels.request}</Button>
-        <Button to="/product" variant="outline" className="font-normal tracking-[0px]">
+        <Button to={`/product/${product.id}`} variant="outline" className="font-normal tracking-[0px]">
           {labels.backToProduct}
         </Button>
       </section>

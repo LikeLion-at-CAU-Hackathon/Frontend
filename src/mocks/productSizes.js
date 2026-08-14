@@ -56,3 +56,42 @@ export const productSizes = [
 export const getProductSizesByGroupId = (groupId) => {
   return productSizes.filter((productSize) => productSize.groupId === Number(groupId));
 };
+
+const getSpecValue = (product, labels) => {
+  return labels
+    .map((label) => product.specs?.find((spec) => spec.label === label)?.value)
+    .find(Boolean);
+};
+
+const buildVariantFromProduct = (product, size, index) => ({
+  id: product.id * 100 + index,
+  productId: product.id,
+  groupId: product.groupId ?? product.group_id ?? product.id,
+  name: product.name,
+  color: product.color,
+  size,
+  image: product.image,
+  isCurrent: size === product.size,
+  dimensions: getSpecValue(product, ["DIMENSIONS", "SIZE", "LENGTH"]) ?? "-",
+  strap: getSpecValue(product, ["STRAP", "WIDTH", "FIT"]) ?? "-",
+  storage: getSpecValue(product, ["STORAGE", "MATERIAL", "TYPE"]) ?? "-",
+  price: product.price,
+  stock: product.stock,
+  stockLabel: `${product.stock}개 (현재 매장)`,
+});
+
+export const getProductSizesForProduct = (product) => {
+  const groupId = product.groupId ?? product.group_id;
+  const groupedSizes = groupId ? getProductSizesByGroupId(groupId) : [];
+
+  if (groupedSizes.length > 0) {
+    return groupedSizes.map((productSize) => ({
+      ...productSize,
+      isCurrent: productSize.size === product.size || productSize.productId === product.id,
+    }));
+  }
+
+  return (product.sizes?.length ? product.sizes : [product.size]).map((size, index) =>
+    buildVariantFromProduct(product, size, index + 1),
+  );
+};

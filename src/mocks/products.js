@@ -220,3 +220,22 @@ export const products = [
     ],
   },
 ];
+
+export const DEFAULT_PRODUCT_ID = products[0].id;
+
+export const getMockProductById = (productId) => {
+  return products.find((product) => product.id === Number(productId)) ?? products[0];
+};
+
+export const getMockProductStocks = (productId) => {
+  const product = getMockProductById(productId);
+
+  return product.stocks?.length
+    ? product.stocks
+    : [
+        {
+          branch_name: "MCM 신세계 본점",
+          quantity: product.stock,
+        },
+      ];
+};

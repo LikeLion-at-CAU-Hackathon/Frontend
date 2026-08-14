@@ -173,3 +173,122 @@ export const productStory = {
     })),
   },
 };
+
+const getSpecValue = (product, labels) => {
+  return labels
+    .map((label) => product.specs?.find((spec) => spec.label === label)?.value)
+    .find(Boolean);
+};
+
+export const getAiDocentFaqsForProduct = (product) => [
+  {
+    question: "주요 소재는 무엇인가요?",
+    answer:
+      getSpecValue(product, ["MATERIAL", "UPPER", "TYPE"]) ??
+      `${product.name}의 주요 소재 정보는 제품 상세 정보를 기준으로 안내해 드립니다.`,
+  },
+  {
+    question: "비가 오는 날 사용해도 되나요?",
+    answer:
+      "비나 습기에 장시간 노출되는 것은 피해주세요. 젖었을 때는 부드러운 천으로 가볍게 닦고 그늘에서 말려주세요.",
+  },
+  {
+    question: "이 제품의 주요 특징은 무엇인가요?",
+    answer:
+      getSpecValue(product, ["STORAGE", "DETAIL", "DESIGN", "PATTERN"]) ??
+      `${product.collection} 컬렉션의 무드와 ${product.name}의 제품 정보를 함께 확인해 보세요.`,
+  },
+  {
+    question: "어떻게 관리하나요?",
+    answer:
+      getSpecValue(product, ["CARE"]) ??
+      "지속적인 마찰과 거친 표면 접촉을 피하고, 직사광선과 높은 습도를 피해 보관하는 것이 좋습니다.",
+  },
+];
+
+export const getProductStoryForProduct = (product) => {
+  const materialSections = (product.specs ?? [])
+    .filter((spec) =>
+      ["MATERIAL", "TRIM", "HARDWARE", "PATTERN", "UPPER", "LINING", "INSOLE", "LENS", "FRAME", "TYPE"].includes(
+        spec.label,
+      ),
+    )
+    .map((spec, index) => ({
+      title: spec.label,
+      description: `${spec.value} 정보를 바탕으로 ${product.name}의 소재와 디테일을 확인할 수 있습니다.`,
+      location: index === 0 ? "Main" : "Detail",
+    }));
+
+  const sections = [
+    { title: "Collection", content: `${product.collection} Collection` },
+    {
+      title: "Design",
+      content: `${product.name}은 ${product.collection} 컬렉션의 무드를 담아 제품의 실루엣과 디테일을 보여줍니다.`,
+    },
+    { title: "Signature", content: product.styleNo },
+    { title: "Heritage", content: "MCM Heritage" },
+  ];
+
+  return {
+    productId: product.id,
+    product: {
+      name: product.name,
+      color: product.color,
+      size: product.size,
+      price: `₩${product.price.toLocaleString("ko-KR")}`,
+      specs: product.specs?.map((spec) => spec.value) ?? [],
+    },
+    design: {
+      eyebrow: "DESIGN & HERITAGE",
+      title: product.name,
+      image: product.image,
+      paragraphs: [
+        sections[1].content,
+        `${sections[0].content}의 대표적인 분위기와 ${product.category} 카테고리의 기능적 요소를 함께 담았습니다.`,
+        `Style No. ${product.styleNo} 기준의 상세 정보를 통해 제품의 특징을 확인할 수 있습니다.`,
+      ],
+      highlights: sections.map((section) => ({
+        label: section.title.toUpperCase(),
+        value: section.content,
+      })),
+    },
+    materials: {
+      eyebrow: "MATERIALS & CRAFT",
+      title: getSpecValue(product, ["MATERIAL", "UPPER", "TYPE"]) ?? product.name,
+      image: materialCanvasImage,
+      sections: materialSections.length
+        ? materialSections
+        : [
+            {
+              title: "Product Detail",
+              description: `${product.name}의 상세 정보는 제품 스펙을 기준으로 제공됩니다.`,
+              location: "Detail",
+            },
+          ],
+    },
+    care: {
+      eyebrow: "CARE GUIDE",
+      title: "제품 관리 가이드",
+      guides: [
+        {
+          title: "일상 관리",
+          description: "지속적인 마찰을 피하고 거친 표면에 제품이 닿지 않도록 주의해주세요.",
+        },
+        {
+          title: "보관",
+          description: "직사광선과 높은 습도를 피해 서늘하고 건조한 곳에 보관해주세요.",
+        },
+        {
+          title: "제품별 관리",
+          description:
+            getSpecValue(product, ["CARE"]) ??
+            "오염이나 물기가 생긴 경우 부드러운 천으로 가볍게 닦아주세요.",
+        },
+        {
+          title: "주의사항",
+          description: "비누 또는 솔벤트를 사용하지 마세요. 거친 표면과의 마찰을 피해주세요.",
+        },
+      ],
+    },
+  };
+};

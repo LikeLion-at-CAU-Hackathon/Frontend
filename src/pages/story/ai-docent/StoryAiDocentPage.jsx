@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import sendIcon from "../../../assets/images/figma/story/ai-docent-send.svg";
 import { askAiDocent } from "../../../api/productApi";
 
-const greeting =
-  "안녕하세요. Aren Hobo Mini에 대한 검증된 정보를 안내해 드립니다. 소재, 관리 방법, 수납 용량 등을 질문해 보세요.";
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 function TypingDots() {
@@ -51,12 +49,13 @@ function SuggestedQuestion({ disabled = false, question, onClick }) {
   );
 }
 
-function StoryAiDocentPage({ faqs = [] }) {
+function StoryAiDocentPage({ faqs = [], product }) {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState([]);
   const [isResponding, setIsResponding] = useState(false);
   const latestMessageRef = useRef(null);
   const hasConversation = messages.length > 0;
+  const greeting = `안녕하세요. ${product?.name ?? "이 제품"}에 대한 검증된 정보를 안내해 드립니다. 소재, 관리 방법, 특징 등을 질문해 보세요.`;
 
   useEffect(() => {
     const scrollTimer = window.setTimeout(() => {
@@ -86,7 +85,7 @@ function StoryAiDocentPage({ faqs = [] }) {
     ]);
 
     try {
-      const response = await askAiDocent(trimmedQuestion);
+      const response = await askAiDocent(product?.id, trimmedQuestion);
 
       await wait(450);
       setMessages((prevMessages) =>

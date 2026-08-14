@@ -9,6 +9,7 @@ import ProductSizeComparePage from "./pages/size/ProductSizeComparePage";
 import ProductSizeCompareResultPage from "./pages/size/ProductSizeCompareResultPage";
 import ProductStockPage from "./pages/stock/ProductStockPage";
 import ProductStoryPage from "./pages/story/ProductStoryPage";
+import { DEFAULT_PRODUCT_ID } from "./mocks/products";
 
 const pages = [
   { path: "/nfc", title: "NFC" },
@@ -37,13 +38,19 @@ function AppContent() {
         }`}
       >
         <Routes>
-          <Route path="/" element={<Navigate to="/product" replace />} />
-          <Route path="/product" element={<ProductDetailPage />} />
-          <Route path="/story" element={<ProductStoryPage />} />
-          <Route path="/product/stock" element={<ProductStockPage />} />
-          <Route path="/product/explore-more" element={<ProductExploreMorePage />} />
-          <Route path="/product/size-compare" element={<ProductSizeComparePage />} />
-          <Route path="/product/size-compare/result" element={<ProductSizeCompareResultPage />} />
+          <Route path="/" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}`} replace />} />
+          <Route path="/product" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}`} replace />} />
+          <Route path="/story" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}/story`} replace />} />
+          <Route path="/product/stock" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}/stock`} replace />} />
+          <Route path="/product/explore-more" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}/explore-more`} replace />} />
+          <Route path="/product/size-compare" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}/size-compare`} replace />} />
+          <Route path="/product/size-compare/result" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}/size-compare/result`} replace />} />
+          <Route path="/product/:productId" element={<ProductDetailPage />} />
+          <Route path="/product/:productId/story" element={<ProductStoryPage />} />
+          <Route path="/product/:productId/stock" element={<ProductStockPage />} />
+          <Route path="/product/:productId/explore-more" element={<ProductExploreMorePage />} />
+          <Route path="/product/:productId/size-compare" element={<ProductSizeComparePage />} />
+          <Route path="/product/:productId/size-compare/result" element={<ProductSizeCompareResultPage />} />
           <Route path="/error" element={<ErrorPage />} />
           <Route path="/nfc/loading" element={<NfcLoadingPage />} />
           <Route path="/nfc/failed" element={<NfcFailedPage />} />
