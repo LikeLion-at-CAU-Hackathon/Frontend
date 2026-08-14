@@ -17,12 +17,13 @@ function StoryHighlight({ label, value }) {
 }
 
 function ProductStoryPage() {
+  const [activeTab, setActiveTab] = useState("design");
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const { design } = productStory;
 
   return (
     <main className="relative min-h-full w-full bg-[#faf8f5]">
-      <StoryTabBar activeKey="design" />
+      <StoryTabBar activeKey={activeTab} onTabClick={setActiveTab} />
 
       <section className="mx-auto max-w-[393px] px-[22px] pb-[124px] pt-[17px] text-center">
         <p className="font-['DM_Sans'] text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#6b3f1f]">
