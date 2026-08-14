@@ -56,3 +56,12 @@ select {
 .loading-dot {
   animation: loading-dot-bounce 1s infinite ease-in-out;
 }
+
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}

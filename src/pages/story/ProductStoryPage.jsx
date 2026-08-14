@@ -42,7 +42,7 @@ function ProductStoryPage() {
           <img
             src={design.image}
             alt={design.title}
-            className="size-full object-cover object-center mix-blend-multiply"
+            className="size-full object-cover object-[center_80%] mix-blend-multiply"
           />
         </div>
 

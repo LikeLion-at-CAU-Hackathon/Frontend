@@ -32,7 +32,7 @@ function AppContent() {
   return (
     <div className="mx-auto flex h-dvh w-full max-w-[440px] flex-col overflow-hidden bg-[#f8f6f3]">
       <div
-        className={`min-h-0 flex-1 overflow-y-auto ${
+        className={`scrollbar-hidden min-h-0 flex-1 overflow-y-auto ${
           isNfcTaggingPage ? "" : "pb-[calc(62px+env(safe-area-inset-bottom))]"
         }`}
       >
