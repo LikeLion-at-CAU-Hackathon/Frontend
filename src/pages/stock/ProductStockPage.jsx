@@ -1,10 +1,13 @@
 import { Button, TopBar } from "../../components/common";
+import { productStockResponse, products } from "../../mocks/products";
 
-const currentStoreStocks = [
-  { name: "Aren Hobo Mini", color: "Cognac", stock: "3개", available: true },
-  { name: "Aren Hobo Mini", color: "Ivory White", stock: "재고 없음", available: false },
-  { name: "Aren Hobo Medium", color: "Cognac", stock: "2개", available: true },
-];
+const product = products.find((item) => item.id === 8);
+const currentStoreStocks = productStockResponse.map((stock) => ({
+  name: product.name,
+  color: product.color,
+  stock: `${stock.quantity}개`,
+  available: stock.quantity > 0,
+}));
 
 const nearbyStores = [
   { name: "MCM 롯데백화점 본점", distance: "0.6km", stock: "재고 있음" },
@@ -71,7 +74,7 @@ function ProductStockPage() {
           재고 확인
         </p>
         <h1 className="pt-[10px] text-[18px] font-medium leading-[27px] text-[#0a0908]">
-          MCM 신세계면세점 본점
+          {productStockResponse[0]?.branch_name ?? "MCM 신세계 본점"}
         </h1>
       </section>
 

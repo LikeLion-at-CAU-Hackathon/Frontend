@@ -57,6 +57,22 @@ select {
   animation: loading-dot-bounce 1s infinite ease-in-out;
 }
 
+@keyframes chat-bubble-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-bubble-pop {
+  animation: chat-bubble-pop 180ms ease-out both;
+}
+
 .scrollbar-hidden {
   scrollbar-width: none;
   -ms-overflow-style: none;
