@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AdvisorButton, AdvisorSheet, Button, TopBar } from "../../components/common";
-import { ProductImage, SizeOption } from "../../components/product";
+import AdvisorButton from "../../components/common/AdvisorButton";
+import AdvisorSheet from "../../components/common/AdvisorSheet";
+import Button from "../../components/common/Button";
+import TopBar from "../../components/common/TopBar";
+import ProductImage from "../../components/product/ProductImage";
+import SizeOption from "../../components/product/SizeOption";
 import { products } from "../../mocks/products";
 import { getProductSizesByGroupId } from "../../mocks/productSizes";
 

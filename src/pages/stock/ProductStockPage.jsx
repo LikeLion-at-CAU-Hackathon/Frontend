@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { AdvisorSheet, Button, TopBar } from "../../components/common";
+import AdvisorSheet from "../../components/common/AdvisorSheet";
+import Button from "../../components/common/Button";
+import TopBar from "../../components/common/TopBar";
 import { productStockResponse, products } from "../../mocks/products";
 
 const product = products.find((item) => item.id === 8);

@@ -5,7 +5,8 @@ import exploreHero from "../../assets/images/figma/product-detail/explore-hero.p
 import exploreStep1 from "../../assets/images/figma/product-detail/explore-step-1.png";
 import exploreStep2 from "../../assets/images/figma/product-detail/explore-step-2.png";
 import exploreStep3 from "../../assets/images/figma/product-detail/explore-step-3.png";
-import { AdvisorButton, AdvisorSheet } from "../../components/common";
+import AdvisorButton from "../../components/common/AdvisorButton";
+import AdvisorSheet from "../../components/common/AdvisorSheet";
 import { products } from "../../mocks/products";
 
 const steps = [

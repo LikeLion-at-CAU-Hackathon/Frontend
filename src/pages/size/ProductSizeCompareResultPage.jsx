@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { AdvisorSheet, Button } from "../../components/common";
+import AdvisorSheet from "../../components/common/AdvisorSheet";
+import Button from "../../components/common/Button";
 import { products } from "../../mocks/products";
 import { getProductSizesByGroupId } from "../../mocks/productSizes";
 
