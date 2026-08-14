@@ -1,4 +1,5 @@
-import { Button, TopBar } from "../../components/common";
+import { useState } from "react";
+import { AdvisorSheet, Button, TopBar } from "../../components/common";
 import { productStockResponse, products } from "../../mocks/products";
 
 const product = products.find((item) => item.id === 8);
@@ -65,6 +66,8 @@ function NearbyStoreRow({ name, distance, stock }) {
 }
 
 function ProductStockPage() {
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+
   return (
     <main className="min-h-[719px] overflow-x-hidden bg-[#faf8f5]">
       <TopBar />
@@ -101,8 +104,14 @@ function ProductStockPage() {
       </section>
 
       <section className="bg-[#faf8f5] px-[22px] pb-[22px] pt-[29px]">
-        <Button>직원에게 재고 문의</Button>
+        <Button onClick={() => setIsAdvisorOpen(true)}>직원에게 재고 문의</Button>
       </section>
+
+      <AdvisorSheet
+        isOpen={isAdvisorOpen}
+        product={product}
+        onClose={() => setIsAdvisorOpen(false)}
+      />
     </main>
   );
 }
