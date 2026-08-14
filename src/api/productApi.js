@@ -1,14 +1,13 @@
-import { getMockProductById, products, productStockResponse } from "../mocks/products";
-import { getProductSizesForProduct, productSizesResponse } from "../mocks/productSizes";
 import {
-  aiDocentFaqs,
+  DEFAULT_PRODUCT_ID,
   aiDocentResponse,
-  careGuideResponse,
   getAiDocentFaqsForProduct,
+  getMockProductById,
+  getMockProductStocks,
+  getProductSizesForProduct,
   getProductStoryForProduct,
-  materialsResponse,
-  storyResponse,
-} from "../mocks/productStories";
+  products,
+} from "../mocks/products";
 
 export const getProducts = async () => {
   return products;
@@ -23,38 +22,38 @@ export const getProductDetail = async (productId) => {
 };
 
 export const getProductStory = async (productId) => {
-  const product = getMockProductById(productId);
+  const product = getMockProductById(productId ?? DEFAULT_PRODUCT_ID);
 
-  return productId ? getProductStoryForProduct(product) : storyResponse;
+  return getProductStoryForProduct(product);
 };
 
-export const getProductMaterials = async () => {
-  return materialsResponse;
+export const getProductMaterials = async (productId) => {
+  const product = getMockProductById(productId ?? DEFAULT_PRODUCT_ID);
+
+  return product.materials ?? [];
 };
 
-export const getProductCareGuide = async () => {
-  return careGuideResponse;
+export const getProductCareGuide = async (productId) => {
+  const product = getMockProductById(productId ?? DEFAULT_PRODUCT_ID);
+
+  return { contents: product.careGuide ?? [] };
 };
 
 export const getProductStock = async (productId) => {
-  const product = getMockProductById(productId);
-
-  return productId
-    ? product.stocks ?? [{ branch_name: "MCM 신세계 본점", quantity: product.stock }]
-    : productStockResponse;
+  return getMockProductStocks(productId ?? DEFAULT_PRODUCT_ID);
 };
 
 export const getProductSizes = async (productId) => {
-  const product = getMockProductById(productId);
+  const product = getMockProductById(productId ?? DEFAULT_PRODUCT_ID);
 
-  return productId ? getProductSizesForProduct(product) : productSizesResponse;
+  return getProductSizesForProduct(product);
 };
 
 export const askAiDocent = async (productIdOrQuestion, maybeQuestion) => {
   const hasProductId = maybeQuestion !== undefined;
-  const product = hasProductId ? getMockProductById(productIdOrQuestion) : null;
+  const product = hasProductId ? getMockProductById(productIdOrQuestion) : getMockProductById(DEFAULT_PRODUCT_ID);
   const question = hasProductId ? maybeQuestion : productIdOrQuestion;
-  const faqSource = product ? getAiDocentFaqsForProduct(product) : aiDocentFaqs;
+  const faqSource = getAiDocentFaqsForProduct(product);
   const faq = faqSource.find((item) => item.question === question);
 
   return {

@@ -6,8 +6,7 @@ import Button from "../../components/common/Button";
 import TopBar from "../../components/common/TopBar";
 import ProductImage from "../../components/product/ProductImage";
 import SizeOption from "../../components/product/SizeOption";
-import { getMockProductById } from "../../mocks/products";
-import { getProductSizesForProduct } from "../../mocks/productSizes";
+import { getMockProductById, getProductSizesForProduct } from "../../mocks/products";
 
 const labels = {
   sizeCompare: "사이즈 비교",
@@ -40,7 +39,7 @@ function ProductSizeComparePage() {
       />
 
       <section className="px-[22px] pt-4">
-        <ProductImage image={product.image} alt={product.name} />
+        <ProductImage image={product.image} alt={product.name} imageView={product.imageView} />
 
         <div className="px-[22px] pt-[9px]">
           <p className="text-[10px] leading-[15px] tracking-[1.4px] text-[#8a8078]">

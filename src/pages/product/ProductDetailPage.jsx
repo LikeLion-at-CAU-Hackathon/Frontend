@@ -3,8 +3,7 @@ import bookmarkIcon from "../../assets/images/figma/product-detail/bookmark.svg"
 import Button from "../../components/common/Button";
 import ActionButton from "../../components/product/ActionButton";
 import ProductImage from "../../components/product/ProductImage";
-import { getMockProductById } from "../../mocks/products";
-import { getProductSizesForProduct } from "../../mocks/productSizes";
+import { getMockProductById, getProductSizesForProduct } from "../../mocks/products";
 
 const labels = {
   bookmark: "북마크",
@@ -20,9 +19,15 @@ const labels = {
 
 const colorPalette = {
   Black: "#0a0908",
+  "Black / Silver": "linear-gradient(135deg, #f8f8f6 0 28%, #0a0908 28% 72%, #f8f8f6 72% 100%)",
+  "Black / Matte Black": "#050505",
   Cognac: "#aa5a23",
+  "Cognac / Gold": "linear-gradient(135deg, #aa5a23 0 70%, #d5a856 70% 100%)",
+  "Dark Brown / Black": "linear-gradient(135deg, #241614 0 62%, #050505 62% 100%)",
   Egret: "#efebe4",
+  "Misty Gray / Silver": "linear-gradient(135deg, #b8b6b0 0 70%, #ececea 70% 100%)",
   Pink: "#d7a3a4",
+  "Powder Pink": "#dbaaaa",
 };
 
 const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
@@ -67,6 +72,7 @@ function ProductDetailPage() {
       })),
   ].filter((item) => item.value);
   const colorOptions = product.colors?.length ? product.colors : [product.color];
+  const getColorSwatch = (color) => colorPalette[color] ?? colorPalette[product.color] ?? "#d9d9d9";
 
   return (
     <main className="overflow-x-hidden bg-[#faf8f5]">
@@ -81,7 +87,7 @@ function ProductDetailPage() {
           </button>
         </div>
 
-        <ProductImage image={product.image} alt={product.name} />
+        <ProductImage image={product.image} alt={product.name} imageView={product.imageView} />
 
         <div className="relative bg-[#faf8f5] px-[clamp(16px,5.6vw,22px)] pb-[14px] pt-[18px]">
           <p className="text-[10px] leading-[15px] tracking-[1.4px] text-[#8a8078]">
@@ -101,7 +107,7 @@ function ProductDetailPage() {
               <span
                 key={color}
                 className="size-[18px] rounded-full border border-[#0e0d0d]"
-                style={{ backgroundColor: colorPalette[color] ?? colorPalette[product.color] ?? "#d9d9d9" }}
+                style={{ background: getColorSwatch(color) }}
               />
             ))}
           </div>

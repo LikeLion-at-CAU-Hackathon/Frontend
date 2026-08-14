@@ -12,6 +12,8 @@ function StoryHighlight({ label, value }) {
 }
 
 function StoryDesignPage({ story }) {
+  const imageView = story.imageView ?? {};
+
   return (
     <section className="mx-auto max-w-[393px] px-[22px] pb-[124px] pt-[17px] text-center">
       <p className="font-['DM_Sans'] text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#6b3f1f]">
@@ -31,7 +33,12 @@ function StoryDesignPage({ story }) {
         <img
           src={story.image}
           alt={story.title}
-          className="size-full object-cover object-[center_80%] mix-blend-multiply"
+          className="size-full mix-blend-multiply"
+          style={{
+            objectFit: imageView.fit ?? "contain",
+            objectPosition: imageView.position ?? "center",
+            transform: `translateY(${imageView.translateY ?? "0px"}) scale(${imageView.scale ?? 1})`,
+          }}
         />
       </div>
 

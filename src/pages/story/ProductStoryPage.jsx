@@ -3,8 +3,11 @@ import { useParams } from "react-router-dom";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import StoryTabBar from "../../components/story/StoryTabBar";
-import { getMockProductById } from "../../mocks/products";
-import { getAiDocentFaqsForProduct, getProductStoryForProduct } from "../../mocks/productStories";
+import {
+  getAiDocentFaqsForProduct,
+  getMockProductById,
+  getProductStoryForProduct,
+} from "../../mocks/products";
 import StoryAiDocentPage from "./ai-docent/StoryAiDocentPage";
 import StoryCarePage from "./care/StoryCarePage";
 import StoryDesignPage from "./design/StoryDesignPage";

@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import Button from "../../components/common/Button";
-import { getMockProductById } from "../../mocks/products";
-import { getProductSizesForProduct } from "../../mocks/productSizes";
+import { getMockProductById, getProductSizesForProduct } from "../../mocks/products";
 
 const labels = {
   compareSizes: "Compare Sizes",
