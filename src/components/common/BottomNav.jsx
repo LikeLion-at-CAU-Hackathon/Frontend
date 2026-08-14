@@ -8,7 +8,13 @@ import myIcon from "../../assets/images/figma/navigation/nav-my.svg?raw";
 const navItems = [
   { key: "product", label: "Product", path: "/product", icon: productIcon },
   { key: "story", label: "Story", path: "/story", icon: storyIcon },
-  { key: "nfc", label: "NFC", path: "/nfc", icon: nfcIcon, isCenter: true },
+  {
+    key: "nfc",
+    label: "NFC",
+    path: "/nfc",
+    icon: nfcIcon,
+    iconClassName: "h-[12px] w-[22.5px]",
+  },
   { key: "ai", label: "AI", path: "/ai", icon: aiIcon },
   {
     key: "my",
@@ -34,57 +40,28 @@ function SvgIcon({ svg, className = "" }) {
 
 // 하단 네비게이션의 탭 버튼 하나
 function BottomNavItem({ item }) {
-  if (item.isCenter) {
-    return (
-      <NavLink
-        to={item.path}
-        aria-label={item.label}
-        className={({ isActive }) =>
-          cx(
-            "flex h-full w-[88px] flex-none items-center justify-center border-t no-underline",
-            isActive ? "border-black text-[#0a0908]" : "border-transparent text-[#8a8078]",
-          )
-        }
-      >
-        {({ isActive }) => (
-          <span className="relative flex size-[40px] items-center justify-center">
-            <span className="absolute left-[6.5px] top-[5.5px] size-[27px] overflow-hidden">
-              <SvgIcon svg={item.icon} className="h-[13px] w-[24px]" />
-              <span
-                className={cx(
-                  "absolute inset-x-0 top-[13px] text-center font-[Arial] text-[10px] leading-[17px]",
-                  isActive ? "font-bold" : "font-normal",
-                )}
-              >
-                NFC
-              </span>
-            </span>
-          </span>
-        )}
-      </NavLink>
-    );
-  }
-
   return (
     <NavLink
       to={item.path}
       aria-label={item.label}
       className={({ isActive }) =>
         cx(
-          "flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-[3px] border-t no-underline",
+          "flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-[3px] border-t-2 no-underline",
           isActive ? "border-black text-[#0a0908]" : "border-transparent text-[#8a8078]",
         )
       }
     >
       {({ isActive }) => (
         <>
-          <SvgIcon
-            svg={item.icon}
-            className={cx(
-              "size-[18px] shrink-0 overflow-hidden",
-              item.iconClassName,
-            )}
-          />
+          <span className="flex h-[18px] w-[24px] shrink-0 items-center justify-center">
+            <SvgIcon
+              svg={item.icon}
+              className={cx(
+                item.iconClassName || "size-[18px]",
+                "overflow-hidden",
+              )}
+            />
+          </span>
           <span
             className={cx(
               "whitespace-nowrap text-center text-[12px] leading-[15px] tracking-[0.2px] text-current",
