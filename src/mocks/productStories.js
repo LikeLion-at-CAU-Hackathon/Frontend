@@ -1,4 +1,5 @@
 import hoboBagImage from "../assets/images/products/hobobag.webp";
+import materialCanvasImage from "../assets/images/figma/story/story-material-raw-1.png";
 
 export const productStory = {
   productId: 8,
@@ -16,6 +17,33 @@ export const productStory = {
       { label: "DESIGN", value: "Softness & Structure" },
       { label: "SIGNATURE", value: "Leather Hang Tag" },
       { label: "HERITAGE", value: "MCM Luggage" },
+    ],
+  },
+  materials: {
+    eyebrow: "MATERIALS & CRAFT",
+    title: "Visetos Monogram Canvas",
+    image: materialCanvasImage,
+    sections: [
+      {
+        title: "Visetos 패턴",
+        description:
+          "MCM의 시그니처 Visetos 모노그램 캔버스를 바디에 사용했습니다. 제품의 주요 소재로, 클래식한 모노그램 패턴이 Aren Hobo의 전체적인 디자인을 완성합니다.",
+      },
+      {
+        title: "Natural Nappa Leather",
+        description:
+          "천연 나파 가죽을 트림에 사용했습니다. 가죽 행택과 패드락 주변의 디테일에도 가죽 소재가 적용됩니다.",
+      },
+      {
+        title: "24K Gold-Plated Brass",
+        description:
+          "브라스 하드웨어에 24K 골드 도금을 적용했습니다. 패드락과 지퍼 등의 금속 장식에 사용됩니다.",
+      },
+      {
+        title: "Suede-Finish Microfiber",
+        description:
+          "가방 내부에는 스웨이드 마감 마이크로파이버 안감을 사용했습니다. 부드러운 스웨이드 질감의 마감으로 내부를 구성합니다.",
+      },
     ],
   },
 };
