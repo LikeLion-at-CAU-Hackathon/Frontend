@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { AdvisorButton, AdvisorSheet } from "../../components/common";
-import { StoryTabBar } from "../../components/story";
+import AdvisorButton from "../../components/common/AdvisorButton";
+import AdvisorSheet from "../../components/common/AdvisorSheet";
+import StoryTabBar from "../../components/story/StoryTabBar";
 import { aiDocentFaqs, productStory } from "../../mocks/productStories";
 import StoryAiDocentPage from "./ai-docent/StoryAiDocentPage";
 import StoryCarePage from "./care/StoryCarePage";

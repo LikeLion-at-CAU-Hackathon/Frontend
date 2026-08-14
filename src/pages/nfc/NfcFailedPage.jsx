@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import nfcFailedIcon from "../../assets/images/figma/nfc/nfc-failed.svg";
-import { Button } from "../../components/common";
+import Button from "../../components/common/Button";
 
 const guideItems = [
   "스마트폰 상단을 제품 태그 위에 대세요",

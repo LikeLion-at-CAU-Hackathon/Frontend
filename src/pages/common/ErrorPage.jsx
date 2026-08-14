@@ -1,4 +1,4 @@
-import { ErrorModal } from "../../components/common";
+import ErrorModal from "../../components/common/ErrorModal";
 
 // 공통 오류 모달 확인용 페이지
 function ErrorPage() {

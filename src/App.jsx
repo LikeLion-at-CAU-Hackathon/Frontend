@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { BottomNav } from "./components/common";
+import BottomNav from "./components/common/BottomNav";
 import ErrorPage from "./pages/common/ErrorPage";
 import NfcFailedPage from "./pages/nfc/NfcFailedPage";
 import NfcLoadingPage from "./pages/nfc/NfcLoadingPage";

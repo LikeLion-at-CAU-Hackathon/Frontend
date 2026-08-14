@@ -1,6 +1,7 @@
 import bookmarkIcon from "../../assets/images/figma/product-detail/bookmark.svg";
-import { Button } from "../../components/common";
-import { ActionButton, ProductImage } from "../../components/product";
+import Button from "../../components/common/Button";
+import ActionButton from "../../components/product/ActionButton";
+import ProductImage from "../../components/product/ProductImage";
 import { products } from "../../mocks/products";
 import { getProductSizesByGroupId } from "../../mocks/productSizes";
 
