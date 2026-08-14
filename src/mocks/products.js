@@ -394,7 +394,7 @@ export const products = [
         dimensions: "30 ml",
         strap: "-",
         storage: "Eau de Parfum",
-        price: 93000,
+        price: 94000,
         stock: 4,
         stockLabel: "4개 (현재 매장)",
       },
@@ -603,7 +603,7 @@ export const products = [
     images: [sneakersImage],
     imageView: { scale: 1.38, translateY: "-30px" },
     stocks: [{ branch_name: "MCM 신세계 본점", quantity: 6 }],
-    variants: ["35 IT", "36 IT", "37 IT", "38 IT", "39 IT"].map((size, index) => ({
+    variants: ["36 IT", "37 IT", "38 IT", "39 IT"].map((size, index) => ({
       id: 701 + index,
       productId: 7,
       name: "네오 터레인 모노그램 레더 로우탑 스니커즈",
