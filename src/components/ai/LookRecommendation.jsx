@@ -71,6 +71,17 @@ function LookRecommendation({ looks, onViewDetail }) {
     carouselRef.current.releasePointerCapture(event.pointerId);
   };
 
+  const handleIndicatorClick = (index) => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    setActiveIndex(index);
+    carousel.scrollTo({
+      left: carousel.clientWidth * index,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <section className="mt-[22px] min-w-0 max-w-full overflow-hidden">
       <div
@@ -88,10 +99,14 @@ function LookRecommendation({ looks, onViewDetail }) {
         ))}
       </div>
 
-      <div className="mt-6 flex h-[6px] items-center justify-center gap-[6px]" aria-hidden="true">
+      <div className="mt-6 flex h-[6px] items-center justify-center gap-[6px]" aria-label="Look 선택">
         {looks.map((look, index) => (
-          <span
+          <button
             key={look.id}
+            type="button"
+            onClick={() => handleIndicatorClick(index)}
+            aria-label={`Look ${index + 1} 보기`}
+            aria-current={activeIndex === index ? "true" : undefined}
             className={`h-[6px] rounded-[3px] transition-[width,background-color] duration-200 ${
               activeIndex === index ? "w-4 bg-[#2a211a]" : "w-[6px] bg-[rgba(42,33,26,0.25)]"
             }`}
