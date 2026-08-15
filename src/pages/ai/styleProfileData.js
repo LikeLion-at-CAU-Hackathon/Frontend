@@ -85,7 +85,7 @@ export const lookDetailData = {
     reason: "네이비와 블루의 차분한 컬러에 꼬냑과 핑크를 포인트로 더해 단정하면서도 밋밋하지 않은 스타일을 연출할 수 있습니다. ",
     products: [
       { id: 1, image: shirtImage, category: "Top", name: "Monogram Flock Pocket Western Shirt", price: "₩690,000" },
-      { id: 2, image: buclepantsImage, category: "Bottom", name: "boucle pants", price: "₩790,000" },
+      { id: 2, image: buclepantsImage, category: "Bottom", name: "Boucle Pants", price: "₩790,000" },
       { id: 3, image: ropersneakersImage, category: "Shoes", name: "Calfskin platform loafers", price: "₩930,000" },
       { id: 4, image: hobobagImage, category: "Bag", name: "Aren Visetos Hobo Mini", price: "₩1,290,000" },
       { id: 5, image: silkscarfImage, category: "Accessory", name: "Monogram Print Triangular Silk Scarf", price: "₩390,000" },

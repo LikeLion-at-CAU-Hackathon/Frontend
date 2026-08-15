@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
+import { ChevronRight } from "lucide-react";
 import LookProductList from "./LookProductList";
-import chevronIcon from "../../assets/images/figma/ai/style-profile-chevron.svg";
 
 function LookCard({ index, look, onViewDetail }) {
   return (
@@ -15,8 +15,8 @@ function LookCard({ index, look, onViewDetail }) {
           onClick={() => onViewDetail(look)}
           className="mt-[7px] flex h-[31px] w-full items-center justify-center gap-1 rounded-[4px] bg-[#faf8f5] text-[10px] text-black"
         >
-          상세 보기
-          <img src={chevronIcon} alt="" className="size-[11px]" />
+          <span>상세 보기</span>
+          <ChevronRight size={13} strokeWidth={1.25} />
         </button>
       </div>
 
