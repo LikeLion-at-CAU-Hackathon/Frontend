@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import mcmLoadingLogo from "../../assets/images/figma/ai/mcm-loading-logo.png";
@@ -16,11 +17,15 @@ const messages = [
 ];
 
 function AiLoadingPage() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
 
   useEffect(() => {
-    if (step >= loadingSteps.length - 1) return undefined;
+    if (step >= loadingSteps.length - 1) {
+      const completionTimer = window.setTimeout(() => navigate("/ai/style-profile"), 1100);
+      return () => window.clearTimeout(completionTimer);
+    }
 
     const timer = window.setTimeout(
       () => setStep((currentStep) => currentStep + 1),
@@ -28,7 +33,7 @@ function AiLoadingPage() {
     );
 
     return () => window.clearTimeout(timer);
-  }, [step]);
+  }, [navigate, step]);
 
   return (
     <main className="relative min-h-dvh overflow-hidden bg-[#faf8f5] text-[#1a1208]">

@@ -10,6 +10,8 @@ import ProductSizeCompareResultPage from "./pages/size/ProductSizeCompareResultP
 import ProductStockPage from "./pages/stock/ProductStockPage";
 import ProductStoryPage from "./pages/story/ProductStoryPage";
 import AiLoadingPage from "./pages/ai/AiLoadingPage";
+import AIStyleProfilePage from "./pages/ai/AIStyleProfilePage";
+import LookDetailPage from "./pages/ai/LookDetailPage";
 import { DEFAULT_PRODUCT_ID } from "./mocks/products";
 
 const pages = [
@@ -56,6 +58,23 @@ function AppContent() {
           <Route path="/nfc/failed" element={<NfcFailedPage />} />
           <Route path="/nfc/staff-called" element={<NfcFailedPage isStaffCalled />} />
           <Route path="/ai" element={<AiLoadingPage />} />
+          <Route path="/ai/style-profile" element={<AIStyleProfilePage />} />
+          <Route
+            path="/ai/style-recommendation"
+            element={<PlaceholderPage title="Style Recommendation Detail" />}
+          />
+          <Route
+            path="/ai/style-recommendation/look1"
+            element={<LookDetailPage lookKey="look1" />}
+          />
+          <Route
+            path="/ai/style-recommendation/look2"
+            element={<LookDetailPage lookKey="look2" />}
+          />
+          <Route
+            path="/ai/style-recommendation/look3"
+            element={<LookDetailPage lookKey="look3" />}
+          />
           {pages.map((page) => (
             <Route
               key={page.path}
