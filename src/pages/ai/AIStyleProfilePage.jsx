@@ -19,7 +19,7 @@ function AIStyleProfilePage() {
   };
 
   return (
-    <main className="min-h-full bg-[#faf8f4] pb-6 text-[#0a0908]">
+    <main className="min-h-full bg-[#faf8f4] text-[#0a0908]">
       <header className="flex items-end justify-between px-[25px] pb-[11px] pt-[46px]">
         <h1 className="font-playfair text-[20px] font-medium leading-[30px]">AI STYLE PROFILE</h1>
         <button type="button" aria-label="스타일 프로필 저장" className="p-1">
