@@ -45,7 +45,7 @@ function LookRecommendation({ looks, onViewDetail }) {
   };
 
   const handlePointerDown = (event) => {
-    if (event.pointerType !== "mouse") return;
+    if (event.pointerType !== "mouse" || event.target.closest("button, a")) return;
 
     const carousel = carouselRef.current;
     dragStateRef.current = {

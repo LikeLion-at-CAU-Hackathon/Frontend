@@ -1,13 +1,13 @@
+import { ArrowRight } from "lucide-react";
 import LookDetailProductCard from "./LookDetailProductCard";
-import chevronIcon from "../../assets/images/figma/ai/style-profile-chevron.svg";
 
 function LookDetailContent({ detail, onRequestAdvisor }) {
   return (
     <>
-      <section className="flex h-[118px] flex-col justify-center rounded-[16px] bg-[#28190e] px-12 text-center text-[14px] leading-[18px] text-white">
-        <p>{detail.description}</p>
+      <section className="flex h-[118px] flex-col justify-center rounded-[16px] bg-[#28190e] px-8 text-left text-[14px] leading-[21px] text-white">
+        <p className="w-full">{detail.description}</p>
         <div className="my-[7px] h-px bg-[#6d5944]" />
-        <p>{detail.reason}</p>
+        <p className="w-full">{detail.reason}</p>
         <div className="mt-[7px] h-px bg-[#6d5944]" />
       </section>
 
@@ -17,7 +17,7 @@ function LookDetailContent({ detail, onRequestAdvisor }) {
         ))}
       </section>
 
-      <section className="mt-[14px] flex flex-col items-center text-center text-[#6b3f1f]">
+      <section className="mt-[26px] flex flex-col items-center text-center text-[#6b3f1f]">
         <p className="text-[10px] leading-[18px]">제품에 대해 궁금하신 점이 있나요?</p>
         <p className="text-[10px] leading-[18px]">Advisor와 상담을 진행할 수 있습니다</p>
         <button
@@ -25,8 +25,8 @@ function LookDetailContent({ detail, onRequestAdvisor }) {
           onClick={onRequestAdvisor}
           className="mt-[5px] flex items-center gap-[10px] rounded-full bg-[#ece6d9] py-[7px] pl-[14px] pr-[13px] text-[14px] leading-[18px] text-black"
         >
-          상담 접수하기
-          <img src={chevronIcon} alt="" className="h-[7px] w-[11px]" />
+          <span>상담 접수하기</span>
+          <ArrowRight size={18} strokeWidth={1.8} />
         </button>
       </section>
     </>

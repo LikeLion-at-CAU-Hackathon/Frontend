@@ -20,7 +20,7 @@ export const todayItems = [
   { id: 3, name: "Aren Hobo Mini", image: hobobagImage },
 ];
 
-export const styleKeywords = ["Warm Tones", "Compact Size", "Classic Styling"];
+export const styleKeywords = ["Warm Tone", "Classic", "Heritage"];
 
 const businessCasualProducts = [
   { id: 1, image: cropshirtImage, name: "Top" },
@@ -69,38 +69,38 @@ export const looks = [
 export const lookDetailData = {
   look1: {
     name: "Monogram Daily",
-    description: "시그니처 모노그램으로 완성한 데일리 스타일",
-    reason: "따뜻한 톤과 실용적인 아이템을 조화롭게 구성했어요",
+    description: "캐주얼하면서도 MCM의 아이덴티티가 드러나는 룩",
+    reason: "데일리로 부담 없이 활용하기 좋은 조합으로, 개성 있는 스타일을 완성해줍니다.",
     products: [
-      { id: 1, image: cropshirtImage, category: "Top", name: "Monogram Crop T-Shirt", price: "₩590,000" },
-      { id: 2, image: denimPantsImage, category: "Bottom", name: "Logo Patch Denim Pants", price: "₩790,000" },
-      { id: 3, image: sandalImage, category: "Shoes", name: "Monogram Sandals", price: "₩650,000" },
-      { id: 4, image: hobobagImage, category: "Bag", name: "Aren Hobo Mini", price: "₩1,150,000" },
-      { id: 5, image: silkscarfImage, category: "Accessory", name: "Monogram Silk Scarf", price: "₩330,000" },
+      { id: 1, image: cropshirtImage, category: "Top", name: "Monogram Crop T-Shirt", price: "₩390,000" },
+      { id: 2, image: denimPantsImage, category: "Bottom", name: "Lurex Denim Flare Pants", price: "₩830,000" },
+      { id: 3, image: sandalImage, category: "Shoes", name: "Monogram Platform Lambskin Sandals", price: "₩890,000" },
+      { id: 4, image: hobobagImage, category: "Bag", name: "Aren Visetos Hobo Mini", price: "₩1,290,000" },
+      { id: 5, image: silkscarfImage, category: "Accessory", name: "Monogram Print Triangular Silk Scarf", price: "₩390,000" },
     ],
   },
   look2: {
     name: "Modern Classic",
-    description: "절제된 실루엣에 클래식한 디테일을 더한 스타일",
-    reason: "차분한 컬러와 구조적인 아이템이 취향에 잘 어울려요",
+    description: "클래식하면서도 현대적인 무드로 완성한 룩",
+    reason: "네이비와 블루의 차분한 컬러에 꼬냑과 핑크를 포인트로 더해 단정하면서도 밋밋하지 않은 스타일을 연출할 수 있습니다. ",
     products: [
-      { id: 1, image: shirtImage, category: "Top", name: "Laurel Monogram Shirt", price: "₩690,000" },
-      { id: 2, image: buclepantsImage, category: "Bottom", name: "Bouclé Tailored Pants", price: "₩750,000" },
-      { id: 3, image: ropersneakersImage, category: "Shoes", name: "Neo Terrain Lo Sneakers", price: "₩850,000" },
-      { id: 4, image: hobobagImage, category: "Bag", name: "Aren Hobo Mini", price: "₩1,150,000" },
-      { id: 5, image: silkscarfImage, category: "Accessory", name: "Monogram Silk Scarf", price: "₩330,000" },
+      { id: 1, image: shirtImage, category: "Top", name: "Monogram Flock Pocket Western Shirt", price: "₩690,000" },
+      { id: 2, image: buclepantsImage, category: "Bottom", name: "boucle pants", price: "₩790,000" },
+      { id: 3, image: ropersneakersImage, category: "Shoes", name: "Calfskin platform loafers", price: "₩930,000" },
+      { id: 4, image: hobobagImage, category: "Bag", name: "Aren Visetos Hobo Mini", price: "₩1,290,000" },
+      { id: 5, image: silkscarfImage, category: "Accessory", name: "Monogram Print Triangular Silk Scarf", price: "₩390,000" },
     ],
   },
   look3: {
     name: "Sporty Casual",
-    description: "가볍고 활동적인 무드의 감각적인 캐주얼 스타일",
-    reason: "편안한 핏에 선명한 액세서리로 포인트를 더했어요",
+    description: "스포티하면서도 시크한 무드로 완성한 룩.",
+    reason: "캐주얼한 아이템을 중심으로 구성해 활동성이 좋고, 트렌디하고 세련된 분위기를 연출할 수 있습니다.",
     products: [
-      { id: 1, image: cropshirtImage, category: "Top", name: "Monogram Crop T-Shirt", price: "₩590,000" },
-      { id: 2, image: lambshortpantsImage, category: "Bottom", name: "Laurel Logo Short Pants", price: "₩630,000" },
-      { id: 3, image: basetonessandalsImage, category: "Shoes", name: "Base Tone Sandals", price: "₩610,000" },
-      { id: 4, image: hobobagImage, category: "Bag", name: "Aren Hobo Mini", price: "₩1,150,000" },
-      { id: 5, image: ovalSunglassesImage, category: "Accessory", name: "Oval Logo Sunglasses", price: "₩410,000" },
+      { id: 1, image: cropshirtImage, category: "Top", name: "Monogram Crop T-Shirt", price: "₩390,000" },
+      { id: 2, image: lambshortpantsImage, category: "Bottom", name: "Lambskin shorts", price: "₩990,000" },
+      { id: 3, image: basetonessandalsImage, category: "Shoes", name: "Visetos Sandals", price: "₩770,000" },
+      { id: 4, image: hobobagImage, category: "Bag", name: "Aren Visetos Hobo Mini", price: "₩1,290,000" },
+      { id: 5, image: ovalSunglassesImage, category: "Accessory", name: "Misplaced Sunglasses", price: "₩290,000" },
     ],
   },
 };

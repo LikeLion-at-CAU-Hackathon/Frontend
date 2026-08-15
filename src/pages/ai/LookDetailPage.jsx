@@ -13,7 +13,9 @@ function LookDetailPage({ lookKey }) {
   if (!detail) return <Navigate to="/ai/style-profile" replace />;
 
   return (
-    <main className="min-h-full bg-[rgba(232,230,226,0.6)] px-[23px] pb-6 pt-[50px] text-[#0a0908]">
+    <div className="min-h-full bg-white">
+      <div className="h-[50px] bg-white" aria-hidden="true" />
+      <main className="bg-[rgba(232,230,226,0.6)] px-[23px] pb-6 text-[#0a0908]">
       <button
         type="button"
         onClick={() => navigate(-1)}
@@ -31,7 +33,8 @@ function LookDetailPage({ lookKey }) {
       </div>
 
       <AdvisorSheet isOpen={isAdvisorOpen} onClose={() => setIsAdvisorOpen(false)} />
-    </main>
+      </main>
+    </div>
   );
 }
 
