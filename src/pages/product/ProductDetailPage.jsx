@@ -4,6 +4,7 @@ import Button from "../../components/common/Button";
 import ActionButton from "../../components/product/ActionButton";
 import ProductImage from "../../components/product/ProductImage";
 import { getMockProductById, getProductSizesForProduct } from "../../mocks/products";
+import useSavedProductsStore from "../../stores/useSavedProductsStore";
 
 const labels = {
   bookmark: "북마크",
@@ -73,6 +74,20 @@ function ProductDetailPage() {
   ].filter((item) => item.value);
   const colorOptions = product.colors?.length ? product.colors : [product.color];
   const getColorSwatch = (color) => colorPalette[color] ?? colorPalette[product.color] ?? "#d9d9d9";
+  const addSavedProduct = useSavedProductsStore((state) => state.addSavedProduct);
+  const isSaved = useSavedProductsStore((state) =>
+    state.savedProducts.some((item) => item.id === product.id),
+  );
+
+  const handleSaveProduct = () => {
+    addSavedProduct({
+      ...product,
+      collection: collectionLabel,
+      option: `${product.color} · ${currentSize.size}`,
+      store: product.stocks?.[0]?.branch_name ?? "MCM 신세계 강남점",
+      isSaved: true,
+    });
+  };
 
   return (
     <main className="overflow-x-hidden bg-[#faf8f5]">
@@ -156,8 +171,11 @@ function ProductDetailPage() {
         <Button to={`/product/${product.id}/explore-more`} variant="outline" className="font-normal tracking-[0px]">
           Explore More
         </Button>
-        <Button className="text-[12px] leading-[18px] tracking-[0.72px]">
-          {labels.addSelection}
+        <Button
+          onClick={handleSaveProduct}
+          className="text-[12px] leading-[18px] tracking-[0.72px]"
+        >
+          {isSaved ? "My Selection에 저장됨" : labels.addSelection}
         </Button>
       </section>
     </main>
