@@ -9,11 +9,13 @@ import ProductSizeComparePage from "./pages/size/ProductSizeComparePage";
 import ProductSizeCompareResultPage from "./pages/size/ProductSizeCompareResultPage";
 import ProductStockPage from "./pages/stock/ProductStockPage";
 import ProductStoryPage from "./pages/story/ProductStoryPage";
+import AiLoadingPage from "./pages/ai/AiLoadingPage";
+import AIStyleProfilePage from "./pages/ai/AIStyleProfilePage";
+import LookDetailPage from "./pages/ai/LookDetailPage";
 import { DEFAULT_PRODUCT_ID } from "./mocks/products";
 
 const pages = [
   { path: "/nfc", title: "NFC" },
-  { path: "/ai", title: "AI" },
   { path: "/my", title: "My" },
 ];
 
@@ -28,13 +30,13 @@ function PlaceholderPage({ title }) {
 
 function AppContent() {
   const { pathname } = useLocation();
-  const isNfcTaggingPage = ["/nfc/loading", "/nfc/failed", "/nfc/staff-called"].includes(pathname);
+  const isFullScreenPage = ["/nfc/loading", "/nfc/failed", "/nfc/staff-called"].includes(pathname);
 
   return (
     <div className="mx-auto flex h-dvh w-full max-w-[440px] flex-col overflow-hidden bg-[#f8f6f3]">
       <div
         className={`scrollbar-hidden min-h-0 flex-1 overflow-y-auto ${
-          isNfcTaggingPage ? "" : "pb-[calc(62px+env(safe-area-inset-bottom))]"
+          isFullScreenPage ? "" : "pb-[calc(62px+env(safe-area-inset-bottom))]"
         }`}
       >
         <Routes>
@@ -55,6 +57,24 @@ function AppContent() {
           <Route path="/nfc/loading" element={<NfcLoadingPage />} />
           <Route path="/nfc/failed" element={<NfcFailedPage />} />
           <Route path="/nfc/staff-called" element={<NfcFailedPage isStaffCalled />} />
+          <Route path="/ai" element={<AiLoadingPage />} />
+          <Route path="/ai/style-profile" element={<AIStyleProfilePage />} />
+          <Route
+            path="/ai/style-recommendation"
+            element={<PlaceholderPage title="Style Recommendation Detail" />}
+          />
+          <Route
+            path="/ai/style-recommendation/look1"
+            element={<LookDetailPage lookKey="look1" />}
+          />
+          <Route
+            path="/ai/style-recommendation/look2"
+            element={<LookDetailPage lookKey="look2" />}
+          />
+          <Route
+            path="/ai/style-recommendation/look3"
+            element={<LookDetailPage lookKey="look3" />}
+          />
           {pages.map((page) => (
             <Route
               key={page.path}
@@ -64,7 +84,7 @@ function AppContent() {
           ))}
         </Routes>
       </div>
-      {!isNfcTaggingPage && <BottomNav className="max-w-[440px]" />}
+      {!isFullScreenPage && <BottomNav className="max-w-[440px]" />}
     </div>
   );
 }
