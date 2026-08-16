@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import bookmarkIcon from "../../assets/images/figma/product-detail/bookmark.svg";
+import { Bookmark } from "lucide-react";
 import Button from "../../components/common/Button";
 import ActionButton from "../../components/product/ActionButton";
 import ProductImage from "../../components/product/ProductImage";
@@ -77,7 +77,7 @@ function ProductDetailPage() {
   const addSavedProduct = useSavedProductsStore((state) => state.addSavedProduct);
   const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
   const isSaved = useSavedProductsStore((state) =>
-    state.savedProducts.some((item) => item.id === product.id),
+    state.savedProducts.some((item) => String(item.id) === String(product.id)),
   );
 
   const handleToggleSavedProduct = () => {
@@ -101,10 +101,17 @@ function ProductDetailPage() {
         <div className="h-[52px] bg-[#faf8f5]">
           <button
             type="button"
-            aria-label={labels.bookmark}
+            onClick={handleToggleSavedProduct}
+            aria-label={isSaved ? "My Selection에서 제거" : "My Selection에 저장"}
+            aria-pressed={isSaved}
             className="absolute right-[22px] top-[18px] flex size-[26px] items-center justify-center"
           >
-            <img src={bookmarkIcon} alt="" className="size-[18px]" />
+            <Bookmark
+              size={18}
+              strokeWidth={1.125}
+              fill={isSaved ? "currentColor" : "none"}
+              aria-hidden="true"
+            />
           </button>
         </div>
 
