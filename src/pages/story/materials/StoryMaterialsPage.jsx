@@ -36,8 +36,10 @@ function FeaturedMaterial({ section }) {
 function MaterialListItem({ section }) {
   return (
     <article className="flex items-center gap-5">
-      <div className="size-[55px] shrink-0 overflow-hidden rounded-full border border-[#8b7355] bg-[#e5e0da]">
-        {section.image ? (
+      <div className="relative size-[55px] shrink-0 overflow-hidden rounded-full border border-[#8b7355] bg-[#e5e0da]">
+        {section.image && section.imageStyle ? (
+          <img src={section.image} alt="" className="absolute max-w-none" style={section.imageStyle} />
+        ) : section.image ? (
           <img src={section.image} alt="" className="size-full object-cover object-center" />
         ) : (
           <MaterialImageFallback rounded />

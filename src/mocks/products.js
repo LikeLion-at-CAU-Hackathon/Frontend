@@ -1,4 +1,7 @@
 import materialCanvasImage from "../assets/images/figma/story/story-material-raw-1.png";
+import hoboGoldBrassMaterialImage from "../assets/images/figma/story/materials/hobo-gold-brass.png";
+import hoboNappaLeatherMaterialImage from "../assets/images/figma/story/materials/hobo-nappa-leather.png";
+import hoboSuedeMicrofiberMaterialImage from "../assets/images/figma/story/materials/hobo-suede-microfiber.png";
 import beltImage from "../assets/images/products/belt.webp";
 import eauDeParfumImage from "../assets/images/products/eau-de-parfum.webp";
 import hoboBagImage from "../assets/images/products/hobobag.webp";
@@ -57,20 +60,33 @@ export const products = [
         id: 1,
         name: "Visetos Monogram Canvas",
         location: "Body",
-        description: "MCM의 시그니처 비세토스 모노그램 캔버스를 바디에 사용했습니다.",
+        description: "비세토스 모노그램 캔버스를 바디에 사용했습니다.",
       },
       {
         id: 2,
-        name: "Natural Nappa Leather",
+        name: "Natural Leather",
         location: "Trim",
-        description: "천연 나파 가죽 트림으로 부드러운 촉감과 고급스러운 마감을 더했습니다.",
+        description: "천연 가죽으로 트림을 마감했습니다.",
+      },
+      {
+        id: 3,
+        name: "Gold-Plated Metal Hardware",
+        location: "HARDWARE",
+        description: "로고 브라스 장식 플레이트와 스냅 클로저에골드 도금 메탈 하드웨어를 적용했습니다.",
+      },
+      {
+        id: 4,
+        name: "Fabric Lining",
+        location: "HARDWARE",
+        description: "카드 슬롯에 패브릭 안감을 적용했습니다.",
       },
     ],
     careGuide: [
-      { title: "일상 관리", content: "표면 마찰과 날카로운 물체 접촉을 피해주세요." },
-      { title: "보관", content: "직사광선과 습기를 피해 더스트백에 보관해주세요." },
-      { title: "가죽 관리", content: "오염 시 부드러운 마른 천으로 가볍게 닦아주세요." },
-      { title: "주의사항", content: "비누, 솔벤트, 강한 세정제 사용을 피해주세요." },
+      { title: "일상 관리", content: "지속적인 마찰을 피하고, 거친 표면에 제품이 긁히거나 마찰되지 않도록 주의해 주세요." },
+      { title: "보관", content: "제품을 보호용 더스트 백에 넣어 직사광선과 밝은 빛을 피해 서늘하고 건조한 곳에 보관해 주세요." },
+      { title: "가죽 관리", content: "가죽 제품이 젖거나 얼룩지지 않도록 주의하세요. 표면이 젖거나 오염되었을 경우, 보풀이 없는 밝은 색상의 흡수성 천으로 닦아 말려주세요. " },
+      { title: "주의사항", content: "비누 또는 솔벤트는 사용하지 마세요. 거친 표면과의 마찰을 피하고, 제품이 긁히지 않도록 주의하세요. 적절히 관리하면 시간이 지나면서 가죽에 자연스러운 멋이 더해집니다." },
+      { title: "제품 문의", content: "제품에 대한 문의 사항이 있으시면 MCM 매장이나 고객 서비스 팀에 언제든지 연락해 주세요."},
     ],
     aiDocentFaqs: [
       {
@@ -89,15 +105,15 @@ export const products = [
     story: {
       sections: [
         { title: "Collection", content: "Visetos Collection" },
-        { title: "Design", content: "컴팩트한 3단 구조에 MCM 비세토스 패턴을 담은 지갑입니다." },
+        { title: "Design", content: "VISETOS MONOGRAM비세토스 모노그램 캔버스\nLOGO BRASS PLATEMCM 로고 브라스 장식 플레이트\nSNAP CLOSURE스냅 클로저TRI-FOLD트라이폴드 구조" },
         { title: "Signature", content: "Visetos Monogram" },
         { title: "Heritage", content: "MCM Leather Goods" },
       ],
       design: {
+        title: "헤리티지 하드웨어로 완성한 모노그램 지갑",
         paragraphs: [
-          "Aren 비세토스 3단 지갑은 작은 크기 안에 카드, 지폐, 동전 수납을 균형 있게 담은 컴팩트한 액세서리입니다.",
-          "MCM의 시그니처 비세토스 모노그램과 나파 가죽 트림이 더해져 일상적인 사용성과 브랜드 아이덴티티를 함께 보여줍니다.",
-          "스냅 클로저 구조로 간편하게 여닫을 수 있어 가벼운 외출이나 작은 가방과 함께 사용하기 좋습니다.",
+          "비세토스 모노그램 캔버스에MCM 로고 브라스 플레이트와 스냅 클로저를 더했습니다.",
+          "트라이폴드 구조로 구성된 지갑으로,아이코닉한 MCM 로고와 헤리티지 하드웨어를 통해MCM의 디자인 아이덴티티를 보여줍니다.",
         ],
       },
       materials: { title: "Visetos Monogram Canvas" },
@@ -145,22 +161,35 @@ export const products = [
     materials: [
       {
         id: 1,
-        name: "Organic Silk",
-        location: "Main",
-        description: "100% 오가닉 실크 소재로 부드럽고 가벼운 착용감을 제공합니다.",
+        name: "Organic Silk 100%",
+        location: "Material",
+        description: "100%오가닉 이탈리안 실크 100%를 사용했습니다.",
       },
       {
         id: 2,
+        name: "Hand-Sewn",
+        location: "Construction",
+        description: "수작업으로 봉제했습니다.",
+      },
+      {
+        id: 3,
         name: "Visetos Monogram Print",
-        location: "Pattern",
-        description: "MCM의 비세토스 모노그램 패턴을 스카프 전체에 적용했습니다.",
+        location: "Print",
+        description: "메인 측면에 비세토스 모노그램 프린트를 적용했습니다.",
+      },
+      {
+        id: 4,
+        name: "MCM Logo & Stripe Print",
+        location: "Reverse",
+        description: "반대쪽 면에 MCM 로고와 대비되는 스트라이프 프린트를 적용했습니다.",
       },
     ],
     careGuide: [
-      { title: "일상 관리", content: "거친 장신구나 지퍼에 걸리지 않도록 주의해주세요." },
-      { title: "세탁", content: "실크 소재 특성상 드라이클리닝을 권장합니다." },
-      { title: "보관", content: "접힌 자국이 깊게 남지 않도록 느슨하게 보관해주세요." },
-      { title: "주의사항", content: "물, 향수, 화장품이 직접 닿지 않도록 주의해주세요." },
+      { title: "드라이클리닝 전용", content: "스카프는 드라이클리닝으로만 관리해 주세요.물세탁은 피하고, 제품의 소재 특성에 맞는 방식으로 관리하는 것을 권장합니다." },
+      { title: "더스트 백에 넣어 보관", content: "제공된 보호용 더스트 백에 넣어 직사광선이나 밝은 조명을 피해 서늘하고 건조한 곳에 보관해 주세요." },
+      { title: "젖거나 오염되지 않도록 주의", content: "표면이 젖거나 오염되었을 경우보풀이 없는 밝은 색상의 흡수성 천으로 닦아 말려주세요." },
+      { title: "비누·솔벤트 사용 금지", content: "비누 또는 솔벤트를 사용하지 마세요." },
+      { title: "거친 표면과의 마찰 주의", content: "제품이 거친 표면에 긁히거나 마찰되지 않도록 주의해 주세요." },
     ],
     aiDocentFaqs: [
       {
@@ -184,10 +213,10 @@ export const products = [
         { title: "Heritage", content: "MCM Accessories" },
       ],
       design: {
+        title: "두 가지 아이콘을 담은 리버서블 디자인",
         paragraphs: [
-          "모노그램 프린트 쁘띠 실크 스카프는 MCM의 상징적인 비세토스 패턴을 가볍고 섬세한 실크 위에 표현한 액세서리입니다.",
-          "슬림한 형태로 목, 손목, 가방 핸들 등 다양한 방식으로 연출할 수 있습니다.",
-          "리버서블 디자인으로 스타일링에 따라 다른 분위기를 더할 수 있습니다.",
+          "앞면에는 비세토스 모노그램 프린트,반대쪽 면에는 MCM 로고와 대비되는 스트라이프 컬러 블록 모티프를 적용했습니다.",
+          "하나의 스카프로 두 가지 디자인을 즐길 수 있으며,스카프·리본 매듭·가방 핸들 등 다양한 방식으로 스타일링할 수 있습니다.",
         ],
       },
       materials: { title: "Organic Silk" },
@@ -631,28 +660,41 @@ export const products = [
     materials: [
       {
         id: 1,
-        name: "Italian Calf Leather",
+        name: "UPPER100% Calf Leather",
         location: "Upper",
-        description: "이탈리안 카프 레더 어퍼로 고급스러운 질감과 견고함을 제공합니다.",
+        description: "부드럽고 견고한 100% 송아지 가죽을 어퍼에 사용해 고급스러운 질감과 안정적인 착화감을 제공합니다.",
       },
       {
         id: 2,
-        name: "Embossed Visetos Monogram",
-        location: "Pattern",
-        description: "엠보싱 비세토스 모노그램이 슈즈 표면에 적용되었습니다.",
+        name: "TRIM100% Calf Leather",
+        location: "Trim",
+        description: "슈즈의 트림 부분에도 100% 송아지 가죽을 적용해 전체적인 완성도와 내구성을 높였습니다.",
       },
       {
         id: 3,
-        name: "OrthoLite Insole",
+        name: "LININGLeather Lining with Mesh",
+        location: "Lining",
+        description: "가죽 라이닝과 메쉬 소재를 함께 사용해 발을 부드럽게 감싸면서도 쾌적한 착용감을 제공합니다.",
+      },
+      {
+        id: 4,
+        name: "INSOLERemovable OrthoLite® Memory Foam Insole",
         location: "Insole",
-        description: "OrthoLite 인솔로 편안한 착화감을 제공합니다.",
+        description: "탈착 가능한 OrthoLite® 메모리폼 인솔이 적용되어 장시간 착용에도 편안한 쿠셔닝을 제공합니다.",
+      },
+      {
+        id: 5,
+        name: "HARDWAREGold-Tone Diamond Metal Eyelets",
+        location: "Hardware",
+        description: "골드 톤 다이아몬드 메탈 아일렛 디테일로 스니커즈에 세련된 포인트를 더했습니다.",
       },
     ],
     careGuide: [
-      { title: "일상 관리", content: "착용 후 부드러운 브러시나 천으로 먼지를 제거해주세요." },
-      { title: "보관", content: "직사광선과 습기를 피해 통풍이 되는 곳에 보관해주세요." },
-      { title: "가죽 관리", content: "가죽 전용 관리 제품 사용 전 눈에 띄지 않는 부분에 먼저 테스트해주세요." },
-      { title: "주의사항", content: "비나 물에 장시간 노출되는 상황은 피해주세요." },
+      { title: "LIQUIDS", content: "알코올이 함유된 물질예: 향수, 화장품, 오일및 물과의 접촉을 피하십시오." },
+      { title: "BEFORE CLEANING", content: "클리닝 전에 내부 삭스를 제거하세요." },
+      { title: "DRYING", content: "클리닝 후 실내 온도에서 건조하세요." },
+      { title: "OUTSOLE", content: "아웃솔은 부드러운 브러시를 사용해 세척하세요." },
+      { title: "UPPER", content: "어퍼는 살짝 물에 적신 코튼 천을 사용해 세척하세요." },
     ],
     aiDocentFaqs: [
       {
@@ -671,15 +713,14 @@ export const products = [
     story: {
       sections: [
         { title: "Collection", content: "Neo Terrain Collection" },
-        { title: "Design", content: "모노그램 레더와 기능적 착화감을 결합한 로우탑 스니커즈입니다." },
+        { title: "Design", content: "DESIGN DETAILS01 — MONOGRAMEmbossed Visetos Monogram\n02 — TONGUELaurel Logo Label\n03 — HEELLeather Diamond Patch\n04 — OUTSOLERubber Outsole · MCM Logo Motif" },
         { title: "Signature", content: "Bavarian Diamond Heel Patch" },
         { title: "Heritage", content: "MCM Footwear" },
       ],
       design: {
         paragraphs: [
-          "네오 터레인 모노그램 레더 로우탑 스니커즈는 MCM의 모노그램 디테일을 현대적인 풋웨어로 풀어낸 제품입니다.",
-          "이탈리안 카프 레더와 엠보싱 비세토스 패턴이 고급스러운 표정을 만들고, OrthoLite 인솔이 편안한 착화감을 더합니다.",
-          "바바리안 다이아몬드 힐 패치가 MCM의 헤리티지를 은근하게 드러냅니다.",
+          "클래식한 비세토스 모노그램이 새겨진이탈리안 송아지 가죽 어퍼로 완성한 로우탑 스니커즈입니다.",
+          "바이에른 다이아몬드를 참고한 우븐 텅 라벨과가죽 힐 패치가 디자인에 포인트를 더합니다.",
         ],
       },
       materials: { title: "Italian Calf Leather" },
@@ -780,25 +821,32 @@ export const products = [
         name: "Natural Nappa Leather",
         location: "Trim",
         description: "천연 나파 가죽을 트림에 사용했습니다.\n가죽 행택과 패드락 주변에도 가죽 소재가 적용됩니다.",
+        image: hoboNappaLeatherMaterialImage,
+        imageStyle: { height: "702.83%", left: "-46.81%", top: "-409.21%", width: "187.23%" },
       },
       {
         id: 3,
         name: "24K Gold-Plated Brass",
         location: "Hardware",
-        description: "브라스 하드웨어에 24K 골드 도금을 적용했습니다.\n패드락과 지퍼 등의 금속 장식에 사용됩니다.",
+        description: "브라스 하드웨어에 24K 골드 도금을 적용했습니다.\n패드락과 지퍼 등의 금속 장식에 사용됩니다.",
+        image: hoboGoldBrassMaterialImage,
+        imageStyle: { height: "735.55%", left: "-450.09%", top: "-499.07%", width: "709.62%" },
       },
       {
         id: 4,
         name: "Suede-Finish Microfiber",
         location: "Lining",
-        description: "가방 내부에는 스웨이드 마감의\n마이크로파이버 안감을 사용했습니다. ",
+        description: "가방 내부에는 스웨이드 마감의\n마이크로파이버 안감을 사용했습니다. ",
+        image: hoboSuedeMicrofiberMaterialImage,
+        imageStyle: { height: "126.14%", left: "-28.26%", top: "-18.6%", width: "152.17%" },
       },
     ],
     careGuide: [
-      { title: "일상 관리", content: "지속적인 마찰을 피하고 거친 표면에 제품이 닿지 않도록 주의해주세요." },
-      { title: "보관", content: "제품을 보관할 때는 직사광선과 높은 습도를 피해 서늘하고 건조한 곳에 보관해주세요." },
-      { title: "가죽 관리", content: "가죽 제품이 젖거나 얼룩이 생긴 경우 부드러운 천으로 가볍게 닦아주세요." },
-      { title: "주의사항", content: "비누 또는 솔벤트를 사용하지 마세요. 거친 표면과의 마찰을 피해주세요." },
+      { title: "일상 관리", content: "지속적인 마찰을 피하고, 거친 표면에 제품이 긁히거나 마찰되지 않도록 주의해 주세요." },
+      { title: "보관", content: "제품을 보호용 더스트 백에 넣어 직사광선과 밝은 빛을 피해 서늘하고 건조한 곳에 보관해 주세요." },
+      { title: "가죽 관리", content: "가죽 제품이 젖거나 얼룩지지 않도록 주의하세요. 표면이 젖거나 오염되었을 경우, 보풀이 없는 밝은 색상의 흡수성 천으로 닦아 말려주세요. " },
+      { title: "주의사항", content: "비누 또는 솔벤트는 사용하지 마세요. 거친 표면과의 마찰을 피하고, 제품이 긁히지 않도록 주의하세요. 적절히 관리하면 시간이 지나면서 가죽에 자연스러운 멋이 더해집니다." },
+      { title: "제품 문의", content: "제품에 대한 문의 사항이 있으시면 MCM 매장이나 고객 서비스 팀에 언제든지 연락해 주세요."},
     ],
     aiDocentFaqs: [
       {
@@ -896,7 +944,7 @@ export const getProductStoryForProduct = (product) => {
     },
     design: {
       eyebrow: "DESIGN & HERITAGE",
-      title: product.name,
+      title: product.story?.design?.title ?? product.name,
       image: product.image,
       imageView: product.imageView,
       paragraphs: product.story?.design?.paragraphs ?? [sections[1].content],
@@ -914,6 +962,7 @@ export const getProductStoryForProduct = (product) => {
         description: material.description,
         location: material.location,
         image: material.image,
+        imageStyle: material.imageStyle,
       })),
     },
     care: {
