@@ -1,13 +1,15 @@
+import { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { DEFAULT_PRODUCT_ID } from "../../mocks/products";
+import useAppStore from "../../stores/useAppStore";
 import productIcon from "../../assets/images/figma/navigation/nav-product.svg?raw";
 import storyIcon from "../../assets/images/figma/navigation/nav-story.svg?raw";
 import nfcIcon from "../../assets/images/figma/navigation/nav-nfc.svg?raw";
 import aiIcon from "../../assets/images/figma/navigation/nav-ai.svg?raw";
 import myIcon from "../../assets/images/figma/navigation/nav-my.svg?raw";
 
-const getCurrentProductId = (pathname) => {
-  return pathname.match(/^\/product\/([^/]+)/)?.[1] ?? DEFAULT_PRODUCT_ID;
+const getProductIdFromPath = (pathname) => {
+  return pathname.match(/^\/product\/([^/]+)/)?.[1];
 };
 
 const createNavItems = (productId) => [
@@ -110,8 +112,17 @@ function BottomNavItem({ item, isActive }) {
 // 화면 아래에 고정되는 하단 네비게이션 바
 function BottomNav({ className = "" }) {
   const { pathname } = useLocation();
-  const productId = getCurrentProductId(pathname);
+  const productIdFromPath = getProductIdFromPath(pathname);
+  const currentProductId = useAppStore((state) => state.currentProductId);
+  const setCurrentProductId = useAppStore((state) => state.setCurrentProductId);
+  const productId = productIdFromPath ?? currentProductId ?? DEFAULT_PRODUCT_ID;
   const navItems = createNavItems(productId);
+
+  useEffect(() => {
+    if (productIdFromPath && productIdFromPath !== currentProductId) {
+      setCurrentProductId(productIdFromPath);
+    }
+  }, [currentProductId, productIdFromPath, setCurrentProductId]);
 
   return (
     <nav
