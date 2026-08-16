@@ -6,7 +6,7 @@ function SavedProductsEmpty() {
       <div className="flex w-[175px] flex-col items-center gap-[11px]">
         <img src={emptyIcon} alt="" className="size-[85px]" />
         <div className="flex w-full flex-col gap-[17px]">
-          <h1 className="font-playfair text-[18px] font-medium leading-[27px] text-[#0a0908]">
+          <h1 className="font-playfair whitespace-nowrap text-[18px] font-bold leading-[27px] text-[#0a0908]">
             저장된 항목이 없습니다
           </h1>
           <p className="text-[13px] leading-[22.75px] text-[#8a8078]">
