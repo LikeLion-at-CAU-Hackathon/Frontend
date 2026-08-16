@@ -84,10 +84,7 @@ function AiLoadingPage() {
         </div>
       </section>
 
-      <AdvisorButton
-        positionClassName="bottom-[83px] right-[max(8px,calc((100vw_-_393px)/2_+_8px))]"
-        onClick={() => setIsAdvisorOpen(true)}
-      />
+      <AdvisorButton onClick={() => setIsAdvisorOpen(true)} />
       <AdvisorSheet isOpen={isAdvisorOpen} onClose={() => setIsAdvisorOpen(false)} />
     </main>
   );
