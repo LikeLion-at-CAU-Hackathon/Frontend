@@ -16,7 +16,7 @@ const createNavItems = (productId) => [
   {
     key: "nfc",
     label: "NFC",
-    path: "/nfc",
+    path: `/product/${productId}/explore-more`,
     icon: nfcIcon,
     iconClassName: "h-[12px] w-[22.5px]",
   },
@@ -38,8 +38,7 @@ const isProductPathActive = (pathname, productId) => {
   return (
     pathname === productBasePath ||
     pathname.startsWith(`${productBasePath}/stock`) ||
-    pathname.startsWith(`${productBasePath}/size-compare`) ||
-    pathname.startsWith(`${productBasePath}/explore-more`)
+    pathname.startsWith(`${productBasePath}/size-compare`)
   );
 };
 
@@ -50,6 +49,10 @@ const isItemActive = (item, pathname, productId) => {
 
   if (item.key === "story") {
     return pathname.startsWith(`/product/${productId}/story`);
+  }
+
+  if (item.key === "nfc") {
+    return pathname.startsWith(`/product/${productId}/explore-more`);
   }
 
   return pathname === item.path || pathname.startsWith(`${item.path}/`);
