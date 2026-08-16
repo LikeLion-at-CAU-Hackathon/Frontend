@@ -114,6 +114,8 @@ function ProductStockPage() {
       <AdvisorSheet
         isOpen={isAdvisorOpen}
         product={product}
+        initialSubmitted
+        initialRequest="재고 문의"
         onClose={() => setIsAdvisorOpen(false)}
       />
     </main>

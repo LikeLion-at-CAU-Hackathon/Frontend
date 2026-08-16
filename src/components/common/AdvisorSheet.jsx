@@ -7,7 +7,13 @@ const options = ["다른 옵션", "착용 상담", "스타일링", "기타"];
 const defaultProduct = getMockProductById(DEFAULT_PRODUCT_ID);
 
 // Advisor 버튼을 눌렀을 때 뜨는 상담 요청창
-function AdvisorSheet({ isOpen, onClose, product = defaultProduct }) {
+function AdvisorSheet({
+  isOpen,
+  onClose,
+  product = defaultProduct,
+  initialSubmitted = false,
+  initialRequest = "재고 문의",
+}) {
   const [selectedOption, setSelectedOption] = useState("");
   const [requestText, setRequestText] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -16,8 +22,10 @@ function AdvisorSheet({ isOpen, onClose, product = defaultProduct }) {
     return null;
   }
 
-  const submittedRequest =
-    requestText.trim() && (!selectedOption || selectedOption === "기타")
+  const hasSubmitted = initialSubmitted || isSubmitted;
+  const submittedRequest = initialSubmitted
+    ? initialRequest
+    : requestText.trim() && (!selectedOption || selectedOption === "기타")
       ? requestText.trim()
       : selectedOption || requestText.trim() || "재고 문의";
 
@@ -37,7 +45,7 @@ function AdvisorSheet({ isOpen, onClose, product = defaultProduct }) {
     >
       <section
         className={`absolute bottom-0 left-0 w-full rounded-t-[16px] bg-[#fcfbf9] ${
-          isSubmitted ? "max-h-[calc(100dvh-84px)] overflow-y-auto" : "min-h-[467px]"
+          hasSubmitted ? "max-h-[calc(100dvh-84px)] overflow-y-auto" : "min-h-[467px]"
         }`}
         onClick={(event) => event.stopPropagation()}
       >
@@ -45,7 +53,7 @@ function AdvisorSheet({ isOpen, onClose, product = defaultProduct }) {
           <span className="h-1 w-9 rounded-[2px] bg-[#e5e0da]" />
         </div>
 
-        {isSubmitted ? (
+        {hasSubmitted ? (
           <SubmittedContent onClose={handleClose} selectedOption={submittedRequest} />
         ) : (
           <RequestContent
