@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Bell, Share2 } from "lucide-react";
+import { Share2 } from "lucide-react";
 import { toPng } from "html-to-image";
 import { useNavigate, useParams } from "react-router-dom";
 import AdvisorButton from "../../components/common/AdvisorButton";
@@ -72,12 +72,6 @@ function ProductProfilePage() {
           My Selection
         </p>
         <h1 className="pt-[10px] text-[22px] font-medium leading-[33px]">저장한 제품</h1>
-        <Bell
-          size={20}
-          strokeWidth={1.6}
-          className="absolute right-[22px] top-4"
-          aria-label="알림"
-        />
       </header>
 
       {profile ? (
