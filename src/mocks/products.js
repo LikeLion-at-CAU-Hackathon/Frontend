@@ -771,27 +771,27 @@ export const products = [
     materials: [
       {
         id: 1,
-        name: "Visetos Pattern",
+        name: "Visetos 패턴",
         location: "Body",
-        description: "MCM의 시그니처 Visetos 모노그램 캔버스를 바디에 사용했습니다.",
+        description: "MCM의 시그니처 Visetos 모노그램 캔버스를 바디에 사용했습니다.\n제품의 주요 소재로, 클래식한 모노그램 패턴이 Aren Hobo의 전체적인 디자인을 완성합니다.",
       },
       {
         id: 2,
         name: "Natural Nappa Leather",
         location: "Trim",
-        description: "천연 나파 가죽을 트림에 사용해 부드러운 질감과 고급스러운 마감을 더했습니다.",
+        description: "천연 나파 가죽을 트림에 사용했습니다.\n가죽 행택과 패드락 주변에도 가죽 소재가 적용됩니다.",
       },
       {
         id: 3,
         name: "24K Gold-Plated Brass",
         location: "Hardware",
-        description: "브라스 하드웨어에 24K 골드 도금을 적용했습니다.",
+        description: "브라스 하드웨어에 24K 골드 도금을 적용했습니다.\n패드락과 지퍼 등의 금속 장식에 사용됩니다.",
       },
       {
         id: 4,
         name: "Suede-Finish Microfiber",
         location: "Lining",
-        description: "가방 내부에 스웨이드 마이크로파이버 안감을 사용했습니다.",
+        description: "가방 내부에는 스웨이드 마감의\n마이크로파이버 안감을 사용했습니다. ",
       },
     ],
     careGuide: [
@@ -913,6 +913,7 @@ export const getProductStoryForProduct = (product) => {
         title: material.name,
         description: material.description,
         location: material.location,
+        image: material.image,
       })),
     },
     care: {
