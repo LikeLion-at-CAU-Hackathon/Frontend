@@ -1,17 +1,22 @@
-import { looks } from "../pages/ai/styleProfileData";
+import { products } from "./products";
 
-const aiAnalysisByProductId = {
-  8: {
-    currentStyleInterests: ["Warm Tones", "Compact Size", "Classic Styling"],
+export const mapAiAnalysisResponse = (response) => {
+  if (!response) return null;
+
+  const curatedLooks = response.curatedLooks ?? response.curated_looks ?? [];
+
+  return {
+    currentStyleInterests:
+      response.currentStyleInterests ?? response.style_interests ?? [],
     description:
-      "Cognac 톤 제품을 반복 탐색하신 성향을 바탕으로 Monogram Daily, Modern Classic, Sporty Casual 3가지 룩을 추천드려요.",
-    curatedLooks: looks.map(({ id, name, image, detailPath }) => ({
-      id,
-      name,
-      image,
-      detailPath,
+      response.description ?? response.analysisSummary ?? response.analysis_summary ?? "",
+    curatedLooks: curatedLooks.map((look) => ({
+      id: look.id,
+      name: look.name ?? look.title ?? "",
+      image: look.image ?? look.imageUrl ?? look.image_url ?? "",
+      detailPath: look.detailPath ?? look.detail_path,
     })),
-  },
+  };
 };
 
 const getStorySection = (product, title) =>
@@ -20,9 +25,15 @@ const getStorySection = (product, title) =>
 export const createProductProfile = (product) => {
   if (!product) return null;
 
+  const mockProduct = products.find(
+    (item) => String(item.id) === String(product.id),
+  );
+
   return {
     ...product,
-    aiAnalysis: aiAnalysisByProductId[product.id] ?? null,
+    aiAnalysis: mapAiAnalysisResponse(
+      product.aiAnalysis ?? mockProduct?.aiAnalysis,
+    ),
     brandStory: {
       design:
         getStorySection(product, "Design") ??
@@ -39,4 +50,3 @@ export const createProductProfile = (product) => {
     },
   };
 };
-

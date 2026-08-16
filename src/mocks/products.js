@@ -8,6 +8,9 @@ import sneakersImage from "../assets/images/products/sneakers.webp";
 import sunglassesImage from "../assets/images/products/sunglasses.webp";
 import tshirtImage from "../assets/images/products/tshirt.webp";
 import walletImage from "../assets/images/products/wallet.webp";
+import modernClassicLookImage from "../assets/images/lookbook/modernclassiclook.png";
+import monogramDailyLookImage from "../assets/images/lookbook/monogramdailylook.png";
+import sportyCasualLookImage from "../assets/images/lookbook/sportycasuallook.png";
 
 export const products = [
   {
@@ -702,6 +705,31 @@ export const products = [
     image: hoboBagImage,
     images: [hoboBagImage],
     imageView: { scale: 1.38, translateY: "-30px" },
+    aiAnalysis: {
+      currentStyleInterests: ["Warm Tones", "Compact Size", "Classic Styling"],
+      description:
+        "Cognac 톤 제품을 반복 탐색하신 성향을 바탕으로 Monogram Daily, Modern Classic, Sporty Casual 3가지 룩을 추천드려요.",
+      curatedLooks: [
+        {
+          id: 1,
+          name: "Monogram Daily",
+          image: monogramDailyLookImage,
+          detailPath: "/ai/style-recommendation/look1",
+        },
+        {
+          id: 2,
+          name: "Modern Classic",
+          image: modernClassicLookImage,
+          detailPath: "/ai/style-recommendation/look2",
+        },
+        {
+          id: 3,
+          name: "Sporty Casual",
+          image: sportyCasualLookImage,
+          detailPath: "/ai/style-recommendation/look3",
+        },
+      ],
+    },
     stocks: [{ branch_name: "MCM 신세계 본점", quantity: 3 }],
     variants: [
       {
