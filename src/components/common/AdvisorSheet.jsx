@@ -1,22 +1,23 @@
 import { useState } from "react";
 import advisorCheckIcon from "../../assets/images/figma/product-detail/advisor-check.svg";
 import { DEFAULT_PRODUCT_ID, getMockProductById } from "../../mocks/products";
+import useAppStore from "../../stores/useAppStore";
 import Button from "./Button";
 
 const options = ["다른 옵션", "착용 상담", "스타일링", "기타"];
-const defaultProduct = getMockProductById(DEFAULT_PRODUCT_ID);
-
 // Advisor 버튼을 눌렀을 때 뜨는 상담 요청창
 function AdvisorSheet({
   isOpen,
   onClose,
-  product = defaultProduct,
+  product,
   initialSubmitted = false,
   initialRequest = "재고 문의",
 }) {
+  const currentProductId = useAppStore((state) => state.currentProductId);
   const [selectedOption, setSelectedOption] = useState("");
   const [requestText, setRequestText] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const displayProduct = product ?? getMockProductById(currentProductId ?? DEFAULT_PRODUCT_ID);
 
   if (!isOpen) {
     return null;
@@ -57,7 +58,7 @@ function AdvisorSheet({
           <SubmittedContent onClose={handleClose} selectedOption={submittedRequest} />
         ) : (
           <RequestContent
-            product={product}
+            product={displayProduct}
             requestText={requestText}
             selectedOption={selectedOption}
             onRequestTextChange={setRequestText}
