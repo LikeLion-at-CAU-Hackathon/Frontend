@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
-import bookmarkIcon from "../../assets/images/figma/ai/style-profile-bookmark.svg";
 import LookRecommendation from "../../components/ai/LookRecommendation";
 import StyleKeywords from "../../components/ai/StyleKeywords";
 import TodayItems from "../../components/ai/TodayItems";
