@@ -12,11 +12,11 @@ import ProductStoryPage from "./pages/story/ProductStoryPage";
 import AiLoadingPage from "./pages/ai/AiLoadingPage";
 import AIStyleProfilePage from "./pages/ai/AIStyleProfilePage";
 import LookDetailPage from "./pages/ai/LookDetailPage";
+import SavedProductsPage from "./pages/my/SavedProductsPage";
 import { DEFAULT_PRODUCT_ID } from "./mocks/products";
 
 const pages = [
   { path: "/nfc", title: "NFC" },
-  { path: "/my", title: "My" },
 ];
 
 function PlaceholderPage({ title }) {
@@ -59,6 +59,11 @@ function AppContent() {
           <Route path="/nfc/staff-called" element={<NfcFailedPage isStaffCalled />} />
           <Route path="/ai" element={<AiLoadingPage />} />
           <Route path="/ai/style-profile" element={<AIStyleProfilePage />} />
+          <Route path="/my" element={<SavedProductsPage />} />
+          <Route
+            path="/my/saved-products/:productId"
+            element={<PlaceholderPage title="Saved Product Detail" />}
+          />
           <Route
             path="/ai/style-recommendation"
             element={<PlaceholderPage title="Style Recommendation Detail" />}
