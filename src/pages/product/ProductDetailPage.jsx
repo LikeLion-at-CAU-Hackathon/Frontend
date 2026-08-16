@@ -75,11 +75,17 @@ function ProductDetailPage() {
   const colorOptions = product.colors?.length ? product.colors : [product.color];
   const getColorSwatch = (color) => colorPalette[color] ?? colorPalette[product.color] ?? "#d9d9d9";
   const addSavedProduct = useSavedProductsStore((state) => state.addSavedProduct);
+  const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
   const isSaved = useSavedProductsStore((state) =>
     state.savedProducts.some((item) => item.id === product.id),
   );
 
-  const handleSaveProduct = () => {
+  const handleToggleSavedProduct = () => {
+    if (isSaved) {
+      removeSavedProduct(product.id);
+      return;
+    }
+
     addSavedProduct({
       ...product,
       collection: collectionLabel,
@@ -172,10 +178,10 @@ function ProductDetailPage() {
           Explore More
         </Button>
         <Button
-          onClick={handleSaveProduct}
+          onClick={handleToggleSavedProduct}
           className="text-[12px] leading-[18px] tracking-[0.72px]"
         >
-          {isSaved ? "My Selection에 저장됨" : labels.addSelection}
+          {isSaved ? "My Selection에서 제거" : labels.addSelection}
         </Button>
       </section>
     </main>

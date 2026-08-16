@@ -11,6 +11,7 @@ function SavedProductsPage() {
   const navigate = useNavigate();
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const savedProducts = useSavedProductsStore((state) => state.savedProducts);
+  const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
 
   const handleProductClick = (product) => {
     navigate(`/my/saved-products/${product.id}`);
@@ -29,7 +30,11 @@ function SavedProductsPage() {
       {savedProducts.length === 0 ? (
         <SavedProductsEmpty />
       ) : (
-        <SavedProductsList products={savedProducts} onProductClick={handleProductClick} />
+        <SavedProductsList
+          products={savedProducts}
+          onProductClick={handleProductClick}
+          onRemoveProduct={removeSavedProduct}
+        />
       )}
 
       <AdvisorButton onClick={() => setIsAdvisorOpen(true)} />

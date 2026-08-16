@@ -1,15 +1,31 @@
 import { Bookmark, ChevronRight, MapPin } from "lucide-react";
 
-function SavedProductCard({ product, onClick }) {
+function SavedProductCard({ product, onClick, onRemove }) {
   const formattedPrice =
     typeof product.price === "number"
       ? `₩${product.price.toLocaleString("ko-KR")}`
       : product.price;
 
+  const handleBookmarkClick = (event) => {
+    event.stopPropagation();
+    onRemove(product.id);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.target !== event.currentTarget) return;
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onClick(product);
+    }
+  };
+
   return (
-    <button
-      type="button"
+    <article
       onClick={() => onClick(product)}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
       className="flex h-[120px] w-full overflow-hidden rounded-[12px] border border-[#e5e0da] bg-[#faf8f5] text-left transition-all duration-200 hover:-translate-y-px hover:shadow-sm"
     >
       <div className="size-[120px] shrink-0 bg-[#ede8e2]">
@@ -35,13 +51,19 @@ function SavedProductCard({ product, onClick }) {
           <p className="truncate text-[11px] leading-[19.5px]">{product.store}</p>
         </div>
 
-        <Bookmark
-          size={18}
-          strokeWidth={1.7}
-          fill={product.isSaved ? "currentColor" : "none"}
-          className="absolute right-2 top-1 text-[#0a0908]"
-          aria-hidden="true"
-        />
+        <button
+          type="button"
+          onClick={handleBookmarkClick}
+          aria-label={product.isSaved ? "My Selection에서 제거" : "My Selection에 저장"}
+          className="absolute right-2 top-1 flex size-[22px] items-center justify-center text-[#0a0908]"
+        >
+          <Bookmark
+            size={18}
+            strokeWidth={1.8}
+            fill={product.isSaved ? "currentColor" : "none"}
+            aria-hidden="true"
+          />
+        </button>
         <ChevronRight
           size={17}
           strokeWidth={1.7}
@@ -49,7 +71,7 @@ function SavedProductCard({ product, onClick }) {
           aria-hidden="true"
         />
       </div>
-    </button>
+    </article>
   );
 }
 
