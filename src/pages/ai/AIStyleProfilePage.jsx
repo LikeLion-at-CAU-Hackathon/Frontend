@@ -23,7 +23,6 @@ function AIStyleProfilePage() {
       <header className="flex items-end justify-between px-[25px] pb-[11px] pt-[46px]">
         <h1 className="font-playfair text-[20px] font-medium leading-[30px]">AI STYLE PROFILE</h1>
         <button type="button" aria-label="스타일 프로필 저장" className="p-1">
-          <img src={bookmarkIcon} alt="" className="size-[18px]" />
         </button>
       </header>
 
