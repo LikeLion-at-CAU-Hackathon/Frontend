@@ -14,11 +14,15 @@ const useSavedProductsStore = create(
       },
       removeSavedProduct: (productId) => {
         set((state) => ({
-          savedProducts: state.savedProducts.filter((item) => item.id !== productId),
+          savedProducts: state.savedProducts.filter(
+            (item) => String(item.id) !== String(productId),
+          ),
         }));
       },
       isProductSaved: (productId) => {
-        return get().savedProducts.some((item) => item.id === productId);
+        return get().savedProducts.some(
+          (item) => String(item.id) === String(productId),
+        );
       },
     }),
     {

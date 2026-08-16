@@ -3,7 +3,7 @@ import { Bookmark, MapPin } from "lucide-react";
 const formatPrice = (price) =>
   typeof price === "number" ? `₩${price.toLocaleString("ko-KR")}` : price;
 
-function ProductSummary({ product }) {
+function ProductSummary({ product, onUnsave }) {
   const collection = product.collection?.endsWith("COLLECTION")
     ? product.collection
     : `${product.collection} COLLECTION`;
@@ -33,13 +33,14 @@ function ProductSummary({ product }) {
           <p className="truncate text-[11px] leading-[19.5px]">{store}</p>
         </div>
       </div>
-      <Bookmark
-        size={16}
-        strokeWidth={1.8}
-        fill="currentColor"
-        className="absolute right-0 top-3 text-[#0a0908]"
-        aria-label="My Selection에 저장됨"
-      />
+      <button
+        type="button"
+        onClick={onUnsave}
+        className="absolute right-0 top-3 flex size-6 items-center justify-center text-[#0a0908]"
+        aria-label="My Selection에서 제거"
+      >
+        <Bookmark size={16} strokeWidth={1.8} fill="currentColor" aria-hidden="true" />
+      </button>
     </section>
   );
 }
@@ -121,13 +122,13 @@ function BrandStory({ story }) {
   );
 }
 
-function ProductProfileCard({ profile, captureRef }) {
+function ProductProfileCard({ profile, captureRef, onUnsave }) {
   return (
     <article
       ref={captureRef}
       className="mx-5 flex flex-col items-center gap-6 rounded-[12px] border border-[rgba(42,33,26,0.05)] bg-[#fffdfb] p-4"
     >
-      <ProductSummary product={profile} />
+      <ProductSummary product={profile} onUnsave={onUnsave} />
       <AiAnalysis analysis={profile.aiAnalysis} />
       <div className="h-px w-full bg-[#d9d9d9]" />
       <BrandStory story={profile.brandStory} />

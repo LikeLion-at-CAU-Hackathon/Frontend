@@ -18,10 +18,20 @@ function ProductProfilePage() {
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareStatus, setShareStatus] = useState("");
+  const isRemovingRef = useRef(false);
+  const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
   const savedProduct = useSavedProductsStore((state) =>
     state.savedProducts.find((product) => String(product.id) === String(productId)),
   );
   const profile = createProductProfile(savedProduct);
+
+  const handleUnsaveProduct = () => {
+    if (!profile || isRemovingRef.current) return;
+
+    isRemovingRef.current = true;
+    removeSavedProduct(profile.id);
+    navigate("/my");
+  };
 
   const handleShareSelect = async (action) => {
     setShareStatus("");
@@ -73,7 +83,11 @@ function ProductProfilePage() {
       {profile ? (
         <>
           <div className="pt-[18px]">
-            <ProductProfileCard profile={profile} captureRef={captureRef} />
+            <ProductProfileCard
+              profile={profile}
+              captureRef={captureRef}
+              onUnsave={handleUnsaveProduct}
+            />
           </div>
           <div className="px-5 pb-16 pt-4">
             <button
@@ -116,4 +130,3 @@ function ProductProfilePage() {
 }
 
 export default ProductProfilePage;
-
