@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
@@ -20,12 +19,6 @@ function SavedProductsPage() {
   return (
     <main className="relative min-h-[calc(100dvh-62px)] bg-[#faf8f5] text-[#0a0908]">
       <div className="h-px bg-[#e5e0da]" />
-      <Bell
-        size={20}
-        strokeWidth={1.6}
-        className="absolute right-[13px] top-[10px]"
-        aria-label="알림"
-      />
 
       {savedProducts.length === 0 ? (
         <SavedProductsEmpty />

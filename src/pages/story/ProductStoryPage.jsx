@@ -35,14 +35,7 @@ function ProductStoryPage() {
 
       {storyPages[activeTab] ?? <StoryDesignPage story={design} />}
 
-      <AdvisorButton
-        onClick={() => setIsAdvisorOpen(true)}
-        positionClassName={
-          activeTab === "ai-docent"
-            ? "bottom-[139px] right-[max(16px,calc((100vw_-_393px)/2_+_16px))]"
-            : undefined
-        }
-      />
+      <AdvisorButton onClick={() => setIsAdvisorOpen(true)} />
       <AdvisorSheet isOpen={isAdvisorOpen} product={product} onClose={() => setIsAdvisorOpen(false)} />
     </main>
   );

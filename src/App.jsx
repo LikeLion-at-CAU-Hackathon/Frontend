@@ -13,6 +13,7 @@ import AiLoadingPage from "./pages/ai/AiLoadingPage";
 import AIStyleProfilePage from "./pages/ai/AIStyleProfilePage";
 import LookDetailPage from "./pages/ai/LookDetailPage";
 import SavedProductsPage from "./pages/my/SavedProductsPage";
+import ProductProfilePage from "./pages/my/ProductProfilePage";
 import { DEFAULT_PRODUCT_ID } from "./mocks/products";
 
 const pages = [
@@ -62,7 +63,7 @@ function AppContent() {
           <Route path="/my" element={<SavedProductsPage />} />
           <Route
             path="/my/saved-products/:productId"
-            element={<PlaceholderPage title="Saved Product Detail" />}
+            element={<ProductProfilePage />}
           />
           <Route
             path="/ai/style-recommendation"
