@@ -179,7 +179,7 @@ function StoryAiDocentPage({ faqs = [], product }) {
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
               disabled={isResponding}
-              className="w-full bg-transparent text-[13px] leading-normal text-[#0a0908] outline-none placeholder:text-[rgba(10,9,8,0.5)]"
+              className="w-full bg-transparent text-[16px] leading-normal text-[#0a0908] outline-none placeholder:text-[rgba(10,9,8,0.5)]"
               placeholder="이 제품에 대해 질문하세요..."
             />
           </label>
