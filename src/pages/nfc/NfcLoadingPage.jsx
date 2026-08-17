@@ -1,17 +1,31 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { products } from "../../mocks/products";
+import useAppStore from "../../stores/useAppStore";
 
-// NFC 태깅 후 제품 정보를 불러오는 화면
+// NFC 태그로 진입한 제품 정보를 불러오는 화면
 function NfcLoadingPage() {
   const navigate = useNavigate();
+  const { productId } = useParams();
+  const setCurrentProductId = useAppStore((state) => state.setCurrentProductId);
 
   useEffect(() => {
+    const productExists = products.some(
+      (product) => product.id === Number(productId),
+    );
+
     const timerId = window.setTimeout(() => {
+      if (productExists) {
+        setCurrentProductId(productId);
+        navigate(`/product/${productId}`, { replace: true });
+        return;
+      }
+
       navigate("/nfc/failed", { replace: true });
     }, 1600);
 
     return () => window.clearTimeout(timerId);
-  }, [navigate]);
+  }, [navigate, productId, setCurrentProductId]);
 
   return (
     <main className="relative flex min-h-[calc(100dvh_-_env(safe-area-inset-bottom))] items-center justify-center overflow-hidden bg-white px-[22px]">

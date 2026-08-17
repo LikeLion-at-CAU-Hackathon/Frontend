@@ -31,7 +31,7 @@ function PlaceholderPage({ title }) {
 
 function AppContent() {
   const { pathname } = useLocation();
-  const isFullScreenPage = ["/nfc/loading", "/nfc/failed", "/nfc/staff-called"].includes(pathname);
+  const isFullScreenPage = pathname.startsWith("/nfc/");
 
   return (
     <div className="mx-auto flex h-dvh w-full max-w-[440px] flex-col overflow-hidden bg-[#f8f6f3]">
@@ -55,6 +55,7 @@ function AppContent() {
           <Route path="/product/:productId/size-compare" element={<ProductSizeComparePage />} />
           <Route path="/product/:productId/size-compare/result" element={<ProductSizeCompareResultPage />} />
           <Route path="/error" element={<ErrorPage />} />
+          <Route path="/nfc/:productId" element={<NfcLoadingPage />} />
           <Route path="/nfc/loading" element={<NfcLoadingPage />} />
           <Route path="/nfc/failed" element={<NfcFailedPage />} />
           <Route path="/nfc/staff-called" element={<NfcFailedPage isStaffCalled />} />
