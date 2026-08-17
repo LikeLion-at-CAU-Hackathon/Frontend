@@ -201,6 +201,8 @@ function ProductSizeCompareResultPage() {
       <AdvisorSheet
         isOpen={isAdvisorOpen}
         product={product}
+        initialSubmitted
+        initialRequest="실물 비교 요청"
         onClose={() => setIsAdvisorOpen(false)}
       />
     </main>
