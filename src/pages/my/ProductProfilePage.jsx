@@ -90,10 +90,17 @@ function ProductProfilePage() {
                 setShareStatus("");
                 setIsShareOpen(true);
               }}
-              className="flex h-[52px] w-full items-center justify-center gap-[6px] rounded-[3px] bg-[#6b3f1f] text-[12px] font-medium tracking-[0.48px] text-[#fbf9f5]"
+              className="flex h-[52px] w-full items-center justify-center gap-[6px] rounded-[12px] bg-[#2a241a] font-['DM_Sans'] text-[12px] font-medium leading-[18px] tracking-[0.48px] text-[#fbf9f5]"
             >
-              <Share2 size={14} strokeWidth={1.8} aria-hidden="true" />
+              <Share2 size={12} strokeWidth={1.5} aria-hidden="true" />
               결과 공유
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/my")}
+              className="mt-[10px] flex h-[52px] w-full items-center justify-center rounded-[12px] bg-[rgba(42,36,26,0.2)] font-['DM_Sans'] text-[12px] font-medium leading-[18px] tracking-[0.48px] text-[#2a241a]"
+            >
+              돌아가기
             </button>
           </div>
           <AdvisorButton onClick={() => setIsAdvisorOpen(true)} />
