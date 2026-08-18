@@ -873,7 +873,7 @@ export const products = [
     story: {
       sections: [
         { title: "Collection", content: "Visetos Collection" },
-        { title: "Design", content: "클래식한 실루엣과 MCM의 시그니처 모노그램을 현대적으로 재해석한 디자인입니다." },
+        { title: "Design", content: "Softness & Structure" },
         { title: "Signature", content: "Leather Hang Tag" },
         { title: "Heritage", content: "MCM Luggage" },
       ],
