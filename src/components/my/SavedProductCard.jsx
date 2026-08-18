@@ -1,4 +1,5 @@
-import { Bookmark, ChevronRight, MapPin } from "lucide-react";
+import { Bookmark, ChevronRight } from "lucide-react";
+import locationIcon from "../../assets/my-location.svg";
 
 function SavedProductCard({ product, onClick, onRemove }) {
   const formattedPrice =
@@ -47,7 +48,7 @@ function SavedProductCard({ product, onClick, onRemove }) {
         </div>
 
         <div className="flex items-center gap-1 text-[#8a8078]">
-          <MapPin size={16} strokeWidth={1.6} />
+          <img src={locationIcon} alt="" className="size-4 shrink-0" aria-hidden="true" />
           <p className="truncate text-[11px] leading-[19.5px]">{product.store}</p>
         </div>
 

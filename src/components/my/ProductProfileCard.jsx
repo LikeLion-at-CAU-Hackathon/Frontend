@@ -1,4 +1,5 @@
-import { Bookmark, MapPin } from "lucide-react";
+import { Bookmark } from "lucide-react";
+import locationIcon from "../../assets/my-location.svg";
 
 const formatPrice = (price) =>
   typeof price === "number" ? `₩${price.toLocaleString("ko-KR")}` : price;
@@ -29,7 +30,7 @@ function ProductSummary({ product, onUnsave }) {
           {formatPrice(product.price)}
         </p>
         <div className="flex min-w-0 items-center gap-1 text-[#8a8078]">
-          <MapPin size={16} strokeWidth={1.6} className="shrink-0" />
+          <img src={locationIcon} alt="" className="size-4 shrink-0" aria-hidden="true" />
           <p className="truncate text-[11px] leading-[19.5px]">{store}</p>
         </div>
       </div>
