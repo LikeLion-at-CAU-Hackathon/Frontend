@@ -53,8 +53,10 @@ function StoryAiDocentPage({ faqs = [], product }) {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState([]);
   const [isResponding, setIsResponding] = useState(false);
+  const [selectedFaqQuestions, setSelectedFaqQuestions] = useState([]);
   const latestMessageRef = useRef(null);
   const hasConversation = messages.length > 0;
+  const visibleFaqs = faqs.filter((faq) => !selectedFaqQuestions.includes(faq.question.trim()));
   const greeting = `안녕하세요. ${product?.name ?? "이 제품"}에 대한 검증된 정보를 안내해 드립니다. 소재, 관리 방법, 특징 등을 질문해 보세요.`;
 
   useEffect(() => {
@@ -122,6 +124,19 @@ function StoryAiDocentPage({ faqs = [], product }) {
     handleAsk(inputValue);
   };
 
+  const handleSuggestedQuestionClick = (question) => {
+    const trimmedQuestion = question.trim();
+
+    if (!trimmedQuestion || isResponding) {
+      return;
+    }
+
+    setSelectedFaqQuestions((prevQuestions) =>
+      prevQuestions.includes(trimmedQuestion) ? prevQuestions : [...prevQuestions, trimmedQuestion],
+    );
+    handleAsk(trimmedQuestion);
+  };
+
   return (
     <section className="flex min-h-[calc(100dvh-107px)] flex-col bg-[#fafaf8] text-left">
       <header className="border-b border-[#e5e0da] bg-[#fafaf8] px-5 py-[14px]">
@@ -154,12 +169,12 @@ function StoryAiDocentPage({ faqs = [], product }) {
           >
             <p className="text-[11px] leading-[16.5px] text-[#6f6f6f]">자주 묻는 질문</p>
             <div className="mt-1 flex flex-col gap-1">
-              {faqs.map((faq) => (
+              {visibleFaqs.map((faq) => (
                 <SuggestedQuestion
                   key={faq.question}
                   disabled={isResponding}
                   question={faq.question}
-                  onClick={handleAsk}
+                  onClick={handleSuggestedQuestionClick}
                 />
               ))}
             </div>
