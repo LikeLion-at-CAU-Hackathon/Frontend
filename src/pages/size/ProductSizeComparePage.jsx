@@ -48,7 +48,7 @@ function ProductSizeComparePage() {
           <h2 className="font-playfair mt-[5px] text-[23px] font-medium leading-[27.6px] text-[#0a0908]">
             {product.name}
           </h2>
-          <span className="mt-2 inline-flex h-7 items-center rounded-[2px] border border-[#d5b38b] px-[11px] text-[11px] leading-[16.5px] text-[#3d3530]">
+          <span className="mt-2 inline-flex h-7 items-center rounded-[4px] border-[1.5px] border-[#d5b38b] px-[11px] text-[11px] leading-[16.5px] text-[#3d3530]">
             {currentSize.size}
           </span>
           <p className="mt-[9px] text-[15px] font-semibold leading-[22.5px] text-[#0a0908]">
@@ -58,11 +58,11 @@ function ProductSizeComparePage() {
 
         <div className="mt-8 h-px bg-[#d5d0ca]" />
 
-        <div className="px-[22px] pt-[15px]">
+        <div className="px-[22px] pt-[24px]">
           <p className="text-[16px] font-semibold leading-[19.5px] text-[#0a0908]">
             {labels.selectSize}
           </p>
-          <div className="mt-[14px] flex gap-[9px]">
+          <div className="mt-[8px] flex gap-[9px]">
             {compareSizes.map((size) => (
               <SizeOption
                 key={size}
@@ -74,13 +74,12 @@ function ProductSizeComparePage() {
           </div>
           <Button
             disabled={!canCompare}
-            font="playfair"
             onClick={() => {
               if (canCompare) {
                 navigate(`/product/${product.id}/size-compare/result?size=${selectedSize}`);
               }
             }}
-            className="mt-3"
+            className="mt-[24px]"
           >
             {labels.compare}
           </Button>

@@ -862,7 +862,7 @@ export const products = [
       {
         question: "이 가방에는 무엇이 들어가나요?",
         answer:
-          "Mini 사이즈에는 스마트폰, 태블릿, AirPods, AirPods Max 등의 소지품을 수납할 수 있습니다. 노트북은 수납하기 어렵습니다. 가벼운 외출이나 일상적인 약속에 적합한 사이즈입니다. 더 많은 수납이 필요하다면 Large 사이즈도 비교해 보세요.",
+          "Small 사이즈에는 스마트폰, 태블릿, AirPods, AirPods Max 등의 소지품을 수납할 수 있습니다. 노트북은 수납하기 어렵습니다. 가벼운 외출이나 일상적인 약속에 적합한 사이즈입니다. 더 많은 수납이 필요하다면 Large 사이즈도 비교해 보세요.",
       },
       {
         question: "어떻게 관리하나요?",
@@ -873,7 +873,7 @@ export const products = [
     story: {
       sections: [
         { title: "Collection", content: "Visetos Collection" },
-        { title: "Design", content: "클래식한 실루엣과 MCM의 시그니처 모노그램을 현대적으로 재해석한 디자인입니다." },
+        { title: "Design", content: "Softness & Structure" },
         { title: "Signature", content: "Leather Hang Tag" },
         { title: "Heritage", content: "MCM Luggage" },
       ],

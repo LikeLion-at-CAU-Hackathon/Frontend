@@ -18,26 +18,26 @@ const labels = {
   addSelection: "My Selection에 담기",
 };
 
-const colorPalette = {
-  Black: "#0a0908",
-  "Black / Silver": "linear-gradient(135deg, #f8f8f6 0 28%, #0a0908 28% 72%, #f8f8f6 72% 100%)",
-  "Black / Matte Black": "#050505",
-  Cognac: "#aa5a23",
-  "Cognac / Gold": "linear-gradient(135deg, #aa5a23 0 70%, #d5a856 70% 100%)",
-  "Dark Brown / Black": "linear-gradient(135deg, #241614 0 62%, #050505 62% 100%)",
-  Egret: "#efebe4",
-  "Misty Gray / Silver": "linear-gradient(135deg, #b8b6b0 0 70%, #ececea 70% 100%)",
-  Pink: "#d7a3a4",
-  "Powder Pink": "#dbaaaa",
-};
-
 const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
 const formatSpecValue = (value) => value.replaceAll(" x ", " × ").replaceAll(" / ", " · ");
+const formatProductInfoValue = (label, value) => {
+  const formattedValue = formatSpecValue(value);
+
+  if (label === "STORAGE") {
+    return formattedValue.replace(" · AirPods Max", " ·\nAirPods Max");
+  }
+
+  if (label === "STRAP") {
+    return formattedValue.replace(", 125", ",\n125");
+  }
+
+  return formattedValue;
+};
 
 function InfoRow({ label, value }) {
   return (
-    <div className="flex min-h-[42.5px] gap-4 border-b border-[#e5e0da] pb-3 pt-[11px]">
-      <dt className="w-[72px] shrink-0 pt-px text-[10px] uppercase leading-[15px] tracking-[1px] text-[#8a8078]">
+    <div className="mx-[calc(clamp(16px,5.6vw,22px)*-1)] flex min-h-[42.5px] gap-[18px] border-b border-[#e5e0da] px-[clamp(16px,5.6vw,22px)] pb-3 pt-[11px]">
+      <dt className="w-[90px] shrink-0 pt-px text-[10px] uppercase leading-[15px] tracking-[1px] text-[#8a8078]">
         {label}
       </dt>
       <dd className="whitespace-pre-line text-[13px] leading-[19.5px] text-[#3d3530]">
@@ -47,9 +47,24 @@ function InfoRow({ label, value }) {
   );
 }
 
+const formatOtherColorName = (color) => color.replace("Powder Pink", "Pink");
+
+function OtherColorsInfoRow({ colors }) {
+  return (
+    <div className="mx-[calc(clamp(16px,5.6vw,22px)*-1)] flex min-h-[42.5px] gap-[18px] border-b border-[#e5e0da] px-[clamp(16px,5.6vw,22px)] pb-3 pt-[11px]">
+      <dt className="w-[90px] shrink-0 whitespace-nowrap pt-px text-[10px] uppercase leading-[15px] tracking-[1px] text-[#8a8078]">
+        OTHER COLORS
+      </dt>
+      <dd className="min-w-0 text-[13px] leading-[19.5px] text-[#3d3530]">
+        {colors.map(formatOtherColorName).join(" · ")}
+      </dd>
+    </div>
+  );
+}
+
 function Tag({ children }) {
   return (
-    <span className="rounded-[2px] border border-[#e5e0da] px-[11px] py-[6px] text-[11px] leading-[16.5px] text-[#3d3530]">
+    <span className="rounded-[4px] border border-[#e5e0da] px-[11px] py-[6px] text-[11px] leading-[16.5px] text-[#3d3530]">
       {children}
     </span>
   );
@@ -64,16 +79,15 @@ function ProductDetailPage() {
   const canCompareSizes = sizeLabels.length > 1;
   const collectionLabel = `${product.collectionName ?? product.collection} COLLECTION`;
   const productInfo = [
-    { label: "STYLE NO.", value: `# ${product.styleNo}` },
     ...(product.specs ?? [])
       .filter((spec) => spec.label !== "STYLE NO.")
       .map((spec) => ({
         label: spec.label,
-        value: formatSpecValue(spec.value),
+        value: formatProductInfoValue(spec.label, spec.value),
       })),
   ].filter((item) => item.value);
   const colorOptions = product.colors?.length ? product.colors : [product.color];
-  const getColorSwatch = (color) => colorPalette[color] ?? colorPalette[product.color] ?? "#d9d9d9";
+  const otherColorOptions = colorOptions.filter((color) => color !== product.color);
   const addSavedProduct = useSavedProductsStore((state) => state.addSavedProduct);
   const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
   const isSaved = useSavedProductsStore((state) =>
@@ -130,16 +144,6 @@ function ProductDetailPage() {
             </p>
           </div>
 
-          <div className="absolute right-[clamp(16px,5.6vw,22px)] top-[21px] flex gap-[5px]">
-            {colorOptions.map((color) => (
-              <span
-                key={color}
-                className="size-[18px] rounded-full border border-[#0e0d0d]"
-                style={{ background: getColorSwatch(color) }}
-              />
-            ))}
-          </div>
-
           <div className="mt-[10px] flex gap-[6px]">
             {[product.color, currentSize.size, `${labels.stock} ${product.stock}${labels.count}`].map((tag) => (
               <Tag key={tag}>{tag}</Tag>
@@ -148,13 +152,14 @@ function ProductDetailPage() {
         </div>
       </section>
 
-      <div className="h-px bg-[#e5e0da]" />
+      <div className="h-[2px] bg-[#e5e0da]" />
 
       <section className="bg-[#faf8f5] px-[clamp(16px,5.6vw,22px)] py-4">
         <p className="text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#8a8078]">
           {labels.productInfo}
         </p>
         <dl className="mt-[5px]">
+          {otherColorOptions.length > 0 && <OtherColorsInfoRow colors={otherColorOptions} />}
           {productInfo.map((item) => (
             <InfoRow key={item.label} {...item} />
           ))}
@@ -180,8 +185,12 @@ function ProductDetailPage() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-[9px] bg-[#faf8f5] px-[clamp(16px,5.6vw,22px)] pb-[14px] pt-[18px]">
-        <Button to={`/product/${product.id}/explore-more`} variant="outline" className="font-normal tracking-[0px]">
+      <section className="flex flex-col gap-[9px] bg-[#faf8f5] px-[clamp(16px,5.6vw,22px)] pb-[52px] pt-[34px]">
+        <Button
+          to={`/product/${product.id}/explore-more`}
+          variant="outline"
+          className="!border-[1.5px] font-normal tracking-[0px]"
+        >
           Explore More
         </Button>
         <Button
