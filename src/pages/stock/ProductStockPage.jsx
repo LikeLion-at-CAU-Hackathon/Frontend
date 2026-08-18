@@ -134,7 +134,7 @@ function ProductStockPage() {
         </ul>
       </section>
 
-      <section className="flex flex-col gap-2 bg-[#faf8f5] px-[22px] pb-[22px] pt-6">
+      <section className="flex flex-col gap-[8px] bg-[#faf8f5] px-[22px] pb-[22px] pt-6">
         <Button onClick={() => setIsAdvisorOpen(true)} className="!h-[49.5px] !rounded-[3px]">
           {labels.requestStock}
         </Button>
