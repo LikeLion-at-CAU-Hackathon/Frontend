@@ -18,30 +18,32 @@ const labels = {
   addSelection: "My Selection에 담기",
 };
 
-const colorPalette = {
-  Black: "#0a0908",
-  "Black / Silver": "linear-gradient(135deg, #f8f8f6 0 28%, #0a0908 28% 72%, #f8f8f6 72% 100%)",
-  "Black / Matte Black": "#050505",
-  Cognac: "#aa5a23",
-  "Cognac / Gold": "linear-gradient(135deg, #aa5a23 0 70%, #d5a856 70% 100%)",
-  "Dark Brown / Black": "linear-gradient(135deg, #241614 0 62%, #050505 62% 100%)",
-  Egret: "#efebe4",
-  "Misty Gray / Silver": "linear-gradient(135deg, #b8b6b0 0 70%, #ececea 70% 100%)",
-  Pink: "#d7a3a4",
-  "Powder Pink": "#dbaaaa",
-};
-
 const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
 const formatSpecValue = (value) => value.replaceAll(" x ", " × ").replaceAll(" / ", " · ");
 
 function InfoRow({ label, value }) {
   return (
     <div className="flex min-h-[42.5px] gap-4 border-b border-[#e5e0da] pb-3 pt-[11px]">
-      <dt className="w-[72px] shrink-0 pt-px text-[10px] uppercase leading-[15px] tracking-[1px] text-[#8a8078]">
+      <dt className="w-[90px] shrink-0 pt-px text-[10px] uppercase leading-[15px] tracking-[1px] text-[#8a8078]">
         {label}
       </dt>
       <dd className="whitespace-pre-line text-[13px] leading-[19.5px] text-[#3d3530]">
         {value}
+      </dd>
+    </div>
+  );
+}
+
+const formatOtherColorName = (color) => color.replace("Powder Pink", "Pink");
+
+function OtherColorsInfoRow({ colors }) {
+  return (
+    <div className="flex min-h-[42.5px] gap-4 border-b border-[#e5e0da] pb-3 pt-[11px]">
+      <dt className="w-[90px] shrink-0 whitespace-nowrap pt-px text-[10px] uppercase leading-[15px] tracking-[1px] text-[#8a8078]">
+        OTHER COLORS
+      </dt>
+      <dd className="min-w-0 text-[13px] leading-[19.5px] text-[#3d3530]">
+        {colors.map(formatOtherColorName).join(" · ")}
       </dd>
     </div>
   );
@@ -64,7 +66,6 @@ function ProductDetailPage() {
   const canCompareSizes = sizeLabels.length > 1;
   const collectionLabel = `${product.collectionName ?? product.collection} COLLECTION`;
   const productInfo = [
-    { label: "STYLE NO.", value: `# ${product.styleNo}` },
     ...(product.specs ?? [])
       .filter((spec) => spec.label !== "STYLE NO.")
       .map((spec) => ({
@@ -73,7 +74,7 @@ function ProductDetailPage() {
       })),
   ].filter((item) => item.value);
   const colorOptions = product.colors?.length ? product.colors : [product.color];
-  const getColorSwatch = (color) => colorPalette[color] ?? colorPalette[product.color] ?? "#d9d9d9";
+  const otherColorOptions = colorOptions.filter((color) => color !== product.color);
   const addSavedProduct = useSavedProductsStore((state) => state.addSavedProduct);
   const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
   const isSaved = useSavedProductsStore((state) =>
@@ -130,16 +131,6 @@ function ProductDetailPage() {
             </p>
           </div>
 
-          <div className="absolute right-[clamp(16px,5.6vw,22px)] top-[21px] flex gap-[5px]">
-            {colorOptions.map((color) => (
-              <span
-                key={color}
-                className="size-[18px] rounded-full border border-[#0e0d0d]"
-                style={{ background: getColorSwatch(color) }}
-              />
-            ))}
-          </div>
-
           <div className="mt-[10px] flex gap-[6px]">
             {[product.color, currentSize.size, `${labels.stock} ${product.stock}${labels.count}`].map((tag) => (
               <Tag key={tag}>{tag}</Tag>
@@ -155,6 +146,7 @@ function ProductDetailPage() {
           {labels.productInfo}
         </p>
         <dl className="mt-[5px]">
+          {otherColorOptions.length > 0 && <OtherColorsInfoRow colors={otherColorOptions} />}
           {productInfo.map((item) => (
             <InfoRow key={item.label} {...item} />
           ))}
