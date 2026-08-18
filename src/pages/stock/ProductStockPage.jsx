@@ -29,7 +29,7 @@ function SectionLabel({ children }) {
 function StockBadge({ available, children }) {
   return (
     <span
-      className={`flex min-w-[65px] shrink-0 items-center justify-center rounded-[4px] border px-[9px] py-1 text-[12px] font-medium leading-[18px] ${
+      className={`flex min-w-[65px] shrink-0 items-center justify-center rounded-[4px] border-[1.5px] px-[9px] py-1 text-[12px] font-medium leading-[18px] ${
         available
           ? "border-[#6b3f1f] text-[#6b3f1f]"
           : "border-[#e5e0da] text-[#b0a89a]"
@@ -42,7 +42,7 @@ function StockBadge({ available, children }) {
 
 function StoreStockRow({ name, color, stock, available }) {
   return (
-    <li className="flex min-h-[61px] w-full items-center justify-between gap-4 border-b border-[#e5e0da] py-[11px] last:border-b-0">
+    <li className="flex min-h-[61px] w-full items-center justify-between gap-4 border-b-[1.5px] border-[#e5e0da] py-[11px] last:border-b-0">
       <div className="min-w-0">
         <p className="text-[13px] font-medium leading-[19.5px] text-[#0a0908]">{name}</p>
         <p className="pt-[2px] text-[11px] leading-[16.5px] text-[#8a8078]">{color}</p>
@@ -54,7 +54,7 @@ function StoreStockRow({ name, color, stock, available }) {
 
 function NearbyStoreRow({ name, distance, stock }) {
   return (
-    <li className="border-b border-[#e5e0da] py-2 first:pt-0 last:border-b-0 last:pb-0">
+    <li className="border-b-[1.5px] border-[#e5e0da] py-2 first:pt-0 last:border-b-0 last:pb-0">
       <p className="text-[13px] font-medium leading-[19.5px] text-[#0a0908]">{name}</p>
       <p className="flex items-center gap-[10px] pt-[2px] text-[11px] leading-[16.5px]">
         <span className="text-[#8a8078]">{distance}</span>
@@ -111,7 +111,7 @@ function ProductStockPage() {
       </section>
 
       <div className="bg-[#faf8f5] pt-4">
-        <div className="h-px bg-[#e5e0da]" />
+        <div className="h-[1.5px] bg-[#e5e0da]" />
       </div>
 
       <section className="w-full bg-white px-[22px] py-[14px]">
@@ -123,7 +123,7 @@ function ProductStockPage() {
         </ul>
       </section>
 
-      <div className="h-px bg-[#e5e0da]" />
+      <div className="h-[1.5px] bg-[#e5e0da]" />
 
       <section className="bg-[#faf8f5] px-[22px] pb-[14px] pt-6">
         <SectionLabel>{labels.nearbyStore}</SectionLabel>
@@ -141,7 +141,7 @@ function ProductStockPage() {
         <Button
           to={`/product/${product.id}`}
           variant="outline"
-          className="!h-[49.5px] !rounded-[3px] border-[#e8e6e2] font-normal tracking-[0px]"
+          className="!h-[49.5px] !rounded-[3px] !border-[1.5px] border-[#e8e6e2] font-normal tracking-[0px]"
         >
           {labels.backToProduct}
         </Button>
