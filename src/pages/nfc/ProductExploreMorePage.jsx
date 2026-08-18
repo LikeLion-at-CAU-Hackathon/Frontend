@@ -74,7 +74,7 @@ function ProductExploreMorePage() {
         ))}
       </ol>
 
-      <section className="mx-auto mt-[10px] w-[315px] max-w-[calc(100%_-_44px)] rounded-[8px] bg-[rgba(148,104,61,0.08)] px-[10px] py-[5px]">
+      <section className="mx-auto mt-[10px] w-full max-w-[calc(100%_-_84px)] rounded-[8px] bg-[rgba(148,104,61,0.08)] px-[10px] py-[5px]">
         <h2 className="text-[13px] font-medium leading-[32px] text-black">
           인식되지 않을 때
         </h2>
