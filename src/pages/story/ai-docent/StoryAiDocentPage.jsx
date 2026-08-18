@@ -26,8 +26,8 @@ function ChatBubble({ children, variant = "assistant", isLoading = false, messag
       <p
         className={`chat-bubble-pop max-w-[304px] whitespace-pre-line rounded-[14px] px-[15px] py-[11px] text-[13px] leading-[21.45px] ${
           isUser
-            ? "rounded-br-[3px] bg-[#0a0908] text-white"
-            : "rounded-tl-[3px] bg-[#faf8f5] text-[#0a0908]"
+            ? "bg-[#0a0908] text-white"
+            : "bg-[#faf8f5] text-[#0a0908]"
         }`}
       >
         {isLoading ? <TypingDots /> : children}
@@ -42,7 +42,7 @@ function SuggestedQuestion({ disabled = false, question, onClick }) {
       type="button"
       disabled={disabled}
       onClick={() => onClick(question)}
-      className="flex min-h-[43px] w-full items-center rounded-[3px] border border-[#d5b38b] bg-white px-[15px] py-[10px] text-left text-[13px] leading-[19.5px] text-[#0a0908] disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex min-h-[43px] w-full items-center rounded-[14px] border border-[#d5b38b] bg-white px-[15px] py-[10px] text-left text-[13px] leading-[19.5px] text-[#0a0908] disabled:cursor-not-allowed disabled:opacity-60"
     >
       {question}
     </button>
@@ -130,7 +130,7 @@ function StoryAiDocentPage({ faqs = [], product }) {
         </p>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col bg-[#e8e6e2]">
+      <div className="flex min-h-0 flex-1 flex-col bg-[rgba(232,230,226,0.7)]">
         <div className="flex-1 px-5 py-[14px]">
           <div className="space-y-4">
             <ChatBubble>{greeting}</ChatBubble>
@@ -187,7 +187,7 @@ function StoryAiDocentPage({ faqs = [], product }) {
             type="submit"
             aria-label="질문 보내기"
             disabled={!inputValue.trim() || isResponding}
-            className="flex size-[38px] shrink-0 items-center justify-center rounded-[2px] bg-[#0a0908] disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-[41px] w-[38px] shrink-0 items-center justify-center rounded-[2px] bg-[#0a0908] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <img src={sendIcon} alt="" className="size-[14px]" />
           </button>
