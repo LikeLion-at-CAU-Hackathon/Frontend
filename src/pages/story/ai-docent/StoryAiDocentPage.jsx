@@ -167,17 +167,21 @@ function StoryAiDocentPage({ faqs = [], product }) {
               hasConversation ? "mt-[13px]" : "mt-[14px]"
             }`}
           >
-            <p className="text-[11px] leading-[16.5px] text-[#6f6f6f]">자주 묻는 질문</p>
-            <div className="mt-1 flex flex-col gap-1">
-              {visibleFaqs.map((faq) => (
-                <SuggestedQuestion
-                  key={faq.question}
-                  disabled={isResponding}
-                  question={faq.question}
-                  onClick={handleSuggestedQuestionClick}
-                />
-              ))}
-            </div>
+            {visibleFaqs.length > 0 && (
+              <>
+                <p className="text-[11px] leading-[16.5px] text-[#6f6f6f]">자주 묻는 질문</p>
+                <div className="mt-1 flex flex-col gap-1">
+                  {visibleFaqs.map((faq) => (
+                    <SuggestedQuestion
+                      key={faq.question}
+                      disabled={isResponding}
+                      question={faq.question}
+                      onClick={handleSuggestedQuestionClick}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
             <p className="mt-3 text-[11px] leading-[18.7px] text-[#6f6f6f]">
               검증된 제품 정보만 안내합니다. 일반적인 대화는 지원하지 않습니다.
             </p>
