@@ -4,7 +4,7 @@ function SizeOption({ size, isSelected, onSelect }) {
     <button
       type="button"
       onClick={() => onSelect(size)}
-      className={`font-playfair flex h-[32px] min-w-[39px] items-center justify-center rounded-[16px] border px-[14px] text-[15px] leading-[31.5px] ${
+      className={`font-playfair flex h-[32px] min-w-[39px] items-center justify-center rounded-[15px] border-[1.5px] px-[14px] text-[15px] leading-[31.5px] ${
         isSelected
           ? "border-black bg-black text-white"
           : "border-[#bcbab6] bg-transparent text-black"

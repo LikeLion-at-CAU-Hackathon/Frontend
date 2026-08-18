@@ -48,7 +48,7 @@ function ProductSizeComparePage() {
           <h2 className="font-playfair mt-[5px] text-[23px] font-medium leading-[27.6px] text-[#0a0908]">
             {product.name}
           </h2>
-          <span className="mt-2 inline-flex h-7 items-center rounded-[2px] border border-[#d5b38b] px-[11px] text-[11px] leading-[16.5px] text-[#3d3530]">
+          <span className="mt-2 inline-flex h-7 items-center rounded-[4px] border-[1.5px] border-[#d5b38b] px-[11px] text-[11px] leading-[16.5px] text-[#3d3530]">
             {currentSize.size}
           </span>
           <p className="mt-[9px] text-[15px] font-semibold leading-[22.5px] text-[#0a0908]">
