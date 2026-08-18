@@ -20,10 +20,23 @@ const labels = {
 
 const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
 const formatSpecValue = (value) => value.replaceAll(" x ", " × ").replaceAll(" / ", " · ");
+const formatProductInfoValue = (label, value) => {
+  const formattedValue = formatSpecValue(value);
+
+  if (label === "STORAGE") {
+    return formattedValue.replace(" · AirPods Max", " ·\nAirPods Max");
+  }
+
+  if (label === "STRAP") {
+    return formattedValue.replace(", 125", ",\n125");
+  }
+
+  return formattedValue;
+};
 
 function InfoRow({ label, value }) {
   return (
-    <div className="flex min-h-[42.5px] gap-4 border-b border-[#e5e0da] pb-3 pt-[11px]">
+    <div className="mx-[calc(clamp(16px,5.6vw,22px)*-1)] flex min-h-[42.5px] gap-[18px] border-b border-[#e5e0da] px-[clamp(16px,5.6vw,22px)] pb-3 pt-[11px]">
       <dt className="w-[90px] shrink-0 pt-px text-[10px] uppercase leading-[15px] tracking-[1px] text-[#8a8078]">
         {label}
       </dt>
@@ -38,7 +51,7 @@ const formatOtherColorName = (color) => color.replace("Powder Pink", "Pink");
 
 function OtherColorsInfoRow({ colors }) {
   return (
-    <div className="flex min-h-[42.5px] gap-4 border-b border-[#e5e0da] pb-3 pt-[11px]">
+    <div className="mx-[calc(clamp(16px,5.6vw,22px)*-1)] flex min-h-[42.5px] gap-[18px] border-b border-[#e5e0da] px-[clamp(16px,5.6vw,22px)] pb-3 pt-[11px]">
       <dt className="w-[90px] shrink-0 whitespace-nowrap pt-px text-[10px] uppercase leading-[15px] tracking-[1px] text-[#8a8078]">
         OTHER COLORS
       </dt>
@@ -51,7 +64,7 @@ function OtherColorsInfoRow({ colors }) {
 
 function Tag({ children }) {
   return (
-    <span className="rounded-[2px] border border-[#e5e0da] px-[11px] py-[6px] text-[11px] leading-[16.5px] text-[#3d3530]">
+    <span className="rounded-[4px] border border-[#e5e0da] px-[11px] py-[6px] text-[11px] leading-[16.5px] text-[#3d3530]">
       {children}
     </span>
   );
@@ -70,7 +83,7 @@ function ProductDetailPage() {
       .filter((spec) => spec.label !== "STYLE NO.")
       .map((spec) => ({
         label: spec.label,
-        value: formatSpecValue(spec.value),
+        value: formatProductInfoValue(spec.label, spec.value),
       })),
   ].filter((item) => item.value);
   const colorOptions = product.colors?.length ? product.colors : [product.color];
@@ -139,7 +152,7 @@ function ProductDetailPage() {
         </div>
       </section>
 
-      <div className="h-px bg-[#e5e0da]" />
+      <div className="h-[2px] bg-[#e5e0da]" />
 
       <section className="bg-[#faf8f5] px-[clamp(16px,5.6vw,22px)] py-4">
         <p className="text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#8a8078]">
