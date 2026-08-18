@@ -30,7 +30,7 @@ function ProductCard({
 }) {
   return (
     <article
-      className={`relative aspect-[159/160] min-h-[136px] w-full overflow-visible border px-[9px] py-[7px] ${
+      className={`relative aspect-[159/160] min-h-[136px] w-full overflow-visible rounded-[12px] border px-[9px] py-[7px] ${
         isCurrent ? "border-[#6b3f1f]" : "border-[rgba(107,63,31,0.12)]"
       }`}
     >
@@ -53,7 +53,7 @@ function ProductCard({
               <button
                 type="button"
                 onClick={onToggleDropdown}
-                className="relative flex h-full w-full items-center border border-[#bcbab6] bg-[#faf8f5] pl-[5px] pr-[15px] text-left !text-[11px] !leading-[16.5px] text-black"
+                className="relative flex h-full w-full items-center rounded-[8px] border border-[#bcbab6] bg-[#faf8f5] pl-[5px] pr-[15px] text-left !text-[11px] !leading-[16.5px] text-black"
               >
                 {productSize.size}
                 <span className="absolute right-[5px] top-[4px] size-[9px]" aria-hidden="true">
@@ -61,13 +61,13 @@ function ProductCard({
                 </span>
               </button>
               {isDropdownOpen && (
-                <div className="absolute left-0 top-[18px] z-30 w-full border-x border-[#bcbab6] bg-white shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
+                <div className="absolute left-0 top-[18px] z-30 w-full overflow-hidden rounded-b-[8px] border-x border-b border-[#bcbab6] bg-white">
                   {selectableSizes.map((size) => (
                     <button
                       key={size}
                       type="button"
                       onClick={() => onSelectSize(size)}
-                      className="block h-[17px] w-full border-b border-[#bcbab6] bg-white text-center !text-[11px] !leading-[16.5px] text-black"
+                      className="block h-[17px] w-full border-b border-[#bcbab6] bg-white text-center !text-[11px] !leading-[16.5px] text-black last:border-b-0"
                     >
                       {size}
                     </button>
@@ -75,13 +75,10 @@ function ProductCard({
                 </div>
               )}
             </div>
-            <p className="mt-[2px] text-[10px] leading-[15px] text-[#8a8078]">
-              {productSize.color}
-            </p>
           </>
         )}
       </div>
-      <div className="absolute bottom-0 left-0 h-[64%] w-full overflow-hidden bg-[#f7f5f2]">
+      <div className="absolute bottom-0 left-0 h-[64%] w-full overflow-hidden rounded-b-[12px] bg-[#f7f5f2]">
         <img
           src={productSize.image}
           alt={`${productName} ${productSize.size}`}
@@ -94,8 +91,8 @@ function ProductCard({
 
 function CompareCell({ label, value, strong = false }) {
   return (
-    <div className="flex min-h-[51px] flex-col items-center justify-start gap-[6px] text-center">
-      <p className="text-[9px] leading-[13.5px] tracking-[1.26px] text-black">
+    <div className="flex flex-col items-center gap-0 text-center">
+      <p className="text-[9px] leading-[13.5px] tracking-[1.26px] text-[#6f6f6f]">
         {label}
       </p>
       <p
@@ -163,7 +160,7 @@ function ProductSizeCompareResultPage() {
         />
       </section>
 
-      <section className="mt-[28px] flex flex-col gap-[22px]">
+      <section className="mt-[28px] flex flex-col gap-[24px]">
         <CompareRow
           label={labels.dimension}
           currentValue={currentProduct.dimensions.replaceAll(" x ", " × ")}
