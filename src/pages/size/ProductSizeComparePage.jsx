@@ -80,7 +80,7 @@ function ProductSizeComparePage() {
                 navigate(`/product/${product.id}/size-compare/result?size=${selectedSize}`);
               }
             }}
-            className="mt-3"
+            className="mt-[18px]"
           >
             {labels.compare}
           </Button>

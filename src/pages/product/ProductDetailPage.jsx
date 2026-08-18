@@ -185,7 +185,7 @@ function ProductDetailPage() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-[9px] bg-[#faf8f5] px-[clamp(16px,5.6vw,22px)] pb-[14px] pt-[18px]">
+      <section className="flex flex-col gap-[9px] bg-[#faf8f5] px-[clamp(16px,5.6vw,22px)] pb-[52px] pt-[34px]">
         <Button to={`/product/${product.id}/explore-more`} variant="outline" className="font-normal tracking-[0px]">
           Explore More
         </Button>
