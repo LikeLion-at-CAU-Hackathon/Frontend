@@ -12,7 +12,7 @@ function MaterialImageFallback({ label = "Image", rounded = false }) {
 
 function MaterialHeroImage({ image, alt }) {
   return (
-    <div className="mt-[10px] h-[117px] w-full overflow-hidden bg-[#d9d9d9]">
+    <div className="mt-[10px] h-[117px] w-full overflow-hidden rounded-[4px] bg-[#d9d9d9]">
       {image ? (
         <img src={image} alt={alt} className="h-full w-full object-cover object-center" />
       ) : (

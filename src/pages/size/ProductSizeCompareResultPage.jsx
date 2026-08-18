@@ -190,7 +190,11 @@ function ProductSizeCompareResultPage() {
 
       <section className="mt-[29px] flex flex-col gap-[9px] pb-6">
         <Button onClick={() => setIsAdvisorOpen(true)}>{labels.request}</Button>
-        <Button to={`/product/${product.id}`} variant="outline" className="font-normal tracking-[0px]">
+        <Button
+          to={`/product/${product.id}`}
+          variant="outline"
+          className="!border-[1.5px] font-normal tracking-[0px]"
+        >
           {labels.backToProduct}
         </Button>
       </section>
