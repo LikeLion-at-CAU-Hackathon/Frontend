@@ -113,9 +113,20 @@ function BrandStory({ story }) {
             <h3 className="w-full border-b border-[#d5b38b] text-center text-[12px] font-medium leading-[21px]">
               {item.label}
             </h3>
-            <p className="w-full min-w-0 break-keep [overflow-wrap:break-word] text-[12px] leading-[19.5px] text-black">
-              {item.value}
-            </p>
+            {Array.isArray(item.value) ? (
+              item.value.map((paragraph, index) => (
+                <p
+                  key={`${item.label}-${index}`}
+                  className="w-full min-w-0 break-keep [overflow-wrap:break-word] text-[12px] leading-[19.5px] text-black"
+                >
+                  {paragraph}
+                </p>
+              ))
+            ) : (
+              <p className="w-full min-w-0 break-keep [overflow-wrap:break-word] text-[12px] leading-[19.5px] text-black">
+                {item.value}
+              </p>
+            )}
           </div>
         ))}
       </div>

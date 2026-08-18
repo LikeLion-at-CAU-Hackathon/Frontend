@@ -19,15 +19,19 @@ export const mapAiAnalysisResponse = (response) => {
   };
 };
 
-const getStorySection = (product, title) =>
-  product.story?.sections?.find((section) => section.title === title)?.content;
-
 export const createProductProfile = (product) => {
   if (!product) return null;
 
   const mockProduct = products.find(
     (item) => String(item.id) === String(product.id),
   );
+  const story = product.story ?? mockProduct?.story;
+  const careGuide = product.careGuide ?? mockProduct?.careGuide ?? [];
+  const designParagraphs = story?.design?.paragraphs?.length
+    ? story.design.paragraphs
+    : [
+        story?.sections?.find((section) => section.title === "Design")?.content,
+      ].filter(Boolean);
 
   return {
     ...product,
@@ -35,17 +39,12 @@ export const createProductProfile = (product) => {
       product.aiAnalysis ?? mockProduct?.aiAnalysis,
     ),
     brandStory: {
-      design:
-        getStorySection(product, "Design") ??
-        product.story?.design?.paragraphs?.[0] ??
-        "MCM의 헤리티지를 현대적으로 재해석한 디자인입니다.",
+      design: designParagraphs,
       material:
         product.materials?.[0]?.description ??
         product.story?.materials?.title ??
         "엄선된 소재로 완성했습니다.",
-      care:
-        product.careGuide?.[0]?.content ??
-        "부드러운 천으로 가볍게 닦아 관리하세요.",
+      care: careGuide.map((guide) => guide.content).filter(Boolean),
       aiDocent: product.aiDocentFaqs ?? [],
     },
   };
