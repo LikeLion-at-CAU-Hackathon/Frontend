@@ -61,7 +61,7 @@ function AiLoadingPage() {
           />
         </div>
 
-        <div className="mt-6 flex w-[152px] flex-col gap-3">
+        <div className="mt-6 flex w-[152px] flex-col items-center gap-3">
           {messages.map((message, index) => {
             const isComplete = index <= step;
             const isNext = index === step + 1;
@@ -69,7 +69,7 @@ function AiLoadingPage() {
             return (
               <p
                 key={message}
-                className={`whitespace-nowrap text-[11px] font-normal leading-[16.5px] transition-colors duration-500 ${
+                className={`whitespace-nowrap text-center text-[11px] font-normal leading-[16.5px] transition-colors duration-500 ${
                   isComplete
                     ? "text-[#1a1208]"
                     : isNext
