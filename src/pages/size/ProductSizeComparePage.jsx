@@ -58,11 +58,11 @@ function ProductSizeComparePage() {
 
         <div className="mt-8 h-px bg-[#d5d0ca]" />
 
-        <div className="px-[22px] pt-[15px]">
+        <div className="px-[22px] pt-[24px]">
           <p className="text-[16px] font-semibold leading-[19.5px] text-[#0a0908]">
             {labels.selectSize}
           </p>
-          <div className="mt-[14px] flex gap-[9px]">
+          <div className="mt-[8px] flex gap-[9px]">
             {compareSizes.map((size) => (
               <SizeOption
                 key={size}
@@ -79,7 +79,7 @@ function ProductSizeComparePage() {
                 navigate(`/product/${product.id}/size-compare/result?size=${selectedSize}`);
               }
             }}
-            className="mt-[18px]"
+            className="mt-[24px]"
           >
             {labels.compare}
           </Button>
