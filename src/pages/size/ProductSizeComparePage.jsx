@@ -74,7 +74,6 @@ function ProductSizeComparePage() {
           </div>
           <Button
             disabled={!canCompare}
-            font="playfair"
             onClick={() => {
               if (canCompare) {
                 navigate(`/product/${product.id}/size-compare/result?size=${selectedSize}`);
