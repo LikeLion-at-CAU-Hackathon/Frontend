@@ -161,7 +161,7 @@ function ProductDetailPage() {
         </dl>
       </section>
 
-      <section className="bg-[#faf8f5] px-[clamp(16px,4.4vw,17px)] pb-8 pt-[14.5px]">
+      <section className="bg-[#faf8f5] px-[clamp(16px,4.4vw,17px)] pb-0 pt-[14.5px]">
         <p className="px-[5px] text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#8a8078]">
           {labels.explore}
         </p>
