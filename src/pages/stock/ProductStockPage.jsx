@@ -13,8 +13,43 @@ const labels = {
 };
 
 const formatStockCount = (quantity) => `${quantity}개`;
-const formatStockBadge = (quantity) =>
-  quantity > 0 ? formatStockCount(quantity) : "재고 없음";
+const hasKnownQuantity = (stock) => stock?.quantity !== undefined && stock?.quantity !== null;
+const isStockAvailable = (stock) => {
+  if (!stock) return false;
+  if (hasKnownQuantity(stock)) return Number(stock.quantity) > 0;
+
+  return Boolean(stock.has_stock);
+};
+const formatStockBadge = (stock) => {
+  if (typeof stock === "number") return stock > 0 ? formatStockCount(stock) : "재고 없음";
+  if (hasKnownQuantity(stock)) {
+    return Number(stock.quantity) > 0 ? formatStockCount(Number(stock.quantity)) : "재고 없음";
+  }
+
+  return stock?.has_stock ? "재고 있음" : "재고 없음";
+};
+const formatDistance = (distance) => {
+  if (distance === undefined || distance === null || distance === "") return "-";
+  if (typeof distance === "number") return `${distance}km`;
+
+  return String(distance);
+};
+const formatOpenStatus = (isOpen) => {
+  if (isOpen === false) return "영업 종료";
+
+  return "영업 중";
+};
+const formatBranchName = (name) => {
+  const branchName = String(name ?? "")
+    .trim()
+    .replace(/신세계\s+면세점/g, "신세계면세점")
+    .replace(/명동본점/g, "명동 본점");
+
+  if (!branchName) return "";
+  if (/^MCM\s/i.test(branchName)) return branchName;
+
+  return `MCM ${branchName}`;
+};
 
 function SectionLabel({ children }) {
   return (
@@ -50,14 +85,14 @@ function StoreStockRow({ name, option, stock, available }) {
   );
 }
 
-function NearbyStoreRow({ name, distance, stock }) {
+function NearbyStoreRow({ name, distance, status, stock }) {
   return (
     <li className="border-b-[1.5px] border-[#e5e0da] py-2 first:pt-0 last:border-b-0 last:pb-0">
-      <p className="text-[13px] font-medium leading-[19.5px] text-[#0a0908]">{name}</p>
+      <p className="text-[13px] font-medium leading-[19.5px] text-[#0a0908]">{formatBranchName(name)}</p>
       <p className="flex items-center gap-[10px] pt-[2px] text-[11px] leading-[16.5px]">
         <span className="text-[#8a8078]">{distance}</span>
         <span className="text-[#8a8078]">·</span>
-        <span className="text-[#6b3f1f]">영업 중</span>
+        <span className="text-[#6b3f1f]">{status}</span>
         <span className="text-[#8a8078]">·</span>
         <span className="text-[#3d3530]">{stock}</span>
       </p>
@@ -65,40 +100,63 @@ function NearbyStoreRow({ name, distance, stock }) {
   );
 }
 
+const normalizeBranchNameKey = (name) => {
+  return String(name ?? "")
+    .replace(/^MCM\s*/i, "")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+};
+
+function isSameBranch(stock, branch) {
+  if (!stock || !branch) return false;
+
+  if (branch.branch_id !== undefined && stock.branch_id !== undefined) {
+    if (String(stock.branch_id) === String(branch.branch_id)) return true;
+  }
+
+  return normalizeBranchNameKey(stock.branch_name) === normalizeBranchNameKey(branch.branch_name);
+}
+
 function getStockForBranch(variant, branch) {
-  const branchStock = variant.stocks?.find((stock) => {
-    if (branch?.branch_id !== undefined && stock.branch_id !== undefined) {
-      return String(stock.branch_id) === String(branch.branch_id);
-    }
+  const branchStock = variant.stocks?.find((stock) => isSameBranch(stock, branch));
 
-    return stock.branch_name === branch?.branch_name;
-  });
-
-  return branchStock?.quantity ?? 0;
+  return branchStock ?? { quantity: 0, has_stock: false };
 }
 
 function getCurrentStoreStocks(product, productStocks) {
-  const currentBranch = productStocks[0];
+  const currentBranch = getCurrentBranch(product, productStocks);
 
   if (product.variants?.length > 1) {
-    return product.variants.map((variant) => ({
-      name: variant.name ?? product.name,
-      option: [variant.color ?? product.color, variant.size].filter(Boolean).join(" · "),
-      stock: formatStockBadge(getStockForBranch(variant, currentBranch)),
-      available: getStockForBranch(variant, currentBranch) > 0,
-    }));
+    return product.variants.map((variant) => {
+      const branchStock = getStockForBranch(variant, currentBranch);
+
+      return {
+        name: variant.name ?? product.name,
+        option: [variant.color ?? product.color, variant.size].filter(Boolean).join(" · "),
+        stock: formatStockBadge(branchStock),
+        available: isStockAvailable(branchStock),
+      };
+    });
   }
 
   return productStocks.map((stock) => ({
     name: product.name,
     option: product.color,
-    stock: formatStockBadge(stock.quantity),
-    available: stock.quantity > 0,
+    stock: formatStockBadge(stock),
+    available: isStockAvailable(stock),
   }));
 }
 
+function getCurrentBranch(product, productStocks) {
+  if (product.currentBranch) return product.currentBranch;
+
+  const distanceZeroBranch = productStocks.find((stock) => Number(stock.distance) === 0);
+
+  return distanceZeroBranch ?? product.stocks?.[0] ?? productStocks[0];
+}
+
 function getBranchName(product, productStocks) {
-  return productStocks[0]?.branch_name ?? "";
+  return formatBranchName(getCurrentBranch(product, productStocks)?.branch_name);
 }
 
 function ProductStockPage() {
@@ -122,12 +180,18 @@ function ProductStockPage() {
     );
   }
 
-  const productStocks = product.stocks?.length ? product.stocks : [];
+  const productStocks = product.stockLocations?.length
+    ? product.stockLocations
+    : product.stocks?.length
+      ? product.stocks
+      : [];
+  const currentBranch = getCurrentBranch(product, productStocks);
   const currentStoreStocks = getCurrentStoreStocks(product, productStocks);
-  const nearbyStores = productStocks.slice(1).map((stock) => ({
+  const nearbyStores = productStocks.filter((stock) => !isSameBranch(stock, currentBranch)).map((stock) => ({
     name: stock.branch_name,
-    distance: stock.distance ?? "-",
-    stock: formatStockBadge(stock.quantity),
+    distance: formatDistance(stock.distance),
+    status: formatOpenStatus(stock.is_open),
+    stock: formatStockBadge(stock),
   }));
 
   return (

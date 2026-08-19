@@ -8,6 +8,7 @@ const normalizeFaqs = (faqs) =>
   (faqs ?? [])
     .map((faq) => ({
       question: typeof faq === "string" ? faq : faq?.question ?? faq?.title ?? "",
+      answer: typeof faq === "string" ? "" : faq?.answer ?? faq?.response ?? faq?.content ?? "",
     }))
     .filter((faq) => faq.question.trim());
 
@@ -61,6 +62,7 @@ function StoryAiDocentPage({ faqs = [], product }) {
   const [messages, setMessages] = useState([]);
   const [isResponding, setIsResponding] = useState(false);
   const [selectedFaqQuestions, setSelectedFaqQuestions] = useState([]);
+  const messageIdCounterRef = useRef(0);
   const latestMessageRef = useRef(null);
   const hasConversation = messages.length > 0;
   const visibleFaqs = normalizeFaqs(faqs).filter((faq) => !selectedFaqQuestions.includes(faq.question.trim()));
@@ -74,15 +76,17 @@ function StoryAiDocentPage({ faqs = [], product }) {
     return () => window.clearTimeout(scrollTimer);
   }, [messages]);
 
-  const handleAsk = async (question) => {
+  const handleAsk = async (question, fallbackAnswer = "") => {
     const trimmedQuestion = question.trim();
+    const trimmedFallbackAnswer = fallbackAnswer.trim();
 
     if (!trimmedQuestion || isResponding) {
       return;
     }
 
     setInputValue("");
-    const messageId = `ai-docent-${Date.now()}`;
+    messageIdCounterRef.current += 1;
+    const messageId = `ai-docent-${messageIdCounterRef.current}`;
     const loadingMessageId = `${messageId}-loading`;
 
     setIsResponding(true);
@@ -93,9 +97,26 @@ function StoryAiDocentPage({ faqs = [], product }) {
       { id: loadingMessageId, role: "assistant", content: "", isLoading: true },
     ]);
 
+    if (trimmedFallbackAnswer) {
+      await wait(250);
+      setMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          message.id === loadingMessageId
+            ? {
+                id: `${messageId}-answer`,
+                role: "assistant",
+                content: trimmedFallbackAnswer,
+                isLoading: false,
+              }
+            : message,
+        ),
+      );
+      setIsResponding(false);
+      return;
+    }
+
     try {
       const response = await askAiDocent(product?.id, trimmedQuestion);
-
       await wait(450);
       setMessages((prevMessages) =>
         prevMessages.map((message) =>
@@ -131,8 +152,8 @@ function StoryAiDocentPage({ faqs = [], product }) {
     handleAsk(inputValue);
   };
 
-  const handleSuggestedQuestionClick = (question) => {
-    const trimmedQuestion = question.trim();
+  const handleSuggestedQuestionClick = (faq) => {
+    const trimmedQuestion = faq.question.trim();
 
     if (!trimmedQuestion || isResponding) {
       return;
@@ -141,7 +162,7 @@ function StoryAiDocentPage({ faqs = [], product }) {
     setSelectedFaqQuestions((prevQuestions) =>
       prevQuestions.includes(trimmedQuestion) ? prevQuestions : [...prevQuestions, trimmedQuestion],
     );
-    handleAsk(trimmedQuestion);
+    handleAsk(trimmedQuestion, faq.answer);
   };
 
   return (
@@ -183,7 +204,7 @@ function StoryAiDocentPage({ faqs = [], product }) {
                       key={faq.question}
                       disabled={isResponding}
                       question={faq.question}
-                      onClick={handleSuggestedQuestionClick}
+                      onClick={() => handleSuggestedQuestionClick(faq)}
                     />
                   ))}
                 </div>
