@@ -521,13 +521,13 @@ const getKeyedGuides = (guideMap) => {
 
 const getVisibleMaterialItems = (materials, productPayload) => {
   const productId = Number(productPayload?.id);
-  const primaryMaterialIds = {
-    8: 29,
+  const visibleMaterialIds = {
+    8: [29, 77, 78, 79],
   };
-  const primaryMaterialId = primaryMaterialIds[productId];
+  const visibleIds = visibleMaterialIds[productId];
 
-  if (primaryMaterialId && Array.isArray(materials)) {
-    return materials.filter((item) => Number(item?.id) === primaryMaterialId);
+  if (visibleIds && Array.isArray(materials)) {
+    return materials.filter((item) => visibleIds.includes(Number(item?.id)));
   }
 
   return materials;
@@ -535,7 +535,6 @@ const getVisibleMaterialItems = (materials, productPayload) => {
 
 const normalizeMaterialsStory = (materials, fallbackMaterials, background, productPayload) => {
   const details = normalizeMaterialDetails(background);
-  const shouldShowBackgroundDetails = Number(productPayload?.id) === 8;
 
   if (!materials) {
     return {
@@ -556,7 +555,7 @@ const normalizeMaterialsStory = (materials, fallbackMaterials, background, produ
       image: fallbackMaterials?.image ?? sections.find((section) => section.image)?.image ?? "",
       imageView: fallbackMaterials?.imageView,
       sections,
-      details: !sections.length || shouldShowBackgroundDetails ? details : [],
+      details: sections.length ? [] : details,
     };
   }
 
@@ -572,7 +571,7 @@ const normalizeMaterialsStory = (materials, fallbackMaterials, background, produ
     sections: normalizedSections.length
       ? normalizedSections
       : fallbackMaterials?.sections ?? [],
-    details: !normalizedSections.length || shouldShowBackgroundDetails ? details : [],
+    details: normalizedSections.length ? [] : details,
   };
 };
 
