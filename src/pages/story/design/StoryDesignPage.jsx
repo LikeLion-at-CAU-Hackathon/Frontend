@@ -5,6 +5,8 @@ const EXCLUDED_BACKGROUND_KEYS = new Set([
   "collection",
   "design_details",
   "designDetails",
+  "material_details",
+  "materialDetails",
   "materials",
   "image",
   "story",
@@ -120,33 +122,6 @@ function uniqueValues(values) {
   return [...new Set(values.filter(Boolean).map(String))];
 }
 
-function splitSentences(value) {
-  return normalizeWhitespace(value).match(/[^.!?。！？]+[.!?。！？]?/g)?.map((sentence) => sentence.trim()) ?? [];
-}
-
-function stripTrailingSentenceMark(value) {
-  return value.replace(/[.!?。！？]\s*$/, "").trim();
-}
-
-function splitTitlePhrase(sentence) {
-  const text = stripTrailingSentenceMark(sentence);
-  const titleBodyMatch = text.match(/^(.+?)(?:이|가)\s*특징인\s+(.+)$/);
-
-  if (!titleBodyMatch) {
-    return {
-      title: text,
-      body: "",
-    };
-  }
-
-  const [, title, body] = titleBodyMatch;
-
-  return {
-    title: title.trim(),
-    body: body.trim(),
-  };
-}
-
 function resolveDesignStory(story) {
   if (!isPlainObject(story)) return {};
 
@@ -173,38 +148,22 @@ function buildRawParagraphs(story, background) {
   return uniqueValues([
     story.description,
     background.description,
-    story.story,
-    background.story,
   ].filter(isFilledString));
 }
 
 function resolveTitleAndParagraphs(story, background) {
   const fallbackTitle = [
+    story.productName,
+    story.product_name,
+    story.name,
     story.title,
-    story.design,
-    background.design,
-    background.title,
+    background.productName,
+    background.product_name,
   ].find(isFilledString) ?? "";
-  const rawParagraphs = buildRawParagraphs(story, background);
-  const [firstParagraph] = rawParagraphs;
-  const [firstSentence, ...restSentences] = splitSentences(firstParagraph);
-
-  if (!firstSentence || restSentences.length === 0) {
-    return {
-      title: fallbackTitle,
-      paragraphs: rawParagraphs,
-    };
-  }
-
-  const { title, body } = splitTitlePhrase(firstSentence);
 
   return {
-    title,
-    paragraphs: uniqueValues([
-      body,
-      ...restSentences,
-      ...rawParagraphs.slice(1),
-    ]),
+    title: fallbackTitle,
+    paragraphs: buildRawParagraphs(story, background),
   };
 }
 

@@ -23,10 +23,12 @@ function MaterialHeroImage({ image, alt }) {
 }
 
 function FeaturedMaterial({ section }) {
+  const title = section.displayTitle ?? section.title;
+
   return (
     <article className="border-b border-[#e5e0da] pb-[17px] pt-[18px]">
-      {section.title && (
-        <h2 className="text-[13px] font-bold leading-[19.5px] text-[#0a0908]">{section.title}</h2>
+      {title && (
+        <h2 className="text-[13px] font-bold leading-[19.5px] text-[#0a0908]">{title}</h2>
       )}
       {section.description && (
         <p className="mt-[5px] whitespace-pre-line text-[13px] font-normal leading-[22.1px] text-[#3d3530]">
@@ -64,9 +66,33 @@ function MaterialListItem({ section }) {
   );
 }
 
+function getMaterialDisplayTitle(sectionTitle, pageTitle) {
+  if (!sectionTitle || sectionTitle !== pageTitle) return sectionTitle;
+
+  if (/silk/i.test(sectionTitle)) return "실크 소재";
+  if (/visetos|monogram canvas/i.test(sectionTitle)) return "Visetos 패턴";
+  if (/leather/i.test(sectionTitle)) return "가죽 소재";
+
+  return sectionTitle;
+}
+
 function StoryMaterialsPage({ story }) {
   const [featuredSection, ...materialSections] = story.sections ?? [];
+  const materialDetails = story.details ?? story.highlights ?? [];
   const displayTitle = story.title || featuredSection?.title || "";
+  const featuredMaterial = featuredSection
+    ? {
+      ...featuredSection,
+      displayTitle: getMaterialDisplayTitle(featuredSection.title, displayTitle),
+    }
+    : null;
+  const detailSections = materialDetails.map((detail) => ({
+    title: detail.label,
+    description: detail.value,
+    image: detail.image,
+    imageStyle: detail.imageStyle,
+  }));
+  const lowerSections = [...materialSections, ...detailSections];
 
   return (
     <section className="w-full bg-[#faf8f5] pb-[116px] pt-[14px] text-left">
@@ -82,10 +108,10 @@ function StoryMaterialsPage({ story }) {
 
         <MaterialHeroImage image={story.image} alt={displayTitle} />
 
-        {featuredSection && <FeaturedMaterial section={featuredSection} />}
+        {featuredMaterial && <FeaturedMaterial section={featuredMaterial} />}
 
         <div className="mt-[27px] flex flex-col gap-6">
-          {materialSections.map((section, index) => (
+          {lowerSections.map((section, index) => (
             <MaterialListItem key={`${section.title ?? "material"}-${index}`} section={section} />
           ))}
         </div>

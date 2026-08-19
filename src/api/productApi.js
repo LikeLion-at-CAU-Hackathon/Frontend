@@ -103,9 +103,32 @@ const getStockQuantity = (stock) => {
   return Number(stock?.quantity ?? stock?.stock ?? stock?.count ?? 0);
 };
 
+const getExplicitCurrentStoreStock = (variant) => {
+  const quantity =
+    variant?.current_store_stock ??
+    variant?.currentStoreStock ??
+    variant?.current_branch_stock ??
+    variant?.currentBranchStock;
+
+  return quantity === undefined || quantity === null ? null : Number(quantity);
+};
+
+const normalizeDistance = (stock) => {
+  return stock?.distance ?? stock?.distance_km ?? stock?.distanceKm ?? stock?.branch_distance;
+};
+
+const normalizeIsOpen = (stock) => {
+  return stock?.is_open ?? stock?.isOpen ?? stock?.open;
+};
+
 const getCurrentStoreStock = (variant) => {
+  const explicitStock = getExplicitCurrentStoreStock(variant);
+  if (explicitStock !== null) return explicitStock;
+
   if (Array.isArray(variant?.stocks) && variant.stocks.length > 0) {
-    return getStockQuantity(variant.stocks[0]);
+    return getStockQuantity(
+      variant.stocks.find((stock) => Number(normalizeDistance(stock)) === 0) ?? variant.stocks[0],
+    );
   }
 
   return getStockQuantity(variant);
@@ -116,6 +139,9 @@ const normalizeStocks = (stocks) => {
     ...stock,
     branch_id: stock?.branch_id ?? stock?.branchId ?? stock?.store_id,
     branch_name: stock?.branch_name ?? stock?.branchName ?? stock?.store_name ?? stock?.name,
+    distance: normalizeDistance(stock),
+    is_open: normalizeIsOpen(stock),
+    has_stock: stock?.has_stock ?? stock?.hasStock ?? getStockQuantity(stock) > 0,
     quantity: getStockQuantity(stock),
   }));
 };
@@ -128,7 +154,7 @@ const normalizeVariant = (variant, product) => {
   return {
     id: variant?.id,
     productId: product?.id,
-    name: product?.name ?? variant?.name ?? "",
+    name: variant?.name ?? product?.name ?? "",
     color: variant?.color ?? "",
     size: variant?.size ?? "",
     image: images[0] ?? "",
@@ -140,6 +166,80 @@ const normalizeVariant = (variant, product) => {
     stocks,
     specs: normalizeSpecs(specs, variant?.size),
   };
+};
+
+const normalizeBranchNameKey = (name) => {
+  return String(name ?? "")
+    .replace(/^MCM\s*/i, "")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+};
+
+const getBranchKey = (stock) => {
+  const branchNameKey = normalizeBranchNameKey(stock?.branch_name);
+
+  return branchNameKey || String(stock?.branch_id ?? "");
+};
+
+const isSameStockBranch = (stock, branch) => {
+  if (!stock || !branch) return false;
+
+  if (stock.branch_id !== undefined && branch.branch_id !== undefined) {
+    if (String(stock.branch_id) === String(branch.branch_id)) return true;
+  }
+
+  return normalizeBranchNameKey(stock.branch_name) === normalizeBranchNameKey(branch.branch_name);
+};
+
+const getStockForBranch = (variant, branch) => {
+  return variant?.stocks?.find((stock) => isSameStockBranch(stock, branch));
+};
+
+const getVariantStockForBranch = (variant, branch) => {
+  const branchStock = getStockForBranch(variant, branch);
+
+  return branchStock ? getStockQuantity(branchStock) : variant?.stock;
+};
+
+const mergeStockEntries = (stocks) => {
+  const stockMap = new Map();
+
+  stocks.filter(Boolean).forEach((stock) => {
+    const key = getBranchKey(stock);
+    if (!key) return;
+
+    const existingStock = stockMap.get(key) ?? {};
+
+    stockMap.set(key, {
+      ...existingStock,
+      ...stock,
+      branch_id: stock.branch_id ?? existingStock.branch_id,
+      branch_name: stock.branch_name ?? existingStock.branch_name,
+      distance: stock.distance ?? existingStock.distance,
+      is_open: stock.is_open ?? existingStock.is_open,
+      has_stock: stock.has_stock ?? existingStock.has_stock,
+      quantity: stock.quantity || existingStock.quantity || 0,
+    });
+  });
+
+  return [...stockMap.values()];
+};
+
+const normalizeStockPayload = (stockPayload) => {
+  const stocks = asArray(stockPayload, [
+    "stocks",
+    "branches",
+    "branch_stocks",
+    "branchStocks",
+    "stores",
+    "nearby_stores",
+    "nearbyStores",
+    "items",
+    "results",
+    "value",
+  ]);
+
+  return normalizeStocks(stocks);
 };
 
 const normalizeMaterialSection = (material) => ({
@@ -197,7 +297,16 @@ const normalizeDesignHighlights = (background, productPayload) => {
 
   Object.entries(background)
     .filter(([key, value]) => (
-      !["description", "design", "collection", "design_details", "materials"].includes(key) &&
+      ![
+        "description",
+        "design",
+        "collection",
+        "design_details",
+        "designDetails",
+        "material_details",
+        "materialDetails",
+        "materials",
+      ].includes(key) &&
       value !== null &&
       value !== undefined &&
       value !== ""
@@ -210,6 +319,68 @@ const normalizeDesignHighlights = (background, productPayload) => {
     });
 
   return highlights.filter((highlight) => highlight.value);
+};
+
+const normalizeMaterialDetailItem = (item, index) => {
+  if (typeof item === "string") {
+    const detailKey = String(index + 1).padStart(2, "0");
+    const detail = normalizeDesignDetail(detailKey, item);
+    return detail ? { ...detail, order: detailKey } : null;
+  }
+
+  if (!isPlainObject(item)) return null;
+
+  const label = item.label ?? item.title ?? item.name;
+  const value = item.value ?? item.description ?? item.content ?? item.text;
+  const order = item.order ?? item.number ?? item.index ?? String(index + 1).padStart(2, "0");
+  const image = resolveImageUrl(item.image ?? item.image_url ?? item.imageUrl ?? item.thumbnail);
+  const imageStyle = item.imageStyle ?? item.image_style;
+
+  if (label && value) {
+    return {
+      label: String(label).toUpperCase(),
+      value: formatSpecValue(value),
+      order,
+      image,
+      imageStyle,
+    };
+  }
+
+  const entries = Object.entries(item);
+  if (entries.length !== 1) return null;
+
+  const [key, itemValue] = entries[0];
+  if (isPlainObject(itemValue)) {
+    return normalizeMaterialDetailItem({ ...itemValue, order: key }, index);
+  }
+
+  const detail = normalizeDesignDetail(key, itemValue);
+  return detail ? { ...detail, order: key } : null;
+};
+
+const normalizeMaterialDetails = (background) => {
+  const materialDetails = background?.material_details ?? background?.materialDetails;
+
+  if (isPlainObject(materialDetails)) {
+    return Object.entries(materialDetails)
+      .map(([key, value]) => {
+        if (isPlainObject(value)) {
+          return normalizeMaterialDetailItem({ ...value, order: key }, Number(key) - 1);
+        }
+
+        const detail = normalizeDesignDetail(key, value);
+        return detail ? { ...detail, order: key } : null;
+      })
+      .filter(Boolean);
+  }
+
+  if (Array.isArray(materialDetails)) {
+    return materialDetails
+      .map((item, index) => normalizeMaterialDetailItem(item, index))
+      .filter(Boolean);
+  }
+
+  return [];
 };
 
 const normalizeGuideList = (guides) =>
@@ -315,13 +486,16 @@ const getKeyedGuides = (guideMap) => {
     .map(([key, value]) => normalizeGuide(value, key));
 };
 
-const normalizeMaterialsStory = (materials, fallbackMaterials) => {
+const normalizeMaterialsStory = (materials, fallbackMaterials, background) => {
+  const details = normalizeMaterialDetails(background);
+
   if (!materials) {
     return {
       eyebrow: "MATERIALS & CRAFT",
       title: "",
       image: "",
       sections: [],
+      details,
     };
   }
 
@@ -333,6 +507,7 @@ const normalizeMaterialsStory = (materials, fallbackMaterials) => {
       title: fallbackMaterials?.title ?? sections[0]?.title ?? "",
       image: fallbackMaterials?.image ?? sections.find((section) => section.image)?.image ?? "",
       sections,
+      details,
     };
   }
 
@@ -347,6 +522,7 @@ const normalizeMaterialsStory = (materials, fallbackMaterials) => {
     sections: normalizedSections.length
       ? normalizedSections
       : fallbackMaterials?.sections ?? [],
+    details,
   };
 };
 
@@ -425,12 +601,12 @@ const normalizeStory = (materialsPayload, backgroundPayload, careGuidePayload, p
     sections: [],
     design: {
       eyebrow: "DESIGN & HERITAGE",
-      title: background.design ?? productPayload?.name ?? "",
+      title: productPayload?.name ?? "",
       image: currentVariant?.image ?? normalizeImages(productPayload?.images ?? productPayload?.image)[0] ?? "",
       paragraphs: background.description ? [background.description] : [],
       highlights: normalizeDesignHighlights(background, productPayload),
     },
-    materials: normalizeMaterialsStory(materials, fallbackMaterialsStory),
+    materials: normalizeMaterialsStory(materials, fallbackMaterialsStory, background),
     care: normalizeCareStory(careGuide, fallbackCareStory),
   };
 };
@@ -471,6 +647,7 @@ const buildProductSizes = (product) => {
       sizesByName.set(variant.size, {
         ...variant,
         image: variant.image || product.image || "",
+        stock: getVariantStockForBranch(variant, product.currentBranch),
         isCurrent: variant.size === product.size,
       });
     }
@@ -495,7 +672,14 @@ const buildProductSizes = (product) => {
     : [];
 };
 
-const normalizeProduct = (productPayload, sizesPayload, materialsPayload, backgroundPayload, careGuidePayload) => {
+const normalizeProduct = (
+  productPayload,
+  sizesPayload,
+  materialsPayload,
+  backgroundPayload,
+  careGuidePayload,
+  stockPayload,
+) => {
   const productVariants = asArray(sizesPayload, ["sizes", "variants", "details", "items", "results", "value"]);
   const embeddedVariants = asArray(productPayload?.details, ["variants", "details"]);
   const sourceVariants = embeddedVariants.length ? embeddedVariants : productVariants;
@@ -508,6 +692,16 @@ const normalizeProduct = (productPayload, sizesPayload, materialsPayload, backgr
   const background = backgroundPayload?.background ?? backgroundPayload?.value ?? backgroundPayload ?? productPayload?.background ?? {};
   const productMaterials = (story.materials?.sections ?? story.materials?.items ?? []).map(normalizeProductMaterial);
   const productCareGuide = (story.care?.guides ?? story.care?.contents ?? []).map(normalizeProductCareGuide);
+  const stockLocations = mergeStockEntries([
+    ...normalizeStockPayload(stockPayload),
+    ...normalizeStockPayload(productPayload),
+    ...variants.flatMap((variant) => variant.stocks ?? []),
+  ]);
+  const currentBranch =
+    stockLocations.find((stock) => Number(stock.distance) === 0) ??
+    currentVariant?.stocks?.[0] ??
+    stockLocations[0];
+  const currentStock = getVariantStockForBranch(currentVariant, currentBranch);
 
   return {
     id: productPayload?.id,
@@ -521,10 +715,12 @@ const normalizeProduct = (productPayload, sizesPayload, materialsPayload, backgr
     color: currentVariant?.color ?? productPayload?.color ?? "",
     colors,
     size: currentVariant?.size ?? productPayload?.size ?? "",
-    stock: currentVariant?.stock ?? productPayload?.stock ?? 0,
+    stock: currentStock ?? currentVariant?.stock ?? productPayload?.stock ?? 0,
     image: images[0] ?? currentVariant?.image ?? "",
     images,
     stocks: currentVariant?.stocks ?? [],
+    stockLocations,
+    currentBranch,
     variants,
     specs,
     materials: productMaterials,
@@ -568,6 +764,14 @@ const fetchProductCareGuidePayload = async (productId) => {
   }
 };
 
+const fetchProductStockPayload = async (productId) => {
+  try {
+    return await getApiData(`products/${productId}/stock/`);
+  } catch {
+    return null;
+  }
+};
+
 export const getProducts = async () => {
   try {
     return asArray(await getApiData("products/"), ["products", "items", "results"]);
@@ -589,11 +793,12 @@ export const getProductById = async (productId) => {
 export const getProductDetail = async (productId) => {
   const id = productId ?? DEFAULT_PRODUCT_ID;
   const productPayload = await fetchProductPayload(id);
-  const [sizesPayload, materialsPayload, backgroundPayload, careGuidePayload] = await Promise.all([
+  const [sizesPayload, materialsPayload, backgroundPayload, careGuidePayload, stockPayload] = await Promise.all([
     fetchProductSizesPayload(id),
     fetchProductMaterialsPayload(id),
     fetchProductBackgroundPayload(id),
     fetchProductCareGuidePayload(id),
+    fetchProductStockPayload(id),
   ]);
 
   return normalizeProduct(
@@ -602,6 +807,7 @@ export const getProductDetail = async (productId) => {
     materialsPayload,
     backgroundPayload,
     careGuidePayload,
+    stockPayload,
   );
 };
 

@@ -20,6 +20,22 @@ const defaultCompareFields = [
 ];
 
 const ignoredSpecLabels = new Set(["STYLE NO."]);
+const defaultCompareValueKeys = new Set(defaultCompareFields.map((field) => field.valueKey));
+const specLabelMap = {
+  DIMENSIONS: "크기",
+  STRAP: "스트랩",
+  STORAGE: "수납",
+  PRICE: "가격",
+  STOCK: "재고",
+  CLOSURE: "잠금 방식",
+};
+const specFormatMap = {
+  DIMENSIONS: "dimensions",
+  STRAP: "dash",
+  STORAGE: "storage",
+  PRICE: "price",
+  STOCK: "stock",
+};
 
 const formatPrice = (price) => {
   const numericPrice = Number(price);
@@ -34,15 +50,29 @@ const formatStock = (value) => {
   const numericValue = Number(value);
   return Number.isNaN(numericValue) ? String(value) : formatCurrentStoreStock(numericValue);
 };
+const formatDimension = (value) => String(value).replace(/^약\s+/, "").replaceAll(" x ", " × ");
+const formatStrap = (value) => {
+  const text = String(value).replaceAll("-", "–").replace(/\s*~\s*/g, "–");
+  const measurement = text.match(
+    /\d+(?:\.\d+)?\s*cm\s*–\s*\d+(?:\.\d+)?\s*cm|\d+(?:\.\d+)?\s*–\s*\d+(?:\.\d+)?\s*cm/,
+  )?.[0];
+
+  if (!measurement) return text;
+
+  return measurement
+    .replace(/\s*cm\s*–\s*/i, "–")
+    .replace(/\s+/g, " ")
+    .trim();
+};
 
 const formatCompareValue = (value, field) => {
   if (value === undefined || value === null || value === "") return "-";
 
   switch (field.format) {
     case "dimensions":
-      return String(value).replaceAll(" x ", " × ");
+      return formatDimension(value);
     case "dash":
-      return String(value).replace("-", "–");
+      return formatStrap(value);
     case "storage":
       return formatStorage(String(value)).replace(" · AirPods", " ·\nAirPods");
     case "price":
@@ -65,33 +95,56 @@ const getSpecCompareValue = (productSize, field) => {
   return productSize?.specs?.find((spec) => spec.label === specLabel)?.value;
 };
 
+const hasCompareValue = (value) => value !== undefined && value !== null && value !== "";
+
+const normalizeForCompare = (value, field) => {
+  return formatCompareValue(value, field).replace(/\s+/g, " ").trim();
+};
+
+const hasDifferentCompareValue = (currentProduct, compareProduct, field) => {
+  const currentValue = getSpecCompareValue(currentProduct, field);
+  const compareValue = getSpecCompareValue(compareProduct, field);
+
+  if (!hasCompareValue(currentValue) && !hasCompareValue(compareValue)) return false;
+
+  return normalizeForCompare(currentValue, field) !== normalizeForCompare(compareValue, field);
+};
+
 const buildCompareFields = (currentProduct, compareProduct, product) => {
   const specs = [
     ...(currentProduct?.specs ?? []),
     ...(compareProduct?.specs ?? []),
     ...(product?.specs ?? []),
   ];
-  const specFields = [];
+  const compareFields = defaultCompareFields
+    .filter((field) => !["price", "stock"].includes(field.valueKey))
+    .filter((field) => hasDifferentCompareValue(currentProduct, compareProduct, field));
   const seenLabels = new Set();
 
   specs.forEach((spec) => {
     if (!spec?.label || ignoredSpecLabels.has(spec.label) || seenLabels.has(spec.label)) return;
 
-    seenLabels.add(spec.label);
-    specFields.push({
-      label: spec.label,
+    const normalizedLabel = spec.label.toUpperCase();
+    const mappedKey = normalizedLabel.toLowerCase().replaceAll(" ", "_");
+    if (defaultCompareValueKeys.has(mappedKey)) return;
+
+    const field = {
+      label: specLabelMap[normalizedLabel] ?? spec.label,
       valueKey: `spec:${spec.label}`,
-      format: "text",
-    });
+      format: specFormatMap[normalizedLabel] ?? "text",
+    };
+
+    if (!hasDifferentCompareValue(currentProduct, compareProduct, field)) return;
+
+    seenLabels.add(spec.label);
+    compareFields.push(field);
   });
 
-  return specFields.length
-    ? [
-        ...specFields,
-        { label: "가격", valueKey: "price", format: "price" },
-        { label: "재고", valueKey: "stock", format: "stock" },
-      ]
-    : defaultCompareFields;
+  return [
+    ...(compareFields.length ? compareFields : defaultCompareFields.slice(0, 3)),
+    { label: "가격", valueKey: "price", format: "price" },
+    { label: "재고", valueKey: "stock", format: "stock" },
+  ];
 };
 
 function ProductCard({
