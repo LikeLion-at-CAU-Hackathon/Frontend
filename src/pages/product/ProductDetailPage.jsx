@@ -1,10 +1,29 @@
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Bookmark } from "lucide-react";
+import { addRecommendationHistory } from "../../api/recommendationApi";
 import Button from "../../components/common/Button";
 import ActionButton from "../../components/product/ActionButton";
 import ProductImage from "../../components/product/ProductImage";
 import useProduct from "../../hooks/useProduct";
 import useSavedProductsStore from "../../stores/useSavedProductsStore";
+
+const visitHistoryRequests = new Map();
+
+const recordProductVisit = (productId) => {
+  const requestKey = String(productId);
+
+  if (!visitHistoryRequests.has(requestKey)) {
+    visitHistoryRequests.set(
+      requestKey,
+      addRecommendationHistory(productId).finally(() => {
+        visitHistoryRequests.delete(requestKey);
+      }),
+    );
+  }
+
+  return visitHistoryRequests.get(requestKey);
+};
 
 const labels = {
   bookmark: "북마크",
@@ -82,6 +101,14 @@ function ProductDetailPage() {
   const isSaved = useSavedProductsStore((state) =>
     product ? state.savedProducts.some((item) => String(item.id) === String(product.id)) : false,
   );
+
+  useEffect(() => {
+    if (!product?.id) return undefined;
+
+    recordProductVisit(product.id).catch(() => null);
+
+    return undefined;
+  }, [product?.id]);
 
   if (isLoading) {
     return (

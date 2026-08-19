@@ -44,26 +44,34 @@ const normalizeLook = (look, detail) => {
   };
 };
 
-export const createRecommendationSession = async () => {
-  const { data } = await axiosInstance.post("recommendations/sessions/");
-  return data?.session?.id;
+const asHistoryArray = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  return payload?.histories ?? payload?.history ?? payload?.results ?? payload?.items ?? [];
 };
 
-export const addRecommendationHistory = async (sessionId, productId) => {
-  const { data } = await axiosInstance.post(
-    `recommendations/sessions/${sessionId}/history/`,
-    { product_id: Number(productId) },
-  );
+export const createRecommendationSession = async () => {
+  const { data } = await axiosInstance.post("recommendations/sessions/");
+  return data?.session?.id ?? data?.session_id ?? data?.id ?? "current";
+};
+
+export const addRecommendationHistory = async (...args) => {
+  const productId = args.length > 1 ? args[1] : args[0];
+  const { data } = await axiosInstance.post("recommendations/sessions/history/", {
+    product_id: Number(productId),
+  });
   return data?.history;
 };
 
-export const getRecommendationHistory = async (sessionId) => {
-  const { data } = await axiosInstance.get(`recommendations/sessions/${sessionId}/history/`);
-  const histories = (data?.histories ?? []).slice(-3);
+export const getRecommendationHistory = async () => {
+  const { data } = await axiosInstance.get("recommendations/sessions/history/");
+  const histories = asHistoryArray(data).slice(-3);
 
   return Promise.all(
     histories.map(async (history) => {
-      const product = await getProductPreview(history.product);
+      const productId = history.product ?? history.product_id ?? history.productId;
+      if (!productId) return null;
+
+      const product = await getProductPreview(productId);
       return {
         ...product,
         historyId: history.id,
@@ -72,13 +80,11 @@ export const getRecommendationHistory = async (sessionId) => {
         category: history.product_category ?? product.category,
       };
     }),
-  );
+  ).then((items) => items.filter(Boolean));
 };
 
-export const analyzeRecommendationSession = async (sessionId) => {
-  const { data } = await axiosInstance.post(
-    `recommendations/sessions/${sessionId}/analyze/`,
-  );
+export const analyzeRecommendationSession = async () => {
+  const { data } = await axiosInstance.post("recommendations/sessions/analyze/");
   return data;
 };
 
@@ -88,10 +94,10 @@ export const getRecommendationLookDetail = async (lookId) => {
   return look ? normalizeLook(look, look) : null;
 };
 
-export const getRecommendationResult = async (sessionId) => {
+export const getRecommendationResult = async () => {
   const [{ data }, history] = await Promise.all([
-    axiosInstance.get(`recommendations/sessions/${sessionId}/result/`),
-    getRecommendationHistory(sessionId),
+    axiosInstance.get("recommendations/sessions/result/"),
+    getRecommendationHistory(),
   ]);
   const profile = data?.data;
 
