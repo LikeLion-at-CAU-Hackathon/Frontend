@@ -21,7 +21,7 @@ function AIStyleProfilePage() {
     if (result || !sessionId) return undefined;
 
     let isCancelled = false;
-    getRecommendationResult(sessionId)
+    getRecommendationResult()
       .then((nextResult) => {
         if (!nextResult) throw new Error("AI 스타일 분석 결과가 없습니다.");
         if (!isCancelled) setResult(nextResult);

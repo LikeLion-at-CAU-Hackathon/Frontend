@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Share2 } from "lucide-react";
 import { toPng } from "html-to-image";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,6 +7,7 @@ import AdvisorSheet from "../../components/common/AdvisorSheet";
 import ErrorMessage from "../../components/common/ErrorMessage";
 import ProductProfileCard from "../../components/my/ProductProfileCard";
 import ProductProfileShareSheet from "../../components/my/ProductProfileShareSheet";
+import { getSavedProductAnalysis } from "../../api/savedProductsApi";
 import { createProductProfile } from "../../mocks/productProfiles";
 import useSavedProductsStore from "../../stores/useSavedProductsStore";
 import { shareProductWithKakao } from "../../utils/kakaoShare";
@@ -18,19 +19,46 @@ function ProductProfilePage() {
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareStatus, setShareStatus] = useState("");
+  const [analysis, setAnalysis] = useState(null);
   const isRemovingRef = useRef(false);
-  const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
+  const fetchSavedProducts = useSavedProductsStore((state) => state.fetchSavedProducts);
+  const removeProduct = useSavedProductsStore((state) => state.removeProduct);
   const savedProduct = useSavedProductsStore((state) =>
     state.savedProducts.find((product) => String(product.id) === String(productId)),
   );
-  const profile = createProductProfile(savedProduct);
+  const profile = createProductProfile(
+    savedProduct ? { ...savedProduct, aiAnalysis: analysis } : null,
+  );
 
-  const handleUnsaveProduct = () => {
+  useEffect(() => {
+    fetchSavedProducts().catch(() => null);
+  }, [fetchSavedProducts]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    getSavedProductAnalysis(productId)
+      .then((result) => {
+        if (!isCancelled) setAnalysis(result);
+      })
+      .catch((error) => console.error("Failed to fetch saved product analysis", error));
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [productId]);
+
+  const handleUnsaveProduct = async () => {
     if (!profile || isRemovingRef.current) return;
 
     isRemovingRef.current = true;
-    removeSavedProduct(profile.id);
-    navigate("/my");
+    try {
+      await removeProduct(profile.id);
+      navigate("/my");
+    } catch (error) {
+      console.error("Failed to remove saved product", error);
+      isRemovingRef.current = false;
+    }
   };
 
   const handleShareSelect = async (action) => {

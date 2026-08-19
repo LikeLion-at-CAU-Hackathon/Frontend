@@ -13,7 +13,7 @@ const saveTaggedProduct = (getOrCreateSession, productId) => {
     historyRequests.set(
       requestKey,
       getOrCreateSession()
-        .then((sessionId) => addRecommendationHistory(sessionId, productId))
+        .then(() => addRecommendationHistory(productId))
         .finally(() => historyRequests.delete(requestKey)),
     );
   }

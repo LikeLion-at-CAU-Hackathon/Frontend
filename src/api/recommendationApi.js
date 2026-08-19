@@ -49,16 +49,16 @@ export const createRecommendationSession = async () => {
   return data?.session?.id;
 };
 
-export const addRecommendationHistory = async (sessionId, productId) => {
+export const addRecommendationHistory = async (productId) => {
   const { data } = await axiosInstance.post(
-    `recommendations/sessions/${sessionId}/history/`,
+    "recommendations/sessions/history/",
     { product_id: Number(productId) },
   );
   return data?.history;
 };
 
-export const getRecommendationHistory = async (sessionId) => {
-  const { data } = await axiosInstance.get(`recommendations/sessions/${sessionId}/history/`);
+export const getRecommendationHistory = async () => {
+  const { data } = await axiosInstance.get("recommendations/sessions/history/");
   const histories = (data?.histories ?? []).slice(-3);
 
   return Promise.all(
@@ -75,10 +75,8 @@ export const getRecommendationHistory = async (sessionId) => {
   );
 };
 
-export const analyzeRecommendationSession = async (sessionId) => {
-  const { data } = await axiosInstance.post(
-    `recommendations/sessions/${sessionId}/analyze/`,
-  );
+export const analyzeRecommendationSession = async () => {
+  const { data } = await axiosInstance.post("recommendations/sessions/analyze/");
   return data;
 };
 
@@ -88,10 +86,10 @@ export const getRecommendationLookDetail = async (lookId) => {
   return look ? normalizeLook(look, look) : null;
 };
 
-export const getRecommendationResult = async (sessionId) => {
+export const getRecommendationResult = async () => {
   const [{ data }, history] = await Promise.all([
-    axiosInstance.get(`recommendations/sessions/${sessionId}/result/`),
-    getRecommendationHistory(sessionId),
+    axiosInstance.get("recommendations/sessions/result/"),
+    getRecommendationHistory(),
   ]);
   const profile = data?.data;
 

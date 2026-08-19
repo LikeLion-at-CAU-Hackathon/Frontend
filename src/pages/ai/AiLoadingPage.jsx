@@ -27,8 +27,8 @@ const runAnalysis = (sessionId) => {
   if (!analysisRequests.has(sessionId)) {
     analysisRequests.set(
       sessionId,
-      analyzeRecommendationSession(sessionId)
-        .then(() => getRecommendationResult(sessionId))
+      analyzeRecommendationSession()
+        .then(() => getRecommendationResult())
         .finally(() => analysisRequests.delete(sessionId)),
     );
   }

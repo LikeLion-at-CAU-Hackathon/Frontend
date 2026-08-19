@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Bookmark } from "lucide-react";
 import Button from "../../components/common/Button";
@@ -77,11 +78,17 @@ function Tag({ children }) {
 function ProductDetailPage() {
   const { productId } = useParams();
   const { product, productSizes, isLoading, errorMessage } = useProduct(productId);
-  const addSavedProduct = useSavedProductsStore((state) => state.addSavedProduct);
-  const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
+  const [isSaving, setIsSaving] = useState(false);
+  const fetchSavedProducts = useSavedProductsStore((state) => state.fetchSavedProducts);
+  const saveProduct = useSavedProductsStore((state) => state.saveProduct);
+  const removeProduct = useSavedProductsStore((state) => state.removeProduct);
   const isSaved = useSavedProductsStore((state) =>
     product ? state.savedProducts.some((item) => String(item.id) === String(product.id)) : false,
   );
+
+  useEffect(() => {
+    fetchSavedProducts().catch(() => null);
+  }, [fetchSavedProducts]);
 
   if (isLoading) {
     return (
@@ -117,19 +124,21 @@ function ProductDetailPage() {
   const colorOptions = product.colors?.length ? product.colors : [product.color];
   const otherColorOptions = colorOptions.filter((color) => color !== product.color);
 
-  const handleToggleSavedProduct = () => {
-    if (isSaved) {
-      removeSavedProduct(product.id);
-      return;
-    }
+  const handleToggleSavedProduct = async () => {
+    if (isSaving) return;
 
-    addSavedProduct({
-      ...product,
-      collection: collectionLabel,
-      option: `${product.color} · ${currentSize.size}`,
-      store: product.stocks?.[0]?.branch_name ?? "MCM 신세계 강남점",
-      isSaved: true,
-    });
+    setIsSaving(true);
+    try {
+      if (isSaved) {
+        await removeProduct(product.id);
+      } else {
+        await saveProduct(product.id);
+      }
+    } catch (error) {
+      console.error("Failed to update saved product", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -141,6 +150,7 @@ function ProductDetailPage() {
             onClick={handleToggleSavedProduct}
             aria-label={isSaved ? "My Selection에서 제거" : "My Selection에 저장"}
             aria-pressed={isSaved}
+            disabled={isSaving}
             className="absolute right-[22px] top-[18px] flex size-[26px] items-center justify-center"
           >
             <Bookmark
@@ -220,6 +230,7 @@ function ProductDetailPage() {
         </Button>
         <Button
           onClick={handleToggleSavedProduct}
+          disabled={isSaving}
           className="text-[12px] leading-[18px] tracking-[0.72px]"
         >
           {isSaved ? "My Selection에서 제거" : labels.addSelection}

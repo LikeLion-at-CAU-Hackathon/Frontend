@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
@@ -10,7 +10,12 @@ function SavedProductsPage() {
   const navigate = useNavigate();
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const savedProducts = useSavedProductsStore((state) => state.savedProducts);
-  const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
+  const fetchSavedProducts = useSavedProductsStore((state) => state.fetchSavedProducts);
+  const removeProduct = useSavedProductsStore((state) => state.removeProduct);
+
+  useEffect(() => {
+    fetchSavedProducts().catch(() => null);
+  }, [fetchSavedProducts]);
 
   const handleProductClick = (product) => {
     navigate(`/my/saved-products/${product.id}`);
@@ -26,7 +31,7 @@ function SavedProductsPage() {
         <SavedProductsList
           products={savedProducts}
           onProductClick={handleProductClick}
-          onRemoveProduct={removeSavedProduct}
+          onRemoveProduct={(productId) => removeProduct(productId).catch(() => null)}
         />
       )}
 
