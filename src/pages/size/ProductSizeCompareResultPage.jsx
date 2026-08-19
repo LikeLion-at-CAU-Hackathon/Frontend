@@ -7,17 +7,50 @@ import { getMockProductById, getProductSizesForProduct } from "../../mocks/produ
 const labels = {
   compareSizes: "Compare Sizes",
   current: "현재 선택",
-  dimension: "크기",
-  strap: "스트랩",
-  storage: "수납",
-  price: "가격",
-  stock: "재고",
   request: "두 제품 실물 비교 요청",
   backToProduct: "제품으로 돌아가기",
 };
 
-const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
+const defaultCompareFields = [
+  { label: "크기", valueKey: "dimensions", format: "dimensions" },
+  { label: "스트랩", valueKey: "strap", format: "dash" },
+  { label: "수납", valueKey: "storage", format: "storage" },
+  { label: "가격", valueKey: "price", format: "price" },
+  { label: "재고", valueKey: "stock", format: "stock" },
+];
+
+const formatPrice = (price) => `₩${Number(price).toLocaleString("ko-KR")}`;
 const formatStorage = (value) => value.replaceAll(" / ", " · ");
+const formatStockCount = (quantity) => `${quantity}개`;
+const formatCurrentStoreStock = (quantity) =>
+  quantity > 0 ? `${formatStockCount(quantity)} (현재 매장)` : "재고 없음";
+const formatStock = (value) => {
+  const numericValue = Number(value);
+  return Number.isNaN(numericValue) ? String(value) : formatCurrentStoreStock(numericValue);
+};
+
+const formatCompareValue = (value, field) => {
+  if (value === undefined || value === null || value === "") return "-";
+
+  switch (field.format) {
+    case "dimensions":
+      return String(value).replaceAll(" x ", " × ");
+    case "dash":
+      return String(value).replace("-", "–");
+    case "storage":
+      return formatStorage(String(value)).replace(" · AirPods", " ·\nAirPods");
+    case "price":
+      return formatPrice(value);
+    case "stock":
+      return formatStock(value);
+    case "availability": {
+      const numericValue = Number(value);
+      return Number.isNaN(numericValue) ? String(value) : numericValue > 0 ? "유" : "무";
+    }
+    default:
+      return String(value);
+  }
+};
 
 function ProductCard({
   productName,
@@ -133,6 +166,7 @@ function ProductSizeCompareResultPage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const compareProduct = sizeInfoBySize[compareSize] ?? initialCompareProduct;
+  const compareFields = product.sizeCompareFields ?? defaultCompareFields;
 
   return (
     <main className="min-h-[734px] overflow-x-hidden bg-[#faf8f5] px-[22px] pt-4">
@@ -161,31 +195,14 @@ function ProductSizeCompareResultPage() {
       </section>
 
       <section className="mt-[28px] flex flex-col gap-[24px]">
-        <CompareRow
-          label={labels.dimension}
-          currentValue={currentProduct.dimensions.replaceAll(" x ", " × ")}
-          compareValue={compareProduct.dimensions.replaceAll(" x ", " × ")}
-        />
-        <CompareRow
-          label={labels.strap}
-          currentValue={currentProduct.strap.replace("-", "–")}
-          compareValue={compareProduct.strap.replace("-", "–")}
-        />
-        <CompareRow
-          label={labels.storage}
-          currentValue={formatStorage(currentProduct.storage).replace(" · AirPods", " ·\nAirPods")}
-          compareValue={formatStorage(compareProduct.storage).replace(" · AirPods", " ·\nAirPods")}
-        />
-        <CompareRow
-          label={labels.price}
-          currentValue={formatPrice(currentProduct.price)}
-          compareValue={formatPrice(compareProduct.price)}
-        />
-        <CompareRow
-          label={labels.stock}
-          currentValue={`${currentProduct.stock}개 (현재 매장)`}
-          compareValue={`${compareProduct.stock}개 (현재 매장)`}
-        />
+        {compareFields.map((field) => (
+          <CompareRow
+            key={`${field.label}-${field.valueKey}`}
+            label={field.label}
+            currentValue={formatCompareValue(currentProduct[field.valueKey], field)}
+            compareValue={formatCompareValue(compareProduct[field.valueKey], field)}
+          />
+        ))}
       </section>
 
       <section className="mt-[29px] flex flex-col gap-[9px] pb-6">

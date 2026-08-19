@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import Button from "../../components/common/Button";
-import { getMockProductById, getMockProductStocks } from "../../mocks/products";
+import { getMockProductById, getMockProductStocks, mcmStores } from "../../mocks/products";
 
 const labels = {
   stockCheck: "재고 확인",
@@ -12,11 +12,15 @@ const labels = {
   backToProduct: "제품으로 돌아가기",
 };
 
-const nearbyStores = [
-  { name: "MCM 롯데백화점 본점", distance: "0.6km", stock: "재고 있음" },
-  { name: "MCM 롯데면세점 명동 본점", distance: "0.6km", stock: "재고 있음" },
-  { name: "MCM 신라면세점 본점", distance: "2.9km", stock: "재고 있음" },
-];
+const nearbyStores = mcmStores.slice(1).map((store) => ({
+  ...store,
+  distance: store.distance ?? "-",
+  stock: "재고 있음",
+}));
+
+const formatStockCount = (quantity) => `${quantity}개`;
+const formatStockBadge = (quantity) =>
+  quantity > 0 ? formatStockCount(quantity) : "재고 없음";
 
 function SectionLabel({ children }) {
   return (
@@ -40,12 +44,12 @@ function StockBadge({ available, children }) {
   );
 }
 
-function StoreStockRow({ name, color, stock, available }) {
+function StoreStockRow({ name, option, stock, available }) {
   return (
     <li className="flex min-h-[61px] w-full items-center justify-between gap-4 border-b-[1.5px] border-[#e5e0da] py-[11px] last:border-b-0">
       <div className="min-w-0">
         <p className="text-[13px] font-medium leading-[19.5px] text-[#0a0908]">{name}</p>
-        <p className="pt-[2px] text-[11px] leading-[16.5px] text-[#8a8078]">{color}</p>
+        <p className="pt-[2px] text-[11px] leading-[16.5px] text-[#8a8078]">{option}</p>
       </div>
       <StockBadge available={available}>{stock}</StockBadge>
     </li>
@@ -68,28 +72,29 @@ function NearbyStoreRow({ name, distance, stock }) {
 }
 
 function getCurrentStoreStocks(product, productStocks) {
-  if (product.groupName === "Aren Hobo" || product.group_name === "Aren Hobo") {
-    return [
-      { name: "Aren Hobo Mini", color: "Cognac", stock: "3개", available: true },
-      { name: "Aren Hobo Mini", color: "Ivory White", stock: "재고 없음", available: false },
-      { name: "Aren Hobo Medium", color: "Cognac", stock: "2개", available: true },
-    ];
+  if (product.variants?.length > 1) {
+    return product.variants.map((variant) => ({
+      name: variant.name ?? product.name,
+      option: [variant.color ?? product.color, variant.size].filter(Boolean).join(" · "),
+      stock: formatStockBadge(variant.stock),
+      available: variant.stock > 0,
+    }));
   }
 
   return productStocks.map((stock) => ({
     name: product.name,
-    color: product.color,
-    stock: `${stock.quantity}개`,
+    option: product.color,
+    stock: formatStockBadge(stock.quantity),
     available: stock.quantity > 0,
   }));
 }
 
 function getBranchName(product, productStocks) {
   if (product.groupName === "Aren Hobo" || product.group_name === "Aren Hobo") {
-    return "MCM 신세계면세점 본점";
+    return mcmStores[0].branch_name;
   }
 
-  return productStocks[0]?.branch_name ?? "MCM 신세계 본점";
+  return productStocks[0]?.branch_name ?? mcmStores[0].branch_name;
 }
 
 function ProductStockPage() {
@@ -118,7 +123,7 @@ function ProductStockPage() {
         <SectionLabel>{labels.currentStoreStock}</SectionLabel>
         <ul className="pt-[10px]">
           {currentStoreStocks.map((item) => (
-            <StoreStockRow key={`${item.name}-${item.color}`} {...item} />
+            <StoreStockRow key={`${item.name}-${item.option}`} {...item} />
           ))}
         </ul>
       </section>

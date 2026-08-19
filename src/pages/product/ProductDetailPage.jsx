@@ -9,7 +9,6 @@ import useSavedProductsStore from "../../stores/useSavedProductsStore";
 const labels = {
   bookmark: "북마크",
   stock: "재고",
-  count: "개",
   productInfo: "제품 정보",
   explore: "탐색하기",
   stockCheck: "재고 확인",
@@ -19,6 +18,7 @@ const labels = {
 };
 
 const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
+const formatStockCount = (quantity) => `${quantity}개`;
 const formatSpecValue = (value) => value.replaceAll(" x ", " × ").replaceAll(" / ", " · ");
 const formatProductInfoValue = (label, value) => {
   const formattedValue = formatSpecValue(value);
@@ -145,9 +145,11 @@ function ProductDetailPage() {
           </div>
 
           <div className="mt-[10px] flex gap-[6px]">
-            {[product.color, currentSize.size, `${labels.stock} ${product.stock}${labels.count}`].map((tag) => (
-              <Tag key={tag}>{tag}</Tag>
-            ))}
+            {[product.color, currentSize.size, `${labels.stock} ${formatStockCount(currentSize.stock)}`].map(
+              (tag) => (
+                <Tag key={tag}>{tag}</Tag>
+              ),
+            )}
           </div>
         </div>
       </section>
