@@ -1,14 +1,7 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance, { resolveApiAssetUrl } from "./axiosInstance";
 import { getProductDetail } from "./productApi";
 
-const resolveImageUrl = (image) => {
-  if (!image || /^(?:https?:|data:|blob:)/.test(image)) return image ?? "";
-
-  const baseUrl = axiosInstance.defaults.baseURL;
-  if (!/^https?:/.test(baseUrl ?? "")) return image;
-
-  return new URL(image, baseUrl).href;
-};
+const resolveImageUrl = resolveApiAssetUrl;
 
 const getProductPreview = async (productId) => {
   const product = await getProductDetail(productId);

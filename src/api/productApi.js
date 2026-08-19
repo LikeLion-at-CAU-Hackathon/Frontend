@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance, { resolveApiAssetUrl } from "./axiosInstance";
 
 const DEFAULT_PRODUCT_ID = 1;
 const PRODUCT_ID_RANGE = Array.from({ length: 16 }, (_, index) => index + 1);
@@ -63,14 +63,7 @@ const formatSpecValue = (value, size) => {
     .join(" / ");
 };
 
-const resolveImageUrl = (image) => {
-  if (!image || /^(?:https?:|data:|blob:)/.test(image)) return image ?? "";
-
-  const baseUrl = axiosInstance.defaults.baseURL;
-  if (!/^https?:/.test(baseUrl ?? "")) return image;
-
-  return new URL(image, baseUrl).href;
-};
+const resolveImageUrl = resolveApiAssetUrl;
 
 const toSpecLabel = (key) => key.replaceAll("_", " ").toUpperCase();
 
