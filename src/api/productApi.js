@@ -248,10 +248,80 @@ const normalizeMaterialSection = (material) => ({
   image: resolveImageUrl(material?.image),
 });
 
-const normalizeGuide = (guide, fallbackTitle = "") => ({
-  title: typeof guide === "string" ? fallbackTitle : guide?.title ?? guide?.name ?? fallbackTitle,
-  description: typeof guide === "string" ? guide : guide?.description ?? guide?.content ?? "",
-});
+const normalizeGuideDescriptions = (descriptions) =>
+  (descriptions ?? [])
+    .map((description) => String(description ?? "").trim())
+    .filter(Boolean);
+
+const isNumericKey = (value) => /^\d+$/.test(String(value ?? ""));
+
+const normalizeCareGuideEntry = (entry, fallbackSubtitle = "") => {
+  const subtitleFallback = isNumericKey(fallbackSubtitle) ? "" : fallbackSubtitle;
+
+  if (typeof entry === "string") {
+    return {
+      subtitle: subtitleFallback,
+      description: entry.trim(),
+    };
+  }
+
+  if (!isPlainObject(entry)) {
+    return {
+      subtitle: subtitleFallback,
+      description: String(entry ?? "").trim(),
+    };
+  }
+
+  return {
+    subtitle: String(
+      entry.subtitle ??
+        entry.subTitle ??
+        entry.heading ??
+        entry.title ??
+        entry.name ??
+        entry.label ??
+        subtitleFallback,
+    ).trim(),
+    description: String(
+      entry.description ??
+        entry.content ??
+        entry.body ??
+        entry.text ??
+        entry.value ??
+        "",
+    ).trim(),
+  };
+};
+
+const normalizeCareGuideEntries = (entries) =>
+  (entries ?? [])
+    .map((entry) => normalizeCareGuideEntry(entry))
+    .filter((entry) => entry.subtitle || entry.description);
+
+const normalizeGuide = (guide, fallbackTitle = "") => {
+  const entryPayload = typeof guide === "string"
+    ? []
+    : asArray(guide, ["entries", "guideItems", "guide_items", "descriptions", "contents", "items"]);
+  const items = normalizeCareGuideEntries(entryPayload);
+  const description = typeof guide === "string"
+    ? guide
+    : guide?.description ?? guide?.content ?? guide?.body ?? "";
+  const descriptions = items.length
+    ? items.map((item) => item.description).filter(Boolean)
+    : normalizeGuideDescriptions([description]);
+
+  return {
+    title: typeof guide === "string" ? fallbackTitle : guide?.title ?? guide?.name ?? fallbackTitle,
+    description: descriptions.join(" "),
+    descriptions,
+    items: items.length
+      ? items
+      : descriptions.map((nextDescription) => ({
+          subtitle: "",
+          description: nextDescription,
+        })),
+  };
+};
 
 const normalizeMaterialSections = (sections) =>
   (sections ?? [])
@@ -401,82 +471,41 @@ const removeDuplicateGuides = (guides) => {
   });
 };
 
-const normalizeNumberedGuideTitles = (guides) => {
-  const hasOnlyNumberedTitles = guides.every((guide) => /^\d+$/.test(String(guide.title ?? "")));
+const getCareGuideEntries = (guideMap) => {
+  if (Array.isArray(guideMap)) return normalizeCareGuideEntries(guideMap);
 
-  if (!hasOnlyNumberedTitles) return guides;
-
-  return guides.map((guide, index) => ({
-    ...guide,
-    title: String(index + 1).padStart(2, "0"),
-  }));
+  return Object.entries(guideMap ?? {})
+    .filter(([, value]) => value !== null && value !== undefined && value !== "")
+    .sort(([firstKey], [secondKey]) => Number(firstKey) - Number(secondKey))
+    .map(([key, value]) => normalizeCareGuideEntry(value, key))
+    .filter((entry) => entry.subtitle || entry.description);
 };
 
-const CARE_CATEGORIES = ["STORAGE", "CLEANING", "LEATHER", "CAUTION"];
+const normalizeBackendCareItem = (item) => {
+  const keyedGuide = item?.careguide ?? item?.careGuide;
+  const items = getCareGuideEntries(keyedGuide);
+  const descriptions = items.map((entry) => entry.description).filter(Boolean);
 
-const getCareCategory = (guide) => {
-  const text = `${guide.title ?? ""} ${guide.description ?? ""}`.toLowerCase();
-
-  if (/leather|가죽/.test(text)) return "LEATHER";
-  if (/clean|wipe|cloth|오염|젖|닦|천|관리/.test(text)) return "CLEANING";
-  if (/storage|dust|sun|light|humidity|water|보관|더스트|직사광선|밝은 빛|습기|물/.test(text)) {
-    return "STORAGE";
-  }
-  if (/caution|soap|solvent|rough|scratch|friction|주의|비누|솔벤트|거친|긁|마찰/.test(text)) {
-    return "CAUTION";
-  }
-
-  return "CAUTION";
-};
-
-const shouldGroupCareGuides = (guides) => {
-  const titles = guides.map((guide) => String(guide.title ?? ""));
-  const hasCategoryTitles = titles.some((title) =>
-    CARE_CATEGORIES.includes(title.toUpperCase()),
-  );
-
-  return guides.length > CARE_CATEGORIES.length || titles.every((title) => /^\d+$/.test(title)) || !hasCategoryTitles;
-};
-
-const groupCareGuidesByCategory = (guides) => {
-  if (!shouldGroupCareGuides(guides)) return guides;
-
-  const groupedGuides = new Map(CARE_CATEGORIES.map((category) => [category, []]));
-
-  guides.forEach((guide) => {
-    const description = String(guide.description ?? "").trim();
-    if (!description) return;
-
-    const category = getCareCategory(guide);
-    const categoryGuides = groupedGuides.get(category) ?? [];
-
-    if (!categoryGuides.includes(description)) {
-      categoryGuides.push(description);
-    }
-
-    groupedGuides.set(category, categoryGuides);
-  });
-
-  return CARE_CATEGORIES
-    .map((category) => ({
-      title: category,
-      description: groupedGuides.get(category)?.join(" ") ?? "",
-    }))
-    .filter((guide) => guide.description);
+  return {
+    title: item?.title ?? item?.name ?? item?.subtitle ?? item?.heading ?? "",
+    description: descriptions.join(" "),
+    descriptions,
+    items,
+  };
 };
 
 const normalizeCareItems = (items) =>
-  removeDuplicateGuides(
-    (items ?? []).flatMap((item) => {
+  (items ?? [])
+    .flatMap((item) => {
       const keyedGuide = item?.careguide ?? item?.careGuide;
 
-      if (keyedGuide) {
-        return getKeyedGuides(keyedGuide);
+      if (isPlainObject(keyedGuide) || Array.isArray(keyedGuide)) {
+        return normalizeBackendCareItem(item);
       }
 
       return normalizeGuide(item);
-    }),
-  ).filter((guide) => guide.title || guide.description);
+    })
+    .filter((guide) => guide.title || guide.description || guide.descriptions?.length);
 
 const getKeyedGuides = (guideMap) => {
   if (!isPlainObject(guideMap)) return [];
@@ -536,7 +565,7 @@ const normalizeCareStory = (care, fallbackCare) => {
   }
 
   if (Array.isArray(care)) {
-    const guides = groupCareGuidesByCategory(normalizeNumberedGuideTitles(normalizeCareItems(care)));
+    const guides = normalizeCareItems(care);
 
     return {
       ...fallbackCare,
@@ -545,9 +574,9 @@ const normalizeCareStory = (care, fallbackCare) => {
   }
 
   const guides = asArray(care, ["guides", "contents", "items"]);
-  const normalizedGuides = groupCareGuidesByCategory(normalizeNumberedGuideTitles(
-    removeDuplicateGuides(guides.length ? normalizeGuideList(guides) : getKeyedGuides(care)),
-  ));
+  const normalizedGuides = removeDuplicateGuides(
+    guides.length ? normalizeGuideList(guides) : getKeyedGuides(care),
+  );
 
   return {
     ...fallbackCare,
@@ -621,6 +650,8 @@ const normalizeProductCareGuide = (guide) => ({
   ...guide,
   title: guide?.title ?? guide?.name ?? "",
   content: guide?.content ?? guide?.description ?? "",
+  descriptions: guide?.descriptions ?? [],
+  items: guide?.items ?? [],
 });
 
 const normalizeAiDocentFaqs = (productPayload) =>
