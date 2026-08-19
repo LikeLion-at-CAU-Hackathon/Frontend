@@ -4,6 +4,24 @@ import locationIcon from "../../assets/my-location.svg";
 const formatPrice = (price) =>
   typeof price === "number" ? `₩${price.toLocaleString("ko-KR")}` : price;
 
+const limitToSentences = (value, maxSentences = 2) => {
+  const paragraphs = Array.isArray(value) ? value : [value];
+  let remainingSentences = maxSentences;
+
+  const limitedParagraphs = paragraphs.flatMap((paragraph) => {
+    if (remainingSentences <= 0 || typeof paragraph !== "string") return [];
+
+    const sentences = paragraph.match(/[^.!?。！？]+(?:[.!?。！？]+|$)/g) ?? [];
+    const visibleSentences = sentences.slice(0, remainingSentences);
+    remainingSentences -= visibleSentences.length;
+
+    const limitedParagraph = visibleSentences.join("").trim();
+    return limitedParagraph ? [limitedParagraph] : [];
+  });
+
+  return Array.isArray(value) ? limitedParagraphs : (limitedParagraphs[0] ?? "");
+};
+
 function ProductSummary({ product, onUnsave }) {
   const collection = product.collection?.endsWith("COLLECTION")
     ? product.collection
@@ -99,9 +117,9 @@ function AiAnalysis({ analysis }) {
 
 function BrandStory({ story }) {
   const items = [
-    { label: "Design", value: story.design },
-    { label: "Material", value: story.material },
-    { label: "Care", value: story.care },
+    { label: "Design", value: limitToSentences(story.design) },
+    { label: "Material", value: limitToSentences(story.material) },
+    { label: "Care", value: limitToSentences(story.care) },
   ];
 
   return (
