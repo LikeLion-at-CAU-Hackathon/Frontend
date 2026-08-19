@@ -242,10 +242,21 @@ const normalizeStockPayload = (stockPayload) => {
   return normalizeStocks(stocks);
 };
 
+const getImageSource = (source) =>
+  source?.image ??
+  source?.image_url ??
+  source?.imageUrl ??
+  source?.thumbnail ??
+  source?.thumbnail_url ??
+  source?.thumbnailUrl ??
+  source?.photo ??
+  source?.photo_url ??
+  source?.photoUrl;
+
 const normalizeMaterialSection = (material) => ({
   title: material?.title ?? material?.name ?? "",
   description: material?.description ?? material?.content ?? "",
-  image: resolveImageUrl(material?.image),
+  image: resolveImageUrl(getImageSource(material)),
 });
 
 const normalizeGuideDescriptions = (descriptions) =>
@@ -403,7 +414,7 @@ const normalizeMaterialDetailItem = (item, index) => {
   const label = item.label ?? item.title ?? item.name;
   const value = item.value ?? item.description ?? item.content ?? item.text;
   const order = item.order ?? item.number ?? item.index ?? String(index + 1).padStart(2, "0");
-  const image = resolveImageUrl(item.image ?? item.image_url ?? item.imageUrl ?? item.thumbnail);
+  const image = resolveImageUrl(getImageSource(item));
   const imageStyle = item.imageStyle ?? item.image_style;
 
   if (label && value) {
@@ -534,7 +545,7 @@ const normalizeMaterialsStory = (materials, fallbackMaterials, background) => {
     return {
       ...fallbackMaterials,
       title: fallbackMaterials?.title ?? sections[0]?.title ?? "",
-      image: fallbackMaterials?.image ?? sections.find((section) => section.image)?.image ?? "",
+      image: sections.find((section) => section.image)?.image ?? fallbackMaterials?.image ?? "",
       sections,
       details,
     };
@@ -608,10 +619,11 @@ const normalizeStory = (materialsPayload, backgroundPayload, careGuidePayload, p
     productPayload?.background ??
     {};
   const materials = materialsPayload?.materials ?? materialsPayload;
+  const productImage = currentVariant?.image ?? normalizeImages(productPayload?.images ?? productPayload?.image)[0] ?? "";
   const fallbackMaterialsStory = {
     eyebrow: "MATERIALS & CRAFT",
     title: "",
-    image: "",
+    image: productImage,
     sections: [],
   };
   const fallbackCareStory = {
@@ -631,7 +643,7 @@ const normalizeStory = (materialsPayload, backgroundPayload, careGuidePayload, p
     design: {
       eyebrow: "DESIGN & HERITAGE",
       title: productPayload?.name ?? "",
-      image: currentVariant?.image ?? normalizeImages(productPayload?.images ?? productPayload?.image)[0] ?? "",
+      image: productImage,
       paragraphs: background.description ? [background.description] : [],
       highlights: normalizeDesignHighlights(background, productPayload),
     },
