@@ -25,10 +25,14 @@ function MaterialHeroImage({ image, alt }) {
 function FeaturedMaterial({ section }) {
   return (
     <article className="border-b border-[#e5e0da] pb-[17px] pt-[18px]">
-      <h2 className="text-[13px] font-bold leading-[19.5px] text-[#0a0908]">{section.title}</h2>
-      <p className="mt-[5px] whitespace-pre-line text-[13px] font-normal leading-[22.1px] text-[#3d3530]">
-        {section.description}
-      </p>
+      {section.title && (
+        <h2 className="text-[13px] font-bold leading-[19.5px] text-[#0a0908]">{section.title}</h2>
+      )}
+      {section.description && (
+        <p className="mt-[5px] whitespace-pre-line text-[13px] font-normal leading-[22.1px] text-[#3d3530]">
+          {section.description}
+        </p>
+      )}
     </article>
   );
 }
@@ -47,12 +51,14 @@ function MaterialListItem({ section }) {
       </div>
 
       <div className="min-w-0 flex-1 py-[13px]">
-        <h2 className="text-[13px] font-bold leading-[19.5px] text-[#0a0908]">
-          {section.title}
-        </h2>
-        <p className="mt-[5px] whitespace-pre-line text-[13px] font-normal leading-[22.1px] text-[#3d3530]">
-          {section.description}
-        </p>
+        {section.title && (
+          <h2 className="text-[13px] font-bold leading-[19.5px] text-[#0a0908]">{section.title}</h2>
+        )}
+        {section.description && (
+          <p className="mt-[5px] whitespace-pre-line text-[13px] font-normal leading-[22.1px] text-[#3d3530]">
+            {section.description}
+          </p>
+        )}
       </div>
     </article>
   );
@@ -60,6 +66,7 @@ function MaterialListItem({ section }) {
 
 function StoryMaterialsPage({ story }) {
   const [featuredSection, ...materialSections] = story.sections ?? [];
+  const displayTitle = story.title || featuredSection?.title || "";
 
   return (
     <section className="w-full bg-[#faf8f5] pb-[116px] pt-[14px] text-left">
@@ -67,17 +74,19 @@ function StoryMaterialsPage({ story }) {
         <p className="font-['DM_Sans'] text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#6b3f1f]">
           {story.eyebrow}
         </p>
-        <h1 className="font-playfair mt-[10px] text-[22px] font-medium leading-[27.5px] text-[#0a0908]">
-          {story.title}
-        </h1>
+        {displayTitle && (
+          <h1 className="font-playfair mt-[10px] text-[22px] font-medium leading-[27.5px] text-[#0a0908]">
+            {displayTitle}
+          </h1>
+        )}
 
-        <MaterialHeroImage image={story.image} alt={story.title} />
+        <MaterialHeroImage image={story.image} alt={displayTitle} />
 
         {featuredSection && <FeaturedMaterial section={featuredSection} />}
 
         <div className="mt-[27px] flex flex-col gap-6">
-          {materialSections.map((section) => (
-            <MaterialListItem key={section.title} section={section} />
+          {materialSections.map((section, index) => (
+            <MaterialListItem key={`${section.title ?? "material"}-${index}`} section={section} />
           ))}
         </div>
       </div>
