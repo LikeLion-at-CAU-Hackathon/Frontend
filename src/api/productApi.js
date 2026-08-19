@@ -538,7 +538,8 @@ const normalizeMaterialsStory = (materials, fallbackMaterials, background) => {
     return {
       ...fallbackMaterials,
       title: fallbackMaterials?.title ?? sections[0]?.title ?? "",
-      image: sections.find((section) => section.image)?.image ?? fallbackMaterials?.image ?? "",
+      image: fallbackMaterials?.image ?? sections.find((section) => section.image)?.image ?? "",
+      imageView: fallbackMaterials?.imageView,
       sections,
       details,
     };
@@ -551,7 +552,8 @@ const normalizeMaterialsStory = (materials, fallbackMaterials, background) => {
     ...fallbackMaterials,
     ...materials,
     title: materials?.title ?? materials?.name ?? fallbackMaterials?.title ?? normalizedSections[0]?.title ?? "",
-    image: resolveImageUrl(materials?.image) || fallbackMaterials?.image || "",
+    image: fallbackMaterials?.image || resolveImageUrl(getImageSource(materials)) || "",
+    imageView: fallbackMaterials?.imageView ?? materials?.imageView ?? materials?.image_view,
     sections: normalizedSections.length
       ? normalizedSections
       : fallbackMaterials?.sections ?? [],
@@ -559,7 +561,26 @@ const normalizeMaterialsStory = (materials, fallbackMaterials, background) => {
   };
 };
 
-const normalizeCareStory = (care, fallbackCare) => {
+const getVisibleCareItems = (care, productPayload) => {
+  const productId = Number(productPayload?.id);
+
+  if (productId === 9 && Array.isArray(care)) {
+    return care.filter((item) => Number(item?.id) === 30);
+  }
+
+  return care;
+};
+
+const hideCareGroupTitle = (guide, productPayload) => {
+  if (Number(productPayload?.id) !== 9) return guide;
+
+  return {
+    ...guide,
+    title: "",
+  };
+};
+
+const normalizeCareStory = (care, fallbackCare, productPayload) => {
   if (!care) {
     return {
       eyebrow: "CARE GUIDE",
@@ -569,7 +590,8 @@ const normalizeCareStory = (care, fallbackCare) => {
   }
 
   if (Array.isArray(care)) {
-    const guides = normalizeCareItems(care);
+    const guides = normalizeCareItems(getVisibleCareItems(care, productPayload))
+      .map((guide) => hideCareGroupTitle(guide, productPayload));
 
     return {
       ...fallbackCare,
@@ -604,6 +626,24 @@ const normalizeCarePayload = (carePayload) => {
   return carePayload.careguide ?? carePayload.careGuide ?? carePayload.care_guide ?? carePayload;
 };
 
+const getMaterialHeroImageView = (productPayload) => {
+  const category = String(productPayload?.category ?? "").toUpperCase();
+
+  if (category.includes("BAG")) {
+    return {
+      fit: "cover",
+      position: "center 82%",
+      scale: 1.55,
+    };
+  }
+
+  return {
+    fit: "cover",
+    position: "center",
+    scale: 1.85,
+  };
+};
+
 const normalizeStory = (materialsPayload, backgroundPayload, careGuidePayload, productPayload, currentVariant) => {
   const background =
     backgroundPayload?.background ??
@@ -617,11 +657,12 @@ const normalizeStory = (materialsPayload, backgroundPayload, careGuidePayload, p
     eyebrow: "MATERIALS & CRAFT",
     title: "",
     image: productImage,
+    imageView: getMaterialHeroImageView(productPayload),
     sections: [],
   };
   const fallbackCareStory = {
     eyebrow: "CARE GUIDE",
-    title: "",
+    title: "제품 관리 가이드",
     guides: [],
   };
   const careGuide = normalizeCarePayload(
@@ -641,7 +682,7 @@ const normalizeStory = (materialsPayload, backgroundPayload, careGuidePayload, p
       highlights: normalizeDesignHighlights(background, productPayload),
     },
     materials: normalizeMaterialsStory(materials, fallbackMaterialsStory, background),
-    care: normalizeCareStory(careGuide, fallbackCareStory),
+    care: normalizeCareStory(careGuide, fallbackCareStory, productPayload),
   };
 };
 

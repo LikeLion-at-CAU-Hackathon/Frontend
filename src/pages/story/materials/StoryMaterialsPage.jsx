@@ -30,10 +30,16 @@ function MaterialRemoteImage({ image, alt = "", className, style, rounded = fals
   );
 }
 
-function MaterialHeroImage({ image, alt }) {
+function MaterialHeroImage({ image, alt, imageView = {} }) {
+  const imageStyle = {
+    objectFit: imageView.fit ?? "cover",
+    objectPosition: imageView.position ?? "center",
+    transform: `scale(${imageView.scale ?? 1}) translateY(${imageView.translateY ?? "0px"})`,
+  };
+
   return (
     <div className="mt-[10px] h-[117px] w-full overflow-hidden rounded-[4px] bg-[#d9d9d9]">
-      <MaterialRemoteImage image={image} alt={alt} className="h-full w-full object-cover object-center" />
+      <MaterialRemoteImage image={image} alt={alt} className="h-full w-full" style={imageStyle} />
     </div>
   );
 }
@@ -125,7 +131,7 @@ function StoryMaterialsPage({ story }) {
           </h1>
         )}
 
-        <MaterialHeroImage image={story.image} alt={displayTitle} />
+        <MaterialHeroImage image={story.image} alt={displayTitle} imageView={story.imageView} />
 
         {featuredMaterial && <FeaturedMaterial section={featuredMaterial} />}
 
