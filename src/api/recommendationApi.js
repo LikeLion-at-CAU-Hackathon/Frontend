@@ -68,7 +68,20 @@ const asHistoryArray = (payload) => {
 const getHistoryProductId = (history) => history?.product ?? history?.product_id ?? history?.productId;
 
 const getUniqueRecentHistories = (histories, limit = 3) => {
-  return histories.slice(-limit);
+  const uniqueHistories = [];
+  const seenProductIds = new Set();
+
+  histories.forEach((history) => {
+    const productId = getHistoryProductId(history);
+    const productKey = String(productId);
+
+    if (!productId || seenProductIds.has(productKey)) return;
+
+    seenProductIds.add(productKey);
+    uniqueHistories.push(history);
+  });
+
+  return uniqueHistories.slice(-limit);
 };
 
 export const createRecommendationSession = async () => {
