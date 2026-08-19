@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 function MaterialImageFallback({ label = "Image", rounded = false }) {
   return (
     <div
@@ -10,14 +12,28 @@ function MaterialImageFallback({ label = "Image", rounded = false }) {
   );
 }
 
+function MaterialRemoteImage({ image, alt = "", className, style, rounded = false }) {
+  const [failedImage, setFailedImage] = useState("");
+
+  if (!image || failedImage === image) {
+    return <MaterialImageFallback rounded={rounded} />;
+  }
+
+  return (
+    <img
+      src={image}
+      alt={alt}
+      className={className}
+      style={style}
+      onError={() => setFailedImage(image)}
+    />
+  );
+}
+
 function MaterialHeroImage({ image, alt }) {
   return (
     <div className="mt-[10px] h-[117px] w-full overflow-hidden rounded-[4px] bg-[#d9d9d9]">
-      {image ? (
-        <img src={image} alt={alt} className="h-full w-full object-cover object-center" />
-      ) : (
-        <MaterialImageFallback />
-      )}
+      <MaterialRemoteImage image={image} alt={alt} className="h-full w-full object-cover object-center" />
     </div>
   );
 }
@@ -44,11 +60,14 @@ function MaterialListItem({ section }) {
     <article className="flex items-center gap-5">
       <div className="relative size-[55px] shrink-0 overflow-hidden rounded-full border border-[#8b7355] bg-[#e5e0da]">
         {section.image && section.imageStyle ? (
-          <img src={section.image} alt="" className="absolute max-w-none" style={section.imageStyle} />
-        ) : section.image ? (
-          <img src={section.image} alt="" className="size-full object-cover object-center" />
+          <MaterialRemoteImage
+            image={section.image}
+            className="absolute max-w-none"
+            style={section.imageStyle}
+            rounded
+          />
         ) : (
-          <MaterialImageFallback rounded />
+          <MaterialRemoteImage image={section.image} className="size-full object-cover object-center" rounded />
         )}
       </div>
 
