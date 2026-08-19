@@ -1,4 +1,47 @@
-// 관리 방법 하나 보여주는 영역
+function normalizeText(value) {
+  return String(value ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function splitSentences(value) {
+  return normalizeText(value).match(/[^.!?。！？]+[.!?。！？]?/g)?.map((sentence) => sentence.trim()) ?? [];
+}
+
+function dedupeSentences(sentences) {
+  const seen = new Set();
+
+  return sentences.filter((sentence) => {
+    const normalized = sentence.replace(/\s+/g, "");
+    if (!normalized || seen.has(normalized)) return false;
+
+    seen.add(normalized);
+    return true;
+  });
+}
+
+function getCareDescription(description) {
+  const sentences = dedupeSentences(splitSentences(description));
+
+  return sentences.join(" ");
+}
+
+function normalizeGuide(guide) {
+  const title = guide?.title ?? guide?.name ?? "";
+  const description = guide?.description ?? guide?.content ?? guide?.body ?? "";
+
+  return {
+    title: normalizeText(title),
+    description: getCareDescription(description),
+  };
+}
+
+function normalizeGuides(guides) {
+  return (guides ?? [])
+    .map(normalizeGuide)
+    .filter((guide) => guide.title || guide.description);
+}
+
 function CareGuideItem({ guide }) {
   return (
     <li className="flex gap-[14px] border-b border-[#e5e0da] py-[13px]">
@@ -15,8 +58,9 @@ function CareGuideItem({ guide }) {
   );
 }
 
-// 제품 관리 가이드 화면
 function StoryCarePage({ story }) {
+  const guides = normalizeGuides(story.guides);
+
   return (
     <section className="w-full px-[22px] pb-[116px] pt-[17px] text-left">
       <p className="font-['DM_Sans'] text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#6b3f1f]">
@@ -27,7 +71,7 @@ function StoryCarePage({ story }) {
       </h1>
 
       <ul className="mt-[29px]">
-        {story.guides.map((guide, index) => (
+        {guides.map((guide, index) => (
           <CareGuideItem key={`${guide.title}-${index}`} guide={guide} />
         ))}
       </ul>
