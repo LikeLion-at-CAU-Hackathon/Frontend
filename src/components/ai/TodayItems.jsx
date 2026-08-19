@@ -5,7 +5,7 @@ function TodayItems({ items }) {
         BASED ON TODAY’S ITEMS
       </h2>
       <div className="mt-[18px] grid grid-cols-2 gap-x-4 gap-y-[6px]">
-        {items.map((item) => (
+        {(items ?? []).slice(0, 3).map((item) => (
           <article
             key={item.id}
             className="flex h-[48px] min-w-0 items-center gap-[6px] rounded-[6px] border-[0.7px] border-[#e8e7e3] bg-[#f5f3ef] p-1 pr-2 transition duration-150 hover:-translate-y-px hover:bg-white hover:shadow-sm"

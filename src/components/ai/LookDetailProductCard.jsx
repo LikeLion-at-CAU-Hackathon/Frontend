@@ -1,4 +1,8 @@
 function LookDetailProductCard({ product }) {
+  const price = typeof product.price === "number"
+    ? `₩${product.price.toLocaleString("ko-KR")}`
+    : product.price;
+
   return (
     <article className="flex h-20 w-full items-center gap-[15px] overflow-hidden rounded-[4px] bg-[#fffdfb] transition-all duration-200 hover:-translate-y-px hover:shadow-sm">
       <div className="size-20 shrink-0 bg-[#f0ece7]">
@@ -12,7 +16,7 @@ function LookDetailProductCard({ product }) {
           {product.name}
         </h2>
         <p className="mt-2 text-[14px] font-semibold leading-[16.5px] text-[#1a1512]">
-          {product.price}
+          {price}
         </p>
       </div>
     </article>

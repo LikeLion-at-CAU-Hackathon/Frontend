@@ -3,6 +3,11 @@ import { useNavigate } from "react-router-dom";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import mcmLoadingLogo from "../../assets/images/figma/ai/mcm-loading-logo.png";
+import {
+  analyzeRecommendationSession,
+  getRecommendationResult,
+} from "../../api/recommendationApi";
+import useRecommendationStore from "../../stores/useRecommendationStore";
 
 const loadingSteps = [
   { progress: 28, duration: 1300 },
@@ -16,16 +21,31 @@ const messages = [
   "스타일 성향을 정리하고 있어요",
 ];
 
+const analysisRequests = new Map();
+
+const runAnalysis = (sessionId) => {
+  if (!analysisRequests.has(sessionId)) {
+    analysisRequests.set(
+      sessionId,
+      analyzeRecommendationSession(sessionId)
+        .then(() => getRecommendationResult(sessionId))
+        .finally(() => analysisRequests.delete(sessionId)),
+    );
+  }
+
+  return analysisRequests.get(sessionId);
+};
+
 function AiLoadingPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const getOrCreateSession = useRecommendationStore((state) => state.getOrCreateSession);
+  const setResult = useRecommendationStore((state) => state.setResult);
 
   useEffect(() => {
-    if (step >= loadingSteps.length - 1) {
-      const completionTimer = window.setTimeout(() => navigate("/ai/style-profile"), 1100);
-      return () => window.clearTimeout(completionTimer);
-    }
+    if (step >= loadingSteps.length - 1) return undefined;
 
     const timer = window.setTimeout(
       () => setStep((currentStep) => currentStep + 1),
@@ -33,7 +53,39 @@ function AiLoadingPage() {
     );
 
     return () => window.clearTimeout(timer);
-  }, [navigate, step]);
+  }, [step]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const analyze = async () => {
+      try {
+        const sessionId = await getOrCreateSession();
+        const [result] = await Promise.all([
+          runAnalysis(sessionId),
+          new Promise((resolve) => window.setTimeout(resolve, 3900)),
+        ]);
+
+        if (!result) throw new Error("AI 스타일 분석 결과가 없습니다.");
+        if (isCancelled) return;
+
+        setResult(result);
+        navigate("/ai/style-profile", { replace: true });
+      } catch (error) {
+        if (!isCancelled) {
+          setErrorMessage(
+            error?.response?.data?.message ?? error?.message ?? "AI 스타일 분석에 실패했습니다.",
+          );
+        }
+      }
+    };
+
+    analyze();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [getOrCreateSession, navigate, setResult]);
 
   return (
     <main className="relative min-h-dvh overflow-hidden bg-[#faf8f5] text-[#1a1208]">
@@ -81,6 +133,11 @@ function AiLoadingPage() {
               </p>
             );
           })}
+          {errorMessage && (
+            <p className="mt-2 w-[240px] text-center text-[11px] leading-[16.5px] text-[#8a3d2f]">
+              {errorMessage}
+            </p>
+          )}
         </div>
       </section>
 

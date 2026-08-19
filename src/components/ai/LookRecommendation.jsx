@@ -35,7 +35,10 @@ function LookRecommendation({ looks, onViewDetail }) {
 
   const handleScroll = () => {
     const carousel = carouselRef.current;
-    if (!carousel?.clientWidth) return;
+    if (!carousel?.clientWidth || looks.length <= 1) {
+      setActiveIndex(0);
+      return;
+    }
 
     const pageWidth = carousel.scrollWidth > carousel.clientWidth
       ? (carousel.scrollWidth - carousel.clientWidth) / (looks.length - 1)

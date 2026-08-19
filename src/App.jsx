@@ -66,22 +66,7 @@ function AppContent() {
             path="/my/saved-products/:productId"
             element={<ProductProfilePage />}
           />
-          <Route
-            path="/ai/style-recommendation"
-            element={<PlaceholderPage title="Style Recommendation Detail" />}
-          />
-          <Route
-            path="/ai/style-recommendation/look1"
-            element={<LookDetailPage lookKey="look1" />}
-          />
-          <Route
-            path="/ai/style-recommendation/look2"
-            element={<LookDetailPage lookKey="look2" />}
-          />
-          <Route
-            path="/ai/style-recommendation/look3"
-            element={<LookDetailPage lookKey="look3" />}
-          />
+          <Route path="/ai/style-recommendation/:lookId" element={<LookDetailPage />} />
           {pages.map((page) => (
             <Route
               key={page.path}

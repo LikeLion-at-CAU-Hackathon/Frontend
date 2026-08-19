@@ -12,7 +12,7 @@ function LookDetailContent({ detail, onRequestAdvisor }) {
       </section>
 
       <section className="mt-[26px] flex flex-col gap-[5px]">
-        {detail.products.map((product) => (
+        {(detail.products ?? []).map((product) => (
           <LookDetailProductCard key={product.id} product={product} />
         ))}
       </section>
