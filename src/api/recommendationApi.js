@@ -124,6 +124,31 @@ export const analyzeRecommendationSession = async () => {
   return data;
 };
 
+export const saveRecommendationProduct = async (productId) => {
+  await ensureRecommendationSession();
+  const { data } = await axiosInstance.post(
+    `recommendations/sessions/saved-products/${productId}/`,
+  );
+  return data;
+};
+
+export const deleteRecommendationProduct = async (productId) => {
+  await ensureRecommendationSession();
+  const { data } = await axiosInstance.delete(
+    `recommendations/sessions/saved-products/${productId}/`,
+  );
+  return data;
+};
+
+export const getSavedProductAnalysis = async (productId) => {
+  const { data } = await axiosInstance.get(
+    `recommendations/sessions/saved-products/${productId}/analysis/`,
+  );
+
+  const payload = data?.data ?? data?.analysis ?? data?.result ?? data;
+  return payload?.aiAnalysis ?? payload?.ai_analysis ?? payload;
+};
+
 export const getRecommendationLookDetail = async (lookId) => {
   const { data } = await axiosInstance.get(`recommendations/looks/${lookId}/`);
   const look = data?.data ?? data?.look ?? data;

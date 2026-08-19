@@ -31,8 +31,12 @@ function ProductSummary({ product, onUnsave }) {
 
   return (
     <section className="relative flex w-full items-center gap-[14px]">
-      <div className="size-[112px] shrink-0 overflow-hidden rounded-[12px] bg-[#ede8e2]">
-        <img src={product.image} alt={product.name} className="size-full object-contain" />
+      <div className="flex size-[112px] shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-[#ede8e2]">
+        {product.image ? (
+          <img src={product.image} alt={product.name} className="size-full object-contain" />
+        ) : (
+          <span className="text-[12px] leading-[18px] text-[#8a8078]">Image</span>
+        )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-[6px] pr-5">
         <div>
@@ -91,11 +95,17 @@ function AiAnalysis({ analysis }) {
             <div className="grid grid-cols-3 gap-4">
               {analysis.curatedLooks.map((look) => (
                 <div key={look.id} className="flex min-w-0 flex-col items-center gap-2">
-                  <img
-                    src={look.image}
-                    alt={look.name}
-                    className="h-20 w-full object-cover"
-                  />
+                  {look.image ? (
+                    <img
+                      src={look.image}
+                      alt={look.name}
+                      className="h-20 w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-20 w-full items-center justify-center bg-[#ede8e2] text-[12px] leading-[18px] text-[#8a8078]">
+                      Image
+                    </div>
+                  )}
                   <p className="w-full break-keep [overflow-wrap:break-word] text-center text-[12px] font-medium leading-[18px] text-black">
                     {look.name}
                   </p>

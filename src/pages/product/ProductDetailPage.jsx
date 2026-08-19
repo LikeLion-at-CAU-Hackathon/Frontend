@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Bookmark } from "lucide-react";
-import { addRecommendationHistory } from "../../api/recommendationApi";
+import {
+  addRecommendationHistory,
+  deleteRecommendationProduct,
+  saveRecommendationProduct,
+} from "../../api/recommendationApi";
 import Button from "../../components/common/Button";
 import ActionButton from "../../components/product/ActionButton";
 import ProductImage from "../../components/product/ProductImage";
@@ -149,6 +153,7 @@ function ProductDetailPage() {
   const handleToggleSavedProduct = () => {
     if (isSaved) {
       removeSavedProduct(product.id);
+      deleteRecommendationProduct(product.id).catch(() => null);
       return;
     }
 
@@ -159,6 +164,7 @@ function ProductDetailPage() {
       store: product.stocks?.[0]?.branch_name ?? "MCM 신세계 강남점",
       isSaved: true,
     });
+    saveRecommendationProduct(product.id).catch(() => null);
   };
 
   return (

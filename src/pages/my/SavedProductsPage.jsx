@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getProductById } from "../../api/productApi";
+import { deleteRecommendationProduct } from "../../api/recommendationApi";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import SavedProductsEmpty from "../../components/my/SavedProductsEmpty";
@@ -9,11 +11,57 @@ import useSavedProductsStore from "../../stores/useSavedProductsStore";
 function SavedProductsPage() {
   const navigate = useNavigate();
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+  const [productDetails, setProductDetails] = useState({});
   const savedProducts = useSavedProductsStore((state) => state.savedProducts);
   const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
 
+  useEffect(() => {
+    if (savedProducts.length === 0) {
+      return undefined;
+    }
+
+    let isActive = true;
+
+    Promise.all(
+      savedProducts.map((product) =>
+        getProductById(product.id)
+          .then((detail) => [String(product.id), detail])
+          .catch(() => [String(product.id), null]),
+      ),
+    ).then((entries) => {
+      if (!isActive) return;
+
+      setProductDetails(Object.fromEntries(entries));
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [savedProducts]);
+
+  const displayProducts = useMemo(
+    () =>
+      savedProducts.map((product) => {
+        const detail = productDetails[String(product.id)];
+
+        if (!detail) return product;
+
+        return {
+          ...product,
+          image: detail.image || product.image,
+          images: detail.images?.length ? detail.images : product.images,
+        };
+      }),
+    [productDetails, savedProducts],
+  );
+
   const handleProductClick = (product) => {
     navigate(`/my/saved-products/${product.id}`);
+  };
+
+  const handleRemoveProduct = (productId) => {
+    removeSavedProduct(productId);
+    deleteRecommendationProduct(productId).catch(() => null);
   };
 
   return (
@@ -24,9 +72,9 @@ function SavedProductsPage() {
         <SavedProductsEmpty />
       ) : (
         <SavedProductsList
-          products={savedProducts}
+          products={displayProducts}
           onProductClick={handleProductClick}
-          onRemoveProduct={removeSavedProduct}
+          onRemoveProduct={handleRemoveProduct}
         />
       )}
 

@@ -29,8 +29,12 @@ function SavedProductCard({ product, onClick, onRemove }) {
       tabIndex={0}
       className="flex h-[120px] w-full overflow-hidden rounded-[12px] border border-[#e5e0da] bg-[#faf8f5] text-left transition-all duration-200 hover:-translate-y-px hover:shadow-sm"
     >
-      <div className="size-[120px] shrink-0 bg-[#ede8e2]">
-        <img src={product.image} alt={product.name} className="size-full object-contain" />
+      <div className="flex size-[120px] shrink-0 items-center justify-center bg-[#ede8e2]">
+        {product.image ? (
+          <img src={product.image} alt={product.name} className="size-full object-contain" />
+        ) : (
+          <span className="text-[12px] leading-[18px] text-[#8a8078]">Image</span>
+        )}
       </div>
 
       <div className="relative flex min-w-0 flex-1 flex-col justify-center gap-[10px] px-3">

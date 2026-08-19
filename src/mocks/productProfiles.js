@@ -3,13 +3,24 @@ import { products } from "./products";
 export const mapAiAnalysisResponse = (response) => {
   if (!response) return null;
 
-  const curatedLooks = response.curatedLooks ?? response.curated_looks ?? [];
+  const styleInterests =
+    response.currentStyleInterests ??
+    response.style_interests ??
+    response.style_chips ??
+    response.keywords ??
+    [];
+  const curatedLooks = response.curatedLooks ?? response.curated_looks ?? response.looks ?? [];
 
   return {
-    currentStyleInterests:
-      response.currentStyleInterests ?? response.style_interests ?? [],
+    currentStyleInterests: styleInterests.map((interest) => (
+      interest?.label ?? interest?.name ?? interest
+    )),
     description:
-      response.description ?? response.analysisSummary ?? response.analysis_summary ?? "",
+      response.description ??
+      response.summary ??
+      response.analysisSummary ??
+      response.analysis_summary ??
+      "",
     curatedLooks: curatedLooks.map((look) => ({
       id: look.id,
       name: look.name ?? look.title ?? "",
