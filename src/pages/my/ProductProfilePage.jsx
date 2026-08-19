@@ -1,7 +1,13 @@
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Share2 } from "lucide-react";
 import { toPng } from "html-to-image";
 import { useNavigate, useParams } from "react-router-dom";
+import { getProductById } from "../../api/productApi";
+import {
+  deleteRecommendationProduct,
+  getSavedProductAnalysis,
+  saveRecommendationProduct,
+} from "../../api/recommendationApi";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import ErrorMessage from "../../components/common/ErrorMessage";
@@ -18,18 +24,66 @@ function ProductProfilePage() {
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareStatus, setShareStatus] = useState("");
+  const [productDetail, setProductDetail] = useState(null);
+  const [savedAnalysis, setSavedAnalysis] = useState(null);
   const isRemovingRef = useRef(false);
   const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
   const savedProduct = useSavedProductsStore((state) =>
     state.savedProducts.find((product) => String(product.id) === String(productId)),
   );
-  const profile = createProductProfile(savedProduct);
+
+  useEffect(() => {
+    if (!productId) return undefined;
+
+    let isActive = true;
+
+    const analysisRequest = (savedProduct
+      ? saveRecommendationProduct(productId).catch(() => null)
+      : Promise.resolve()
+    ).then(() => getSavedProductAnalysis(productId).catch(() => null));
+
+    Promise.all([
+      getProductById(productId).catch(() => null),
+      analysisRequest,
+    ]).then(([detail, analysis]) => {
+      if (!isActive) return;
+
+      setProductDetail(detail);
+      setSavedAnalysis(analysis);
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [productId, savedProduct]);
+
+  const displayProduct = useMemo(() => {
+    if (!savedProduct && !productDetail) return null;
+
+    return {
+      ...savedProduct,
+      ...productDetail,
+      collection: savedProduct?.collection ?? productDetail?.collection,
+      option: savedProduct?.option ?? `${productDetail?.color ?? ""} · ${productDetail?.size ?? ""}`,
+      store:
+        savedProduct?.store ??
+        productDetail?.currentBranch?.branch_name ??
+        productDetail?.stocks?.[0]?.branch_name,
+      image: productDetail?.image || savedProduct?.image || "",
+      images: productDetail?.images?.length ? productDetail.images : savedProduct?.images,
+      aiAnalysis: savedAnalysis ?? savedProduct?.aiAnalysis ?? productDetail?.aiAnalysis,
+      isSaved: true,
+    };
+  }, [productDetail, savedAnalysis, savedProduct]);
+
+  const profile = createProductProfile(displayProduct);
 
   const handleUnsaveProduct = () => {
     if (!profile || isRemovingRef.current) return;
 
     isRemovingRef.current = true;
     removeSavedProduct(profile.id);
+    deleteRecommendationProduct(profile.id).catch(() => null);
     navigate("/my");
   };
 
