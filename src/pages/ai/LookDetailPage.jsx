@@ -1,16 +1,49 @@
-import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import LookDetailContent from "../../components/ai/LookDetailContent";
 import backIcon from "../../assets/images/figma/product-detail/icon-back.svg";
-import { lookDetailData } from "./styleProfileData";
+import { getRecommendationLookDetail } from "../../api/recommendationApi";
 
-function LookDetailPage({ lookKey }) {
+function LookDetailPage() {
   const navigate = useNavigate();
+  const { lookId } = useParams();
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
-  const detail = lookDetailData[lookKey];
+  const [detail, setDetail] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  if (!detail) return <Navigate to="/ai/style-profile" replace />;
+  useEffect(() => {
+    let isCancelled = false;
+
+    queueMicrotask(() => {
+      if (!isCancelled) {
+        setIsLoading(true);
+        setErrorMessage("");
+        setDetail(null);
+      }
+    });
+
+    getRecommendationLookDetail(lookId)
+      .then((nextDetail) => {
+        if (!nextDetail) throw new Error("선택한 Look 정보를 찾을 수 없습니다.");
+        if (!isCancelled) setDetail(nextDetail);
+      })
+      .catch((error) => {
+        if (!isCancelled) {
+          setErrorMessage(
+            error?.response?.data?.message ?? error?.message ?? "Look 정보를 불러오지 못했습니다.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!isCancelled) setIsLoading(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [lookId]);
 
   return (
     <div className="min-h-full bg-white">
@@ -26,10 +59,14 @@ function LookDetailPage({ lookKey }) {
       </button>
 
       <div className="mt-[10px]">
-        <LookDetailContent
-          detail={detail}
-          onRequestAdvisor={() => setIsAdvisorOpen(true)}
-        />
+        {isLoading && <p className="py-10 text-center text-[12px] text-[#8a8078]">Look 정보를 불러오고 있습니다.</p>}
+        {errorMessage && <p className="py-10 text-center text-[12px] text-[#8a3d2f]">{errorMessage}</p>}
+        {detail && (
+          <LookDetailContent
+            detail={detail}
+            onRequestAdvisor={() => setIsAdvisorOpen(true)}
+          />
+        )}
       </div>
 
       <AdvisorSheet isOpen={isAdvisorOpen} onClose={() => setIsAdvisorOpen(false)} />

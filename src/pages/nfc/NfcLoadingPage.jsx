@@ -1,31 +1,68 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { products } from "../../mocks/products";
+import { addRecommendationHistory } from "../../api/recommendationApi";
 import useAppStore from "../../stores/useAppStore";
+import useRecommendationStore from "../../stores/useRecommendationStore";
+
+const historyRequests = new Map();
+
+const saveTaggedProduct = (getOrCreateSession, productId) => {
+  const requestKey = String(productId);
+  if (!historyRequests.has(requestKey)) {
+    historyRequests.set(
+      requestKey,
+      getOrCreateSession()
+        .then((sessionId) => addRecommendationHistory(sessionId, productId))
+        .finally(() => historyRequests.delete(requestKey)),
+    );
+  }
+
+  return historyRequests.get(requestKey);
+};
 
 // NFC 태그로 진입한 제품 정보를 불러오는 화면
 function NfcLoadingPage() {
   const navigate = useNavigate();
   const { productId } = useParams();
   const setCurrentProductId = useAppStore((state) => state.setCurrentProductId);
+  const getOrCreateSession = useRecommendationStore((state) => state.getOrCreateSession);
+  const clearResult = useRecommendationStore((state) => state.clearResult);
 
   useEffect(() => {
+    let isCancelled = false;
     const productExists = products.some(
       (product) => product.id === Number(productId),
     );
 
-    const timerId = window.setTimeout(() => {
-      if (productExists) {
-        setCurrentProductId(productId);
-        navigate(`/product/${productId}`, { replace: true });
+    const loadTaggedProduct = async () => {
+      if (!productExists) {
+        await new Promise((resolve) => window.setTimeout(resolve, 1600));
+        if (!isCancelled) navigate("/nfc/failed", { replace: true });
         return;
       }
 
-      navigate("/nfc/failed", { replace: true });
-    }, 1600);
+      try {
+        await Promise.all([
+          saveTaggedProduct(getOrCreateSession, productId),
+          new Promise((resolve) => window.setTimeout(resolve, 1600)),
+        ]);
+        if (isCancelled) return;
 
-    return () => window.clearTimeout(timerId);
-  }, [navigate, productId, setCurrentProductId]);
+        clearResult();
+        setCurrentProductId(productId);
+        navigate(`/product/${productId}`, { replace: true });
+      } catch {
+        if (!isCancelled) navigate("/nfc/failed", { replace: true });
+      }
+    };
+
+    loadTaggedProduct();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [clearResult, getOrCreateSession, navigate, productId, setCurrentProductId]);
 
   return (
     <main className="relative flex min-h-[calc(100dvh_-_env(safe-area-inset-bottom))] items-center justify-center overflow-hidden bg-white px-[22px]">
