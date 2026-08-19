@@ -3,7 +3,7 @@ import { Bookmark } from "lucide-react";
 import Button from "../../components/common/Button";
 import ActionButton from "../../components/product/ActionButton";
 import ProductImage from "../../components/product/ProductImage";
-import { getMockProductById, getProductSizesForProduct } from "../../mocks/products";
+import useProduct from "../../hooks/useProduct";
 import useSavedProductsStore from "../../stores/useSavedProductsStore";
 
 const labels = {
@@ -17,7 +17,11 @@ const labels = {
   addSelection: "My Selection에 담기",
 };
 
-const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
+const formatPrice = (price) => {
+  const numericPrice = Number(price);
+
+  return Number.isFinite(numericPrice) ? `₩${numericPrice.toLocaleString("ko-KR")}` : "";
+};
 const formatStockCount = (quantity) => `${quantity}개`;
 const formatSpecValue = (value) => value.replaceAll(" x ", " × ").replaceAll(" / ", " · ");
 const formatProductInfoValue = (label, value) => {
@@ -72,9 +76,33 @@ function Tag({ children }) {
 
 function ProductDetailPage() {
   const { productId } = useParams();
-  const product = getMockProductById(productId);
-  const productSizes = getProductSizesForProduct(product);
-  const currentSize = productSizes.find((item) => item.isCurrent) ?? productSizes[0];
+  const { product, productSizes, isLoading, errorMessage } = useProduct(productId);
+  const addSavedProduct = useSavedProductsStore((state) => state.addSavedProduct);
+  const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
+  const isSaved = useSavedProductsStore((state) =>
+    product ? state.savedProducts.some((item) => String(item.id) === String(product.id)) : false,
+  );
+
+  if (isLoading) {
+    return (
+      <main className="min-h-full bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a8078]">
+        Loading product...
+      </main>
+    );
+  }
+
+  if (errorMessage || !product) {
+    return (
+      <main className="min-h-full bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a3d2f]">
+        {errorMessage || "Product not found."}
+      </main>
+    );
+  }
+
+  const currentSize = productSizes.find((item) => item.isCurrent) ?? productSizes[0] ?? {
+    size: product.size,
+    stock: product.stock,
+  };
   const sizeLabels = [...new Set(productSizes.map((item) => item.size))];
   const canCompareSizes = sizeLabels.length > 1;
   const collectionLabel = `${product.collectionName ?? product.collection} COLLECTION`;
@@ -88,11 +116,6 @@ function ProductDetailPage() {
   ].filter((item) => item.value);
   const colorOptions = product.colors?.length ? product.colors : [product.color];
   const otherColorOptions = colorOptions.filter((color) => color !== product.color);
-  const addSavedProduct = useSavedProductsStore((state) => state.addSavedProduct);
-  const removeSavedProduct = useSavedProductsStore((state) => state.removeSavedProduct);
-  const isSaved = useSavedProductsStore((state) =>
-    state.savedProducts.some((item) => String(item.id) === String(product.id)),
-  );
 
   const handleToggleSavedProduct = () => {
     if (isSaved) {

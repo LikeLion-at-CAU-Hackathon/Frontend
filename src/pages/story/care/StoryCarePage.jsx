@@ -27,8 +27,8 @@ function StoryCarePage({ story }) {
       </h1>
 
       <ul className="mt-[29px]">
-        {story.guides.map((guide) => (
-          <CareGuideItem key={guide.title} guide={guide} />
+        {story.guides.map((guide, index) => (
+          <CareGuideItem key={`${guide.title}-${index}`} guide={guide} />
         ))}
       </ul>
     </section>

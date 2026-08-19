@@ -8,7 +8,7 @@ import exploreStep2 from "../../assets/images/figma/product-detail/explore-step-
 import exploreStep3 from "../../assets/images/figma/product-detail/explore-step-3.png";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
-import { getMockProductById } from "../../mocks/products";
+import useProduct from "../../hooks/useProduct";
 
 const steps = [
   {
@@ -49,8 +49,24 @@ function GuideStep({ number, image, imageClassName, text }) {
 
 function ProductExploreMorePage() {
   const { productId } = useParams();
-  const product = getMockProductById(productId);
+  const { product, isLoading, errorMessage } = useProduct(productId);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+
+  if (isLoading) {
+    return (
+      <main className="relative min-h-[calc(100dvh_-_62px_-_env(safe-area-inset-bottom))] bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a8078]">
+        Loading product...
+      </main>
+    );
+  }
+
+  if (errorMessage || !product) {
+    return (
+      <main className="relative min-h-[calc(100dvh_-_62px_-_env(safe-area-inset-bottom))] bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a3d2f]">
+        {errorMessage || "Product not found."}
+      </main>
+    );
+  }
 
   return (
     <main className="relative min-h-[calc(100dvh_-_62px_-_env(safe-area-inset-bottom))] overflow-x-hidden bg-[#faf8f5] pb-8">

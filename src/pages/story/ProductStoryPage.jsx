@@ -3,11 +3,8 @@ import { useParams } from "react-router-dom";
 import AdvisorButton from "../../components/common/AdvisorButton";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import StoryTabBar from "../../components/story/StoryTabBar";
-import {
-  getAiDocentFaqsForProduct,
-  getMockProductById,
-  getProductStoryForProduct,
-} from "../../mocks/products";
+import useProduct from "../../hooks/useProduct";
+import { getAiDocentFaqsForProduct, getMockProductById } from "../../mocks/products";
 import StoryAiDocentPage from "./ai-docent/StoryAiDocentPage";
 import StoryCarePage from "./care/StoryCarePage";
 import StoryDesignPage from "./design/StoryDesignPage";
@@ -41,22 +38,12 @@ function ProductStoryPage() {
   const [activeTab, setActiveTab] = useState("design");
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const [keyboardInset, setKeyboardInset] = useState(0);
-  const product = getMockProductById(productId);
-  const productStory = getProductStoryForProduct(product);
-  const aiDocentFaqs = getAiDocentFaqsForProduct(product);
-  const { design, materials, care } = productStory;
+  const { product, isLoading, errorMessage } = useProduct(productId);
   const isAiAssistantTab = activeTab === "ai-docent";
-
-  const storyPages = {
-    design: <StoryDesignPage story={design} />,
-    materials: <StoryMaterialsPage story={materials} />,
-    care: <StoryCarePage story={care} />,
-    "ai-docent": <StoryAiDocentPage faqs={aiDocentFaqs} product={product} />,
-  };
 
   useEffect(() => {
     if (!isAiAssistantTab || !window.visualViewport) {
-      setKeyboardInset(0);
+      queueMicrotask(() => setKeyboardInset(0));
       return undefined;
     }
 
@@ -78,11 +65,38 @@ function ProductStoryPage() {
     };
   }, [isAiAssistantTab]);
 
+  if (isLoading) {
+    return (
+      <main className="relative min-h-full w-full bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a8078]">
+        Loading product...
+      </main>
+    );
+  }
+
+  if (errorMessage || !product) {
+    return (
+      <main className="relative min-h-full w-full bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a3d2f]">
+        {errorMessage || "Product not found."}
+      </main>
+    );
+  }
+
+  const productStory = product.story ?? {};
+  const aiDocentFaqs = getAiDocentFaqsForProduct(getMockProductById(productId));
+  const { design, materials, care } = productStory;
+
+  const storyPages = {
+    design: <StoryDesignPage story={design ?? { paragraphs: [], highlights: [] }} />,
+    materials: <StoryMaterialsPage story={materials ?? { sections: [] }} />,
+    care: <StoryCarePage story={care ?? { guides: [] }} />,
+    "ai-docent": <StoryAiDocentPage faqs={aiDocentFaqs} product={product} />,
+  };
+
   return (
     <main className="relative min-h-full w-full bg-[#faf8f5]">
       <StoryTabBar activeKey={activeTab} onTabClick={setActiveTab} />
 
-      {storyPages[activeTab] ?? <StoryDesignPage story={design} />}
+      {storyPages[activeTab] ?? <StoryDesignPage story={design ?? { paragraphs: [], highlights: [] }} />}
 
       <AdvisorButton
         style={

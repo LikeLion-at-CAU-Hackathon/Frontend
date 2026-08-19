@@ -6,7 +6,7 @@ import Button from "../../components/common/Button";
 import TopBar from "../../components/common/TopBar";
 import ProductImage from "../../components/product/ProductImage";
 import SizeOption from "../../components/product/SizeOption";
-import { getMockProductById, getProductSizesForProduct } from "../../mocks/products";
+import useProduct from "../../hooks/useProduct";
 
 const labels = {
   sizeCompare: "사이즈 비교",
@@ -14,20 +14,43 @@ const labels = {
   compare: "비교하기",
 };
 
-const formatPrice = (price) => `₩${price.toLocaleString("ko-KR")}`;
+const formatPrice = (price) => {
+  const numericPrice = Number(price);
+
+  return Number.isFinite(numericPrice) ? `₩${numericPrice.toLocaleString("ko-KR")}` : "";
+};
 
 function ProductSizeComparePage() {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const product = getMockProductById(productId);
-  const productSizes = getProductSizesForProduct(product);
-  const currentSize = productSizes.find((item) => item.isCurrent) ?? productSizes[0];
+  const { product, productSizes, isLoading, errorMessage } = useProduct(productId);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+
+  if (isLoading) {
+    return (
+      <main className="min-h-[734px] bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a8078]">
+        Loading product...
+      </main>
+    );
+  }
+
+  if (errorMessage || !product) {
+    return (
+      <main className="min-h-[734px] bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a3d2f]">
+        {errorMessage || "Product not found."}
+      </main>
+    );
+  }
+
+  const currentSize = productSizes.find((item) => item.isCurrent) ?? productSizes[0] ?? {
+    size: product.size,
+    stock: product.stock,
+  };
   const compareSizes = productSizes
     .filter((item) => item.size !== currentSize.size)
     .map((item) => item.size);
   const collectionLabel = `${product.collectionName ?? product.collection} COLLECTION`;
-  const [selectedSize, setSelectedSize] = useState("");
-  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const canCompare = Boolean(selectedSize);
 
   return (

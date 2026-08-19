@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { products } from "../../mocks/products";
+import { getProductById } from "../../api/productApi";
 import { addRecommendationHistory } from "../../api/recommendationApi";
 import useAppStore from "../../stores/useAppStore";
 import useRecommendationStore from "../../stores/useRecommendationStore";
@@ -31,30 +31,25 @@ function NfcLoadingPage() {
 
   useEffect(() => {
     let isCancelled = false;
-    const productExists = products.some(
-      (product) => product.id === Number(productId),
-    );
 
     const loadTaggedProduct = async () => {
-      if (!productExists) {
+      const product = await getProductById(productId).catch(() => null);
+
+      if (!product) {
         await new Promise((resolve) => window.setTimeout(resolve, 1600));
         if (!isCancelled) navigate("/nfc/failed", { replace: true });
         return;
       }
 
-      try {
-        await Promise.all([
-          saveTaggedProduct(getOrCreateSession, productId),
-          new Promise((resolve) => window.setTimeout(resolve, 1600)),
-        ]);
-        if (isCancelled) return;
+      await Promise.all([
+        saveTaggedProduct(getOrCreateSession, productId).catch(() => null),
+        new Promise((resolve) => window.setTimeout(resolve, 1600)),
+      ]);
+      if (isCancelled) return;
 
-        clearResult();
-        setCurrentProductId(productId);
-        navigate(`/product/${productId}`, { replace: true });
-      } catch {
-        if (!isCancelled) navigate("/nfc/failed", { replace: true });
-      }
+      clearResult();
+      setCurrentProductId(productId);
+      navigate(`/product/${productId}`, { replace: true });
     };
 
     loadTaggedProduct();

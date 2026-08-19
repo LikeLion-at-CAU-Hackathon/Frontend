@@ -1,4 +1,5 @@
 import axiosInstance from "./axiosInstance";
+import { getProductDetail } from "./productApi";
 
 const resolveImageUrl = (image) => {
   if (!image || /^(?:https?:|data:|blob:)/.test(image)) return image ?? "";
@@ -10,15 +11,14 @@ const resolveImageUrl = (image) => {
 };
 
 const getProductPreview = async (productId) => {
-  const { data } = await axiosInstance.get(`products/${productId}/`);
-  const detail = data?.details?.[0];
+  const product = await getProductDetail(productId);
 
   return {
-    id: data?.id ?? productId,
-    name: data?.name ?? "",
-    category: data?.category ?? "",
-    image: resolveImageUrl(detail?.images?.[0]?.image),
-    price: detail?.price ?? null,
+    id: product?.id ?? productId,
+    name: product?.name ?? "",
+    category: product?.category ?? "",
+    image: product?.image ?? "",
+    price: product?.price ?? null,
   };
 };
 
