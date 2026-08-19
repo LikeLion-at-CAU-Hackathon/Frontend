@@ -49,6 +49,29 @@ const asHistoryArray = (payload) => {
   return payload?.histories ?? payload?.history ?? payload?.results ?? payload?.items ?? [];
 };
 
+const getHistoryProductId = (history) => history?.product ?? history?.product_id ?? history?.productId;
+
+const getUniqueRecentHistories = (histories, limit = 3) => {
+  const seenProductIds = new Set();
+  const uniqueHistories = [];
+
+  for (let index = histories.length - 1; index >= 0; index -= 1) {
+    const history = histories[index];
+    const productId = getHistoryProductId(history);
+    if (!productId) continue;
+
+    const productKey = String(productId);
+    if (seenProductIds.has(productKey)) continue;
+
+    seenProductIds.add(productKey);
+    uniqueHistories.push(history);
+
+    if (uniqueHistories.length === limit) break;
+  }
+
+  return uniqueHistories.reverse();
+};
+
 export const createRecommendationSession = async () => {
   const { data } = await axiosInstance.post("recommendations/sessions/");
   return data?.session?.id ?? data?.session_id ?? data?.id ?? "current";
@@ -64,11 +87,11 @@ export const addRecommendationHistory = async (...args) => {
 
 export const getRecommendationHistory = async () => {
   const { data } = await axiosInstance.get("recommendations/sessions/history/");
-  const histories = asHistoryArray(data).slice(-3);
+  const histories = getUniqueRecentHistories(asHistoryArray(data));
 
   return Promise.all(
     histories.map(async (history) => {
-      const productId = history.product ?? history.product_id ?? history.productId;
+      const productId = getHistoryProductId(history);
       if (!productId) return null;
 
       const product = await getProductPreview(productId);
