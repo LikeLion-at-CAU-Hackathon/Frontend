@@ -5,13 +5,14 @@ import AdvisorSheet from "../../components/common/AdvisorSheet";
 import mcmLoadingLogo from "../../assets/images/figma/ai/mcm-loading-logo.png";
 import {
   analyzeRecommendationSession,
+  getRecommendationHistory,
   getRecommendationResult,
 } from "../../api/recommendationApi";
 import useRecommendationStore from "../../stores/useRecommendationStore";
 
 const loadingSteps = [
-  { progress: 28, duration: 1300 },
-  { progress: 52, duration: 1500 },
+  { progress: 28, duration: 4300 },
+  { progress: 52, duration: 5500 },
   { progress: 100, duration: 0 },
 ];
 
@@ -23,17 +24,23 @@ const messages = [
 
 const analysisRequests = new Map();
 
-const runAnalysis = (sessionId) => {
-  if (!analysisRequests.has(sessionId)) {
+const runAnalysis = () => {
+  const requestKey = "browser-session";
+
+  if (!analysisRequests.has(requestKey)) {
     analysisRequests.set(
-      sessionId,
-      analyzeRecommendationSession(sessionId)
-        .then(() => getRecommendationResult(sessionId))
-        .finally(() => analysisRequests.delete(sessionId)),
+      requestKey,
+      getRecommendationHistory()
+        .then((history) => {
+          if (!history.length) throw new Error("최근 탐색 제품이 없습니다.");
+          return analyzeRecommendationSession();
+        })
+        .then(() => getRecommendationResult())
+        .finally(() => analysisRequests.delete(requestKey)),
     );
   }
 
-  return analysisRequests.get(sessionId);
+  return analysisRequests.get(requestKey);
 };
 
 function AiLoadingPage() {
@@ -41,7 +48,6 @@ function AiLoadingPage() {
   const [step, setStep] = useState(0);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const getOrCreateSession = useRecommendationStore((state) => state.getOrCreateSession);
   const setResult = useRecommendationStore((state) => state.setResult);
 
   useEffect(() => {
@@ -60,9 +66,8 @@ function AiLoadingPage() {
 
     const analyze = async () => {
       try {
-        const sessionId = await getOrCreateSession();
         const [result] = await Promise.all([
-          runAnalysis(sessionId),
+          runAnalysis(),
           new Promise((resolve) => window.setTimeout(resolve, 3900)),
         ]);
 
@@ -85,7 +90,7 @@ function AiLoadingPage() {
     return () => {
       isCancelled = true;
     };
-  }, [getOrCreateSession, navigate, setResult]);
+  }, [navigate, setResult]);
 
   return (
     <main className="relative min-h-dvh overflow-hidden bg-[#faf8f5] text-[#1a1208]">

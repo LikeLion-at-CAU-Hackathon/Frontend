@@ -3,8 +3,31 @@ import { getProductDetail } from "./productApi";
 
 const resolveImageUrl = resolveApiAssetUrl;
 
+let sessionRequest = null;
+let sessionInitialized = false;
+let sessionResponse = null;
+
+const ensureRecommendationSession = async () => {
+  if (sessionInitialized) return sessionResponse;
+
+  if (!sessionRequest) {
+    sessionRequest = axiosInstance
+      .post("recommendations/sessions/")
+      .then((response) => {
+        sessionInitialized = true;
+        sessionResponse = response;
+        return response;
+      })
+      .finally(() => {
+        sessionRequest = null;
+      });
+  }
+
+  return sessionRequest;
+};
+
 const getProductPreview = async (productId) => {
-  const product = await getProductDetail(productId);
+  const product = await getProductDetail(productId).catch(() => null);
 
   return {
     id: product?.id ?? productId,
@@ -45,33 +68,17 @@ const asHistoryArray = (payload) => {
 const getHistoryProductId = (history) => history?.product ?? history?.product_id ?? history?.productId;
 
 const getUniqueRecentHistories = (histories, limit = 3) => {
-  const seenProductIds = new Set();
-  const uniqueHistories = [];
-
-  for (let index = histories.length - 1; index >= 0; index -= 1) {
-    const history = histories[index];
-    const productId = getHistoryProductId(history);
-    if (!productId) continue;
-
-    const productKey = String(productId);
-    if (seenProductIds.has(productKey)) continue;
-
-    seenProductIds.add(productKey);
-    uniqueHistories.push(history);
-
-    if (uniqueHistories.length === limit) break;
-  }
-
-  return uniqueHistories.reverse();
+  return histories.slice(-limit);
 };
 
 export const createRecommendationSession = async () => {
-  const { data } = await axiosInstance.post("recommendations/sessions/");
-  return data?.session?.id ?? data?.session_id ?? data?.id ?? "current";
+  const { data } = await ensureRecommendationSession();
+  return data;
 };
 
 export const addRecommendationHistory = async (...args) => {
   const productId = args.length > 1 ? args[1] : args[0];
+  await ensureRecommendationSession();
   const { data } = await axiosInstance.post("recommendations/sessions/history/", {
     product_id: Number(productId),
   });
@@ -92,8 +99,8 @@ export const getRecommendationHistory = async () => {
         ...product,
         historyId: history.id,
         sequence: history.sequence,
-        name: history.product_name ?? product.name,
-        category: history.product_category ?? product.category,
+        name: history.product_name || product.name,
+        category: history.product_category || product.category,
       };
     }),
   ).then((items) => items.filter(Boolean));
@@ -106,7 +113,7 @@ export const analyzeRecommendationSession = async () => {
 
 export const getRecommendationLookDetail = async (lookId) => {
   const { data } = await axiosInstance.get(`recommendations/looks/${lookId}/`);
-  const look = data?.data;
+  const look = data?.data ?? data?.look ?? data;
   return look ? normalizeLook(look, look) : null;
 };
 
@@ -115,22 +122,17 @@ export const getRecommendationResult = async () => {
     axiosInstance.get("recommendations/sessions/result/"),
     getRecommendationHistory(),
   ]);
-  const profile = data?.data;
+  const profile = data?.data ?? data?.result ?? (data?.success === undefined ? data : null);
 
   if (!profile) return null;
 
-  const lookDetails = await Promise.all(
-    (profile.looks ?? []).map(async (look) => {
-      const detail = await getRecommendationLookDetail(look.id);
-      return normalizeLook(look, detail);
-    }),
-  );
+  const looks = profile.looks ?? [];
 
   return {
     id: profile.id,
-    summary: profile.summary ?? "",
-    keywords: (profile.style_chips ?? []).map((chip) => chip.label),
-    looks: lookDetails,
+    summary: profile.summary ?? profile.description ?? "",
+    keywords: (profile.style_chips ?? []).map((chip) => chip.label ?? chip.name ?? chip),
+    looks: looks.map((look) => normalizeLook(look)),
     todayItems: history,
   };
 };

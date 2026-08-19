@@ -5,7 +5,11 @@ import LookProductList from "./LookProductList";
 function LookCard({ index, look, onViewDetail }) {
   return (
     <article className="relative h-[395px] min-w-full basis-full flex-none snap-center overflow-hidden rounded-[12px]">
-      <img src={look.image} alt={look.name} className="absolute inset-0 size-full object-cover" />
+      {look.image ? (
+        <img src={look.image} alt={look.name} className="absolute inset-0 size-full object-cover" />
+      ) : (
+        <div className="absolute inset-0 bg-[#d8d1ca]" aria-hidden="true" />
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/5" />
 
       <div className="absolute right-[10px] top-[10px]">
