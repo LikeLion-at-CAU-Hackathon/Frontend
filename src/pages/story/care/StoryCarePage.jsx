@@ -106,35 +106,34 @@ function getDisplayTitle(title) {
 
 function CareGuideItem({ guide }) {
   return (
-    <li className="flex gap-[14px] border-b border-[#e5e0da] py-[13px]">
-      <span className="mt-[7px] text-[4px] leading-[6px] text-[#6b3f1f]">●</span>
-      <div className="flex-1">
-        <h2 className="text-[13px] font-semibold leading-[19.5px] text-[#0a0908]">
-          {getDisplayTitle(guide.title)}
-        </h2>
-        <div className="mt-[4px] space-y-[6px]">
-          {guide.items.map((item, index) => (
-            <div key={`${item.subtitle}-${item.description}-${index}`}>
-              {item.subtitle ? (
-                <p className="text-[12px] font-semibold leading-[18px] text-[#0a0908]">
-                  {getDisplayTitle(item.subtitle)}
-                </p>
-              ) : null}
-              {item.description ? (
-                <p className="text-[13px] font-normal leading-[21.45px] text-[#8a8078]">
-                  {item.description}
-                </p>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </div>
-    </li>
+    <>
+      {guide.items.map((item, index) => (
+        <li
+          key={`${item.subtitle}-${item.description}-${index}`}
+          className="flex gap-[14px] border-b border-[#e5e0da] py-[13px]"
+        >
+          <span className="mt-[7px] w-[4px] shrink-0 text-[4px] leading-[6px] text-[#6b3f1f]">●</span>
+          <div className="min-w-0 flex-1">
+            {item.subtitle ? (
+              <p className="text-[13px] font-semibold leading-[19.5px] text-[#0a0908]">
+                {getDisplayTitle(item.subtitle)}
+              </p>
+            ) : null}
+            {item.description ? (
+              <p className="mt-[4px] text-[13px] font-normal leading-[21.45px] text-[#8a8078]">
+                {item.description}
+              </p>
+            ) : null}
+          </div>
+        </li>
+      ))}
+    </>
   );
 }
 
 function StoryCarePage({ story }) {
   const guides = normalizeGuides(story.guides);
+  const title = normalizeText(story.title) || "제품 관리 가이드";
 
   return (
     <section className="w-full px-[22px] pb-[116px] pt-[17px] text-left">
@@ -142,7 +141,7 @@ function StoryCarePage({ story }) {
         {story.eyebrow}
       </p>
       <h1 className="mt-[10px] text-[22px] font-medium leading-[27.5px] text-[#0a0908]">
-        {story.title}
+        {title}
       </h1>
 
       <ul className="mt-[29px]">
