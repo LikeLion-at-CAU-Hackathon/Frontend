@@ -519,8 +519,23 @@ const getKeyedGuides = (guideMap) => {
     .map(([key, value]) => normalizeGuide(value, key));
 };
 
-const normalizeMaterialsStory = (materials, fallbackMaterials, background) => {
+const getVisibleMaterialItems = (materials, productPayload) => {
+  const productId = Number(productPayload?.id);
+  const primaryMaterialIds = {
+    8: 29,
+  };
+  const primaryMaterialId = primaryMaterialIds[productId];
+
+  if (primaryMaterialId && Array.isArray(materials)) {
+    return materials.filter((item) => Number(item?.id) === primaryMaterialId);
+  }
+
+  return materials;
+};
+
+const normalizeMaterialsStory = (materials, fallbackMaterials, background, productPayload) => {
   const details = normalizeMaterialDetails(background);
+  const shouldShowBackgroundDetails = Number(productPayload?.id) === 8;
 
   if (!materials) {
     return {
@@ -533,7 +548,7 @@ const normalizeMaterialsStory = (materials, fallbackMaterials, background) => {
   }
 
   if (Array.isArray(materials)) {
-    const sections = normalizeMaterialSections(materials);
+    const sections = normalizeMaterialSections(getVisibleMaterialItems(materials, productPayload));
 
     return {
       ...fallbackMaterials,
@@ -541,7 +556,7 @@ const normalizeMaterialsStory = (materials, fallbackMaterials, background) => {
       image: fallbackMaterials?.image ?? sections.find((section) => section.image)?.image ?? "",
       imageView: fallbackMaterials?.imageView,
       sections,
-      details,
+      details: !sections.length || shouldShowBackgroundDetails ? details : [],
     };
   }
 
@@ -557,15 +572,21 @@ const normalizeMaterialsStory = (materials, fallbackMaterials, background) => {
     sections: normalizedSections.length
       ? normalizedSections
       : fallbackMaterials?.sections ?? [],
-    details,
+    details: !normalizedSections.length || shouldShowBackgroundDetails ? details : [],
   };
 };
 
 const getVisibleCareItems = (care, productPayload) => {
   const productId = Number(productPayload?.id);
+  const primaryCareGuideIds = {
+    8: 29,
+    9: 30,
+    10: 32,
+  };
+  const primaryCareGuideId = primaryCareGuideIds[productId];
 
-  if (productId === 9 && Array.isArray(care)) {
-    return care.filter((item) => Number(item?.id) === 30);
+  if (primaryCareGuideId && Array.isArray(care)) {
+    return care.filter((item) => Number(item?.id) === primaryCareGuideId);
   }
 
   return care;
@@ -628,12 +649,27 @@ const normalizeCarePayload = (carePayload) => {
 
 const getMaterialHeroImageView = (productPayload) => {
   const category = String(productPayload?.category ?? "").toUpperCase();
+  const productName = String(productPayload?.name ?? "").toUpperCase();
 
   if (category.includes("BAG")) {
     return {
       fit: "cover",
       position: "center 82%",
-      scale: 1.55,
+      scale: 3,
+    };
+  }
+
+  if (
+    productName.includes("CROP") ||
+    productName.includes("JERSEY") ||
+    productName.includes("티셔츠") ||
+    productName.includes("크롭")
+  ) {
+    return {
+      fit: "cover",
+      position: "center 48%",
+      scale: 2.7,
+      translateY: "0px",
     };
   }
 
@@ -641,6 +677,36 @@ const getMaterialHeroImageView = (productPayload) => {
     fit: "cover",
     position: "center",
     scale: 1.85,
+  };
+};
+
+const getDesignHeroImageView = (productPayload) => {
+  const category = String(productPayload?.category ?? "").toUpperCase();
+  const productName = String(productPayload?.name ?? "").toUpperCase();
+
+  if (category.includes("BAG")) {
+    return {
+      fit: "contain",
+      position: "center",
+      scale: 1.7,
+      translateY: "-50px",
+    };
+  }
+
+  if (productName.includes("CROP") || productName.includes("크롭")) {
+    return {
+      fit: "contain",
+      position: "center",
+      scale: 1.5,
+      translateY: "18px",
+    };
+  }
+
+  return {
+    fit: "contain",
+    position: "center",
+    scale: 1.5,
+    translateY: "0px",
   };
 };
 
@@ -678,10 +744,11 @@ const normalizeStory = (materialsPayload, backgroundPayload, careGuidePayload, p
       eyebrow: "DESIGN & HERITAGE",
       title: productPayload?.name ?? "",
       image: productImage,
+      imageView: getDesignHeroImageView(productPayload),
       paragraphs: background.description ? [background.description] : [],
       highlights: normalizeDesignHighlights(background, productPayload),
     },
-    materials: normalizeMaterialsStory(materials, fallbackMaterialsStory, background),
+    materials: normalizeMaterialsStory(materials, fallbackMaterialsStory, background, productPayload),
     care: normalizeCareStory(careGuide, fallbackCareStory, productPayload),
   };
 };

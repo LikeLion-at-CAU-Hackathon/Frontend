@@ -143,12 +143,40 @@ function buildRawParagraphs(story, background) {
     ? story.paragraphs.filter(isFilledString)
     : [];
 
-  if (storyParagraphs.length > 0) return uniqueValues(storyParagraphs);
+  if (storyParagraphs.length > 0) {
+    return uniqueValues(storyParagraphs.flatMap(splitDisplayParagraphs));
+  }
 
   return uniqueValues([
     story.description,
     background.description,
-  ].filter(isFilledString));
+  ].filter(isFilledString).flatMap(splitDisplayParagraphs));
+}
+
+function splitDisplayParagraphs(value) {
+  const text = normalizeWhitespace(value);
+  if (!text) return [];
+
+  const sentences = text.match(/[^.!?。！？]+[.!?。！？]?/g)?.map((sentence) => sentence.trim()) ?? [text];
+  const paragraphs = sentences.reduce((groups, sentence) => {
+    const previous = groups[groups.length - 1];
+
+    if (previous && /[A-Za-z]\.$/.test(previous) && /^[가-힣]/.test(sentence)) {
+      groups[groups.length - 1] = `${previous} ${sentence}`;
+      return groups;
+    }
+
+    groups.push(sentence);
+    return groups;
+  }, []);
+
+  if (paragraphs.length <= 3) return paragraphs;
+
+  return [
+    paragraphs[0],
+    paragraphs.slice(1, -1).join(" "),
+    paragraphs[paragraphs.length - 1],
+  ].filter(Boolean);
 }
 
 function resolveTitleAndParagraphs(story, background) {
@@ -215,11 +243,12 @@ function StoryDesignPage({ story }) {
   const designStory = resolveDesignStory(story);
   const background = isPlainObject(designStory.background) ? designStory.background : {};
   const imageView = designStory.imageView ?? {};
+  const imageScale = Number(imageView.scale) || 1.35;
   const { title: displayTitle, paragraphs } = resolveTitleAndParagraphs(designStory, background);
   const highlights = buildHighlights(designStory, background);
 
   return (
-    <section className="mx-auto max-w-[393px] px-[22px] pb-[124px] pt-[17px] text-center">
+    <section className="mx-auto max-w-[393px] px-[22px] pb-[124px] pt-[18px] text-center">
       <p className="font-['DM_Sans'] whitespace-pre-line text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#6b3f1f]">
         {designStory.eyebrow}
       </p>
@@ -227,13 +256,13 @@ function StoryDesignPage({ story }) {
         {displayTitle}
       </h1>
 
-      <div className="mt-[22px] whitespace-pre-line space-y-[22px] text-[13px] leading-[23.4px] text-[#3d3530]">
+      <div className="mt-[14px] whitespace-pre-line space-y-[22px] text-[13px] leading-[23.4px] text-[#3d3530]">
         {paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
       </div>
 
-      <div className="mx-auto mt-[19px] h-[200px] w-[326px] max-w-full overflow-hidden bg-[#faf8f5]">
+      <div className="mx-auto mt-[17px] h-[220px] w-[326px] max-w-full overflow-hidden">
         {designStory.image && (
           <img
             src={designStory.image}
@@ -242,13 +271,13 @@ function StoryDesignPage({ story }) {
             style={{
               objectFit: imageView.fit ?? "contain",
               objectPosition: imageView.position ?? "center",
-              transform: `translateY(${imageView.translateY ?? "0px"}) scale(${imageView.scale ?? 1})`,
+              transform: `translateY(${imageView.translateY ?? "0px"}) scale(${imageScale})`,
             }}
           />
         )}
       </div>
 
-      <dl className="mx-auto mt-[15px] grid w-full max-w-[349px] grid-cols-2 gap-x-[14px] gap-y-[12px] text-left">
+      <dl className="mx-auto mt-[14px] grid w-full max-w-[349px] grid-cols-2 gap-x-[14px] gap-y-[14px] text-left">
         {highlights.map((item) => (
           <StoryHighlight key={`${item.label}-${item.value}`} {...item} />
         ))}
