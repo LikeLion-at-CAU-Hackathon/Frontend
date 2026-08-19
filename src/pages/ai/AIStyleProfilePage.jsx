@@ -13,15 +13,14 @@ function AIStyleProfilePage() {
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const sessionId = useRecommendationStore((state) => state.sessionId);
   const result = useRecommendationStore((state) => state.result);
   const setResult = useRecommendationStore((state) => state.setResult);
 
   useEffect(() => {
-    if (result || !sessionId) return undefined;
+    if (result) return undefined;
 
     let isCancelled = false;
-    getRecommendationResult(sessionId)
+    getRecommendationResult()
       .then((nextResult) => {
         if (!nextResult) throw new Error("AI 스타일 분석 결과가 없습니다.");
         if (!isCancelled) setResult(nextResult);
@@ -40,7 +39,7 @@ function AIStyleProfilePage() {
     return () => {
       isCancelled = true;
     };
-  }, [result, sessionId, setResult]);
+  }, [result, setResult]);
 
   const handleViewDetail = (selectedLook) => {
     navigate(`/ai/style-recommendation/${selectedLook.id}`);
@@ -66,10 +65,10 @@ function AIStyleProfilePage() {
         <p className="font-playfair text-[12px] leading-[18px] text-black">
           {result?.summary}
         </p>
-        {isLoading && !result && sessionId && (
+        {isLoading && !result && (
           <p className="mt-4 text-[12px] text-[#8a8078]">스타일 프로필을 불러오고 있습니다.</p>
         )}
-        {(errorMessage || (!sessionId && !result)) && (
+        {(errorMessage || (!isLoading && !result)) && (
           <p className="mt-4 text-[12px] text-[#8a3d2f]">
             {errorMessage || "먼저 AI 스타일 분석을 진행해 주세요."}
           </p>

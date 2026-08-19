@@ -6,7 +6,9 @@ function LookDetailProductCard({ product }) {
   return (
     <article className="flex h-20 w-full items-center gap-[15px] overflow-hidden rounded-[4px] bg-[#fffdfb] transition-all duration-200 hover:-translate-y-px hover:shadow-sm">
       <div className="size-20 shrink-0 bg-[#f0ece7]">
-        <img src={product.image} alt={product.name} className="size-full object-contain" />
+        {product.image && (
+          <img src={product.image} alt={product.name} className="size-full object-contain" />
+        )}
       </div>
       <div className="min-w-0 py-2">
         <p className="truncate text-[10.5px] leading-[16.5px] tracking-[1.3px] text-[#8a8078]">
