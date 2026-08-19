@@ -1,6 +1,6 @@
 // 제품 이미지를 와프 스타일로 보여주는 컴포넌트
 function ProductImage({ alt, image, imageView = {} }) {
-  const PRODUCT_DETAIL_IMAGE_SCALE = 1.5;
+  const PRODUCT_DETAIL_IMAGE_SCALE = 1.3;
   const {
     fit = "contain",
     position = "center",
