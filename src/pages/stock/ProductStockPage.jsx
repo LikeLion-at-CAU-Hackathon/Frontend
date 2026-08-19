@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import Button from "../../components/common/Button";
-import { getMockProductById, getMockProductStocks, mcmStores } from "../../mocks/products";
+import useProduct from "../../hooks/useProduct";
 
 const labels = {
   stockCheck: "재고 확인",
@@ -11,12 +11,6 @@ const labels = {
   requestStock: "직원에게 재고 문의",
   backToProduct: "제품으로 돌아가기",
 };
-
-const nearbyStores = mcmStores.slice(1).map((store) => ({
-  ...store,
-  distance: store.distance ?? "-",
-  stock: "재고 있음",
-}));
 
 const formatStockCount = (quantity) => `${quantity}개`;
 const formatStockBadge = (quantity) =>
@@ -71,13 +65,27 @@ function NearbyStoreRow({ name, distance, stock }) {
   );
 }
 
+function getStockForBranch(variant, branch) {
+  const branchStock = variant.stocks?.find((stock) => {
+    if (branch?.branch_id !== undefined && stock.branch_id !== undefined) {
+      return String(stock.branch_id) === String(branch.branch_id);
+    }
+
+    return stock.branch_name === branch?.branch_name;
+  });
+
+  return branchStock?.quantity ?? 0;
+}
+
 function getCurrentStoreStocks(product, productStocks) {
+  const currentBranch = productStocks[0];
+
   if (product.variants?.length > 1) {
     return product.variants.map((variant) => ({
       name: variant.name ?? product.name,
       option: [variant.color ?? product.color, variant.size].filter(Boolean).join(" · "),
-      stock: formatStockBadge(variant.stock),
-      available: variant.stock > 0,
+      stock: formatStockBadge(getStockForBranch(variant, currentBranch)),
+      available: getStockForBranch(variant, currentBranch) > 0,
     }));
   }
 
@@ -90,19 +98,37 @@ function getCurrentStoreStocks(product, productStocks) {
 }
 
 function getBranchName(product, productStocks) {
-  if (product.groupName === "Aren Hobo" || product.group_name === "Aren Hobo") {
-    return mcmStores[0].branch_name;
-  }
-
-  return productStocks[0]?.branch_name ?? mcmStores[0].branch_name;
+  return productStocks[0]?.branch_name ?? "";
 }
 
 function ProductStockPage() {
   const { productId } = useParams();
-  const product = getMockProductById(productId);
-  const productStocks = getMockProductStocks(product.id);
-  const currentStoreStocks = getCurrentStoreStocks(product, productStocks);
+  const { product, isLoading, errorMessage } = useProduct(productId);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+
+  if (isLoading) {
+    return (
+      <main className="min-h-[719px] bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a8078]">
+        Loading product...
+      </main>
+    );
+  }
+
+  if (errorMessage || !product) {
+    return (
+      <main className="min-h-[719px] bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a3d2f]">
+        {errorMessage || "Product not found."}
+      </main>
+    );
+  }
+
+  const productStocks = product.stocks?.length ? product.stocks : [];
+  const currentStoreStocks = getCurrentStoreStocks(product, productStocks);
+  const nearbyStores = productStocks.slice(1).map((stock) => ({
+    name: stock.branch_name,
+    distance: stock.distance ?? "-",
+    stock: formatStockBadge(stock.quantity),
+  }));
 
   return (
     <main className="min-h-[719px] overflow-x-hidden bg-[#faf8f5]">

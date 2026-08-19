@@ -4,6 +4,13 @@ import { askAiDocent } from "../../../api/productApi";
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
+const normalizeFaqs = (faqs) =>
+  (faqs ?? [])
+    .map((faq) => ({
+      question: typeof faq === "string" ? faq : faq?.question ?? faq?.title ?? "",
+    }))
+    .filter((faq) => faq.question.trim());
+
 function TypingDots() {
   return (
     <span className="flex h-[21.45px] items-center gap-[4px]" aria-label="답변 작성 중">
@@ -56,7 +63,7 @@ function StoryAiDocentPage({ faqs = [], product }) {
   const [selectedFaqQuestions, setSelectedFaqQuestions] = useState([]);
   const latestMessageRef = useRef(null);
   const hasConversation = messages.length > 0;
-  const visibleFaqs = faqs.filter((faq) => !selectedFaqQuestions.includes(faq.question.trim()));
+  const visibleFaqs = normalizeFaqs(faqs).filter((faq) => !selectedFaqQuestions.includes(faq.question.trim()));
   const greeting = `안녕하세요. ${product?.name ?? "이 제품"}에 대한 검증된 정보를 안내해 드립니다. 소재, 관리 방법, 특징 등을 질문해 보세요.`;
 
   useEffect(() => {

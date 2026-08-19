@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import AdvisorSheet from "../../components/common/AdvisorSheet";
 import Button from "../../components/common/Button";
-import { getMockProductById, getProductSizesForProduct } from "../../mocks/products";
+import useProduct from "../../hooks/useProduct";
 
 const labels = {
   compareSizes: "Compare Sizes",
@@ -19,7 +19,13 @@ const defaultCompareFields = [
   { label: "재고", valueKey: "stock", format: "stock" },
 ];
 
-const formatPrice = (price) => `₩${Number(price).toLocaleString("ko-KR")}`;
+const ignoredSpecLabels = new Set(["STYLE NO."]);
+
+const formatPrice = (price) => {
+  const numericPrice = Number(price);
+
+  return Number.isFinite(numericPrice) ? `₩${numericPrice.toLocaleString("ko-KR")}` : "-";
+};
 const formatStorage = (value) => value.replaceAll(" / ", " · ");
 const formatStockCount = (quantity) => `${quantity}개`;
 const formatCurrentStoreStock = (quantity) =>
@@ -50,6 +56,42 @@ const formatCompareValue = (value, field) => {
     default:
       return String(value);
   }
+};
+
+const getSpecCompareValue = (productSize, field) => {
+  if (!field.valueKey?.startsWith("spec:")) return productSize?.[field.valueKey];
+
+  const specLabel = field.valueKey.slice("spec:".length);
+  return productSize?.specs?.find((spec) => spec.label === specLabel)?.value;
+};
+
+const buildCompareFields = (currentProduct, compareProduct, product) => {
+  const specs = [
+    ...(currentProduct?.specs ?? []),
+    ...(compareProduct?.specs ?? []),
+    ...(product?.specs ?? []),
+  ];
+  const specFields = [];
+  const seenLabels = new Set();
+
+  specs.forEach((spec) => {
+    if (!spec?.label || ignoredSpecLabels.has(spec.label) || seenLabels.has(spec.label)) return;
+
+    seenLabels.add(spec.label);
+    specFields.push({
+      label: spec.label,
+      valueKey: `spec:${spec.label}`,
+      format: "text",
+    });
+  });
+
+  return specFields.length
+    ? [
+        ...specFields,
+        { label: "가격", valueKey: "price", format: "price" },
+        { label: "재고", valueKey: "stock", format: "stock" },
+      ]
+    : defaultCompareFields;
 };
 
 function ProductCard({
@@ -112,11 +154,13 @@ function ProductCard({
         )}
       </div>
       <div className="absolute bottom-0 left-0 h-[64%] w-full overflow-hidden rounded-b-[12px] bg-[#f7f5f2]">
-        <img
-          src={productSize.image}
-          alt={`${productName} ${productSize.size}`}
-          className="size-full object-contain"
-        />
+        {productSize.image && (
+          <img
+            src={productSize.image}
+            alt={`${productName} ${productSize.size}`}
+            className="size-full object-contain"
+          />
+        )}
       </div>
     </article>
   );
@@ -151,22 +195,57 @@ function CompareRow({ label, currentValue, compareValue }) {
 function ProductSizeCompareResultPage() {
   const { productId } = useParams();
   const [searchParams] = useSearchParams();
-  const product = getMockProductById(productId);
-  const productSizes = getProductSizesForProduct(product);
+  const { product, productSizes, isLoading, errorMessage } = useProduct(productId);
   const currentProduct = productSizes.find((item) => item.isCurrent) ?? productSizes[0];
   const initialCompareProduct =
-    productSizes.find((item) => item.size !== currentProduct.size) ?? currentProduct;
-  const selectableSizes = productSizes.map((item) => item.size);
-  const sizeInfoBySize = Object.fromEntries(productSizes.map((item) => [item.size, item]));
+    productSizes.find((item) => item.size !== currentProduct?.size) ?? currentProduct;
+  const selectableSizes = useMemo(() => productSizes.map((item) => item.size), [productSizes]);
+  const sizeInfoBySize = useMemo(
+    () => Object.fromEntries(productSizes.map((item) => [item.size, item])),
+    [productSizes],
+  );
   const requestedSize = searchParams.get("size");
   const defaultCompareSize = selectableSizes.includes(requestedSize)
     ? requestedSize
-    : initialCompareProduct.size;
-  const [compareSize, setCompareSize] = useState(defaultCompareSize);
+    : initialCompareProduct?.size ?? "";
+  const [compareSize, setCompareSize] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+
+  useEffect(() => {
+    if (!defaultCompareSize) return undefined;
+
+    let isCancelled = false;
+    queueMicrotask(() => {
+      if (isCancelled) return;
+      setCompareSize((prevSize) =>
+        selectableSizes.includes(prevSize) ? prevSize : defaultCompareSize,
+      );
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [defaultCompareSize, selectableSizes]);
+
+  if (isLoading) {
+    return (
+      <main className="min-h-[734px] bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a8078]">
+        Loading product...
+      </main>
+    );
+  }
+
+  if (errorMessage || !product || !currentProduct) {
+    return (
+      <main className="min-h-[734px] bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a3d2f]">
+        {errorMessage || "Product not found."}
+      </main>
+    );
+  }
+
   const compareProduct = sizeInfoBySize[compareSize] ?? initialCompareProduct;
-  const compareFields = product.sizeCompareFields ?? defaultCompareFields;
+  const compareFields = product.sizeCompareFields ?? buildCompareFields(currentProduct, compareProduct, product);
 
   return (
     <main className="min-h-[734px] overflow-x-hidden bg-[#faf8f5] px-[22px] pt-4">
@@ -199,8 +278,8 @@ function ProductSizeCompareResultPage() {
           <CompareRow
             key={`${field.label}-${field.valueKey}`}
             label={field.label}
-            currentValue={formatCompareValue(currentProduct[field.valueKey], field)}
-            compareValue={formatCompareValue(compareProduct[field.valueKey], field)}
+            currentValue={formatCompareValue(getSpecCompareValue(currentProduct, field), field)}
+            compareValue={formatCompareValue(getSpecCompareValue(compareProduct, field), field)}
           />
         ))}
       </section>

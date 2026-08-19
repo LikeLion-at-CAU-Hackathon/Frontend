@@ -13,6 +13,8 @@ function StoryHighlight({ label, value }) {
 
 function StoryDesignPage({ story }) {
   const imageView = story.imageView ?? {};
+  const paragraphs = story.paragraphs ?? [];
+  const highlights = story.highlights ?? [];
 
   return (
     <section className="mx-auto max-w-[393px] px-[22px] pb-[124px] pt-[17px] text-center">
@@ -24,26 +26,28 @@ function StoryDesignPage({ story }) {
       </h1>
 
       <div className="mt-[22px] whitespace-pre-line space-y-[22px] text-[13px] leading-[23.4px] text-[#3d3530]">
-        {story.paragraphs.map((paragraph) => (
+        {paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
       </div>
 
       <div className="mx-auto mt-[19px] h-[200px] w-[326px] max-w-full overflow-hidden bg-[#faf8f5]">
-        <img
-          src={story.image}
-          alt={story.title}
-          className="size-full mix-blend-multiply"
-          style={{
-            objectFit: imageView.fit ?? "contain",
-            objectPosition: imageView.position ?? "center",
-            transform: `translateY(${imageView.translateY ?? "0px"}) scale(${imageView.scale ?? 1})`,
-          }}
-        />
+        {story.image && (
+          <img
+            src={story.image}
+            alt={story.title}
+            className="size-full mix-blend-multiply"
+            style={{
+              objectFit: imageView.fit ?? "contain",
+              objectPosition: imageView.position ?? "center",
+              transform: `translateY(${imageView.translateY ?? "0px"}) scale(${imageView.scale ?? 1})`,
+            }}
+          />
+        )}
       </div>
 
       <dl className="mx-auto mt-[15px] grid w-full max-w-[349px] grid-cols-2 gap-x-[14px] gap-y-[12px] text-left">
-        {story.highlights.map((item) => (
+        {highlights.map((item) => (
           <StoryHighlight key={item.label} {...item} />
         ))}
       </dl>
