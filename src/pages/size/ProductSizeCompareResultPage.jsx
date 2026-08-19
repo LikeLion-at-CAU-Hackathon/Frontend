@@ -36,6 +36,8 @@ const specFormatMap = {
   PRICE: "price",
   STOCK: "stock",
 };
+const sizeMeasurementsSpecLabel = "SIZE MEASUREMENTS";
+const specPartValueKeyPrefix = "spec-part:";
 
 const formatPrice = (price) => {
   const numericPrice = Number(price);
@@ -88,11 +90,38 @@ const formatCompareValue = (value, field) => {
   }
 };
 
+const parseSpecParts = (value) => {
+  if (!value) return new Map();
+
+  return String(value)
+    .split(/\s*\/\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .reduce((parts, part) => {
+      const match = part.match(/^([^:：]+)\s*[:：]\s*(.+)$/);
+      if (!match) return parts;
+
+      parts.set(match[1].trim(), match[2].trim());
+      return parts;
+    }, new Map());
+};
+
+const getSpecValue = (productSize, specLabel) =>
+  productSize?.specs?.find((spec) => spec.label === specLabel)?.value;
+
 const getSpecCompareValue = (productSize, field) => {
+  if (field.valueKey?.startsWith(specPartValueKeyPrefix)) {
+    const [specLabel, partLabel] = field.valueKey
+      .slice(specPartValueKeyPrefix.length)
+      .split("::");
+
+    return parseSpecParts(getSpecValue(productSize, specLabel)).get(partLabel);
+  }
+
   if (!field.valueKey?.startsWith("spec:")) return productSize?.[field.valueKey];
 
   const specLabel = field.valueKey.slice("spec:".length);
-  return productSize?.specs?.find((spec) => spec.label === specLabel)?.value;
+  return getSpecValue(productSize, specLabel);
 };
 
 const hasCompareValue = (value) => value !== undefined && value !== null && value !== "";
@@ -110,6 +139,13 @@ const hasDifferentCompareValue = (currentProduct, compareProduct, field) => {
   return normalizeForCompare(currentValue, field) !== normalizeForCompare(compareValue, field);
 };
 
+const hasAnyCompareValue = (currentProduct, compareProduct, field) => {
+  const currentValue = getSpecCompareValue(currentProduct, field);
+  const compareValue = getSpecCompareValue(compareProduct, field);
+
+  return hasCompareValue(currentValue) || hasCompareValue(compareValue);
+};
+
 const buildCompareFields = (currentProduct, compareProduct, product) => {
   const specs = [
     ...(currentProduct?.specs ?? []),
@@ -118,13 +154,38 @@ const buildCompareFields = (currentProduct, compareProduct, product) => {
   ];
   const compareFields = defaultCompareFields
     .filter((field) => !["price", "stock"].includes(field.valueKey))
-    .filter((field) => hasDifferentCompareValue(currentProduct, compareProduct, field));
+    .filter((field) => hasAnyCompareValue(currentProduct, compareProduct, field));
   const seenLabels = new Set();
 
   specs.forEach((spec) => {
     if (!spec?.label || ignoredSpecLabels.has(spec.label) || seenLabels.has(spec.label)) return;
 
     const normalizedLabel = spec.label.toUpperCase();
+
+    if (normalizedLabel === sizeMeasurementsSpecLabel) {
+      const measurementLabels = [
+        ...new Set([
+          ...parseSpecParts(getSpecValue(currentProduct, spec.label)).keys(),
+          ...parseSpecParts(getSpecValue(compareProduct, spec.label)).keys(),
+        ]),
+      ];
+
+      measurementLabels.forEach((measurementLabel) => {
+        const field = {
+          label: measurementLabel,
+          valueKey: `${specPartValueKeyPrefix}${spec.label}::${measurementLabel}`,
+          format: "text",
+        };
+
+        if (!hasAnyCompareValue(currentProduct, compareProduct, field)) return;
+
+        compareFields.push(field);
+      });
+
+      seenLabels.add(spec.label);
+      return;
+    }
+
     const mappedKey = normalizedLabel.toLowerCase().replaceAll(" ", "_");
     if (defaultCompareValueKeys.has(mappedKey)) return;
 
@@ -141,7 +202,7 @@ const buildCompareFields = (currentProduct, compareProduct, product) => {
   });
 
   return [
-    ...(compareFields.length ? compareFields : defaultCompareFields.slice(0, 3)),
+    ...compareFields,
     { label: "가격", valueKey: "price", format: "price" },
     { label: "재고", valueKey: "stock", format: "stock" },
   ];

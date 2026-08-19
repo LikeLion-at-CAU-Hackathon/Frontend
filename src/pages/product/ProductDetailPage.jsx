@@ -57,6 +57,8 @@ const formatProductInfoValue = (label, value) => {
   return formattedValue;
 };
 
+const hiddenProductInfoLabels = new Set(["STYLE NO.", "SIZE MEASUREMENTS"]);
+
 function InfoRow({ label, value }) {
   return (
     <div className="mx-[calc(clamp(16px,5.6vw,22px)*-1)] flex min-h-[42.5px] gap-[18px] border-b border-[#e5e0da] px-[clamp(16px,5.6vw,22px)] pb-3 pt-[11px]">
@@ -135,7 +137,7 @@ function ProductDetailPage() {
   const collectionLabel = `${product.collectionName ?? product.collection} COLLECTION`;
   const productInfo = [
     ...(product.specs ?? [])
-      .filter((spec) => spec.label !== "STYLE NO.")
+      .filter((spec) => !hiddenProductInfoLabels.has(spec.label))
       .map((spec) => ({
         label: spec.label,
         value: formatProductInfoValue(spec.label, spec.value),
