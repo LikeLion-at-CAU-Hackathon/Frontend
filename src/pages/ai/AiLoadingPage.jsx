@@ -10,12 +10,23 @@ import {
 } from "../../api/recommendationApi";
 import useRecommendationStore from "../../stores/useRecommendationStore";
 
+const ANALYSIS_PROGRESS_DURATION_MS = 180000;
+const MAX_PENDING_PROGRESS = 96;
+const PROGRESS_TICK_MS = 250;
+
 const loadingSteps = [
-  { progress: 28, duration: 4300 },
-  { progress: 52, duration: 5500 },
-  { progress: 78, duration: 5500 },
-  { progress: 100, duration: 0 },
+  { progress: 28 },
+  { progress: 52 },
+  { progress: 78 },
+  { progress: 100 },
 ];
+
+const getLoadingStep = (progress) => {
+  return loadingSteps.reduce(
+    (currentStep, loadingStep, index) => (progress >= loadingStep.progress ? index : currentStep),
+    0,
+  );
+};
 
 const messages = [
   "오늘 태그 및 저장한 제품 확인 중",
@@ -48,20 +59,26 @@ const runAnalysis = () => {
 function AiLoadingPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const [progress, setProgress] = useState(0);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const setResult = useRecommendationStore((state) => state.setResult);
 
   useEffect(() => {
-    if (step >= loadingSteps.length - 1) return undefined;
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      const elapsedTime = Date.now() - startedAt;
+      const nextProgress = Math.min(
+        MAX_PENDING_PROGRESS,
+        Math.floor((elapsedTime / ANALYSIS_PROGRESS_DURATION_MS) * MAX_PENDING_PROGRESS),
+      );
 
-    const timer = window.setTimeout(
-      () => setStep((currentStep) => currentStep + 1),
-      loadingSteps[step].duration,
-    );
+      setProgress(nextProgress);
+      setStep(getLoadingStep(nextProgress));
+    }, PROGRESS_TICK_MS);
 
-    return () => window.clearTimeout(timer);
-  }, [step]);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -76,7 +93,12 @@ function AiLoadingPage() {
         if (!result) throw new Error("AI 스타일 분석 결과가 없습니다.");
         if (isCancelled) return;
 
+        setProgress(100);
+        setStep(loadingSteps.length - 1);
         setResult(result);
+        await new Promise((resolve) => window.setTimeout(resolve, 450));
+        if (isCancelled) return;
+
         navigate("/ai/style-profile", { replace: true });
       } catch (error) {
         if (!isCancelled) {
@@ -99,7 +121,7 @@ function AiLoadingPage() {
       <section
         className="absolute left-1/2 top-[233px] flex w-[250px] -translate-x-1/2 flex-col items-center"
         aria-live="polite"
-        aria-label={`스타일 분석 ${loadingSteps[step].progress}% 완료`}
+        aria-label={`스타일 분석 ${progress}% 완료`}
       >
         <img
           src={mcmLoadingLogo}
@@ -112,11 +134,11 @@ function AiLoadingPage() {
           role="progressbar"
           aria-valuemin="0"
           aria-valuemax="100"
-          aria-valuenow={loadingSteps[step].progress}
+          aria-valuenow={progress}
         >
           <div
-            className="h-full rounded-full bg-[#6b3f1f] transition-[width] duration-700 ease-out"
-            style={{ width: `${loadingSteps[step].progress}%` }}
+            className="h-full rounded-full bg-[#6b3f1f] transition-[width] duration-300 ease-linear"
+            style={{ width: `${progress}%` }}
           />
         </div>
 
