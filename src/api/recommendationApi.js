@@ -2,18 +2,56 @@ import axiosInstance, { resolveApiAssetUrl } from "./axiosInstance";
 import { getProductDetail } from "./productApi";
 
 const resolveImageUrl = resolveApiAssetUrl;
+const VISIT_SESSION_ID_STORAGE_KEY = "visit_session_id";
 
 let sessionRequest = null;
 let sessionInitialized = false;
 let sessionResponse = null;
+
+const getStoredVisitSessionId = () => {
+  try {
+    return window.localStorage.getItem(VISIT_SESSION_ID_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const setStoredVisitSessionId = (sessionId) => {
+  if (!sessionId) return;
+
+  try {
+    window.localStorage.setItem(VISIT_SESSION_ID_STORAGE_KEY, String(sessionId));
+  } catch {
+    // localStorage can be unavailable in some private browsing contexts.
+  }
+};
+
+const getSessionIdFromPayload = (payload) => {
+  return payload?.session?.id
+    ?? payload?.data?.session?.id
+    ?? payload?.session_id
+    ?? payload?.sessionId
+    ?? payload?.id;
+};
+
+const getVisitSessionPayload = () => {
+  const visitSessionId = getStoredVisitSessionId();
+  return visitSessionId ? { visit_session_id: visitSessionId } : {};
+};
+
+const getVisitSessionConfig = () => {
+  const visitSessionId = getStoredVisitSessionId();
+  return visitSessionId ? { params: { visit_session_id: visitSessionId } } : undefined;
+};
 
 const ensureRecommendationSession = async () => {
   if (sessionInitialized) return sessionResponse;
 
   if (!sessionRequest) {
     sessionRequest = axiosInstance
-      .post("recommendations/sessions/")
+      .post("recommendations/sessions/", getVisitSessionPayload())
       .then((response) => {
+        setStoredVisitSessionId(getSessionIdFromPayload(response.data));
         sessionInitialized = true;
         sessionResponse = response;
         return response;
@@ -176,12 +214,16 @@ export const addRecommendationHistory = async (...args) => {
   await ensureRecommendationSession();
   const { data } = await axiosInstance.post("recommendations/sessions/history/", {
     product_id: Number(productId),
+    ...getVisitSessionPayload(),
   });
   return data?.history;
 };
 
 export const getRecommendationHistory = async () => {
-  const { data } = await axiosInstance.get("recommendations/sessions/history/");
+  const { data } = await axiosInstance.get(
+    "recommendations/sessions/history/",
+    getVisitSessionConfig(),
+  );
   const histories = getUniqueRecentHistories(asHistoryArray(data));
 
   return Promise.all(
@@ -202,7 +244,11 @@ export const getRecommendationHistory = async () => {
 };
 
 export const analyzeRecommendationSession = async () => {
-  const { data } = await axiosInstance.post("recommendations/sessions/analyze/");
+  await ensureRecommendationSession();
+  const { data } = await axiosInstance.post(
+    "recommendations/sessions/analyze/",
+    getVisitSessionPayload(),
+  );
   return data;
 };
 
@@ -210,6 +256,7 @@ export const saveRecommendationProduct = async (productId) => {
   await ensureRecommendationSession();
   const { data } = await axiosInstance.post(
     `recommendations/sessions/saved-products/${productId}/`,
+    getVisitSessionPayload(),
   );
   return data;
 };
@@ -218,6 +265,7 @@ export const deleteRecommendationProduct = async (productId) => {
   await ensureRecommendationSession();
   const { data } = await axiosInstance.delete(
     `recommendations/sessions/saved-products/${productId}/`,
+    { data: getVisitSessionPayload() },
   );
   return data;
 };
@@ -225,6 +273,7 @@ export const deleteRecommendationProduct = async (productId) => {
 export const getSavedProductAnalysis = async (productId) => {
   const { data } = await axiosInstance.get(
     `recommendations/sessions/saved-products/${productId}/analysis/`,
+    getVisitSessionConfig(),
   );
 
   const payload = data?.data ?? data?.analysis ?? data?.result ?? data;
@@ -239,7 +288,7 @@ export const getRecommendationLookDetail = async (lookId) => {
 
 export const getRecommendationResult = async () => {
   const [{ data }, history] = await Promise.all([
-    axiosInstance.get("recommendations/sessions/result/"),
+    axiosInstance.get("recommendations/sessions/result/", getVisitSessionConfig()),
     getRecommendationHistory(),
   ]);
   const profile = data?.data ?? data?.result ?? (data?.success === undefined ? data : null);
