@@ -145,20 +145,6 @@ const saveProfileImage = async (node, productId) => {
     throw new Error("이미지를 생성하지 못했습니다.");
   }
 
-  const file = new File([blob], fileName, { type: "image/png" });
-
-  if (
-    navigator.share
-    && navigator.canShare
-    && navigator.canShare({ files: [file] })
-  ) {
-    await navigator.share({
-      files: [file],
-      title: "MCM TAP ATELIER",
-    });
-    return;
-  }
-
   downloadImageBlob(blob, fileName);
 };
 
