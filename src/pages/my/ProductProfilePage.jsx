@@ -19,6 +19,7 @@ import { shareProductWithKakao } from "../../utils/kakaoShare";
 
 const TRANSPARENT_IMAGE_PLACEHOLDER =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 const PROFILE_CAPTURE_BACKGROUND = "#fffdfb";
 
 const downloadImageBlob = (blob, fileName) => {
@@ -32,23 +33,84 @@ const downloadImageBlob = (blob, fileName) => {
   window.setTimeout(() => URL.revokeObjectURL(imageUrl), 1000);
 };
 
+const getCaptureSafeImageUrl = (source) => {
+  if (!source || source.startsWith("data:") || source.startsWith("blob:")) return source;
+  if (!API_BASE_URL || !/^https?:/.test(API_BASE_URL)) return source;
+
+  try {
+    const sourceUrl = new URL(source, window.location.origin);
+    const apiUrl = new URL(API_BASE_URL);
+
+    if (sourceUrl.origin === apiUrl.origin && sourceUrl.pathname.startsWith("/media/")) {
+      return `${sourceUrl.pathname}${sourceUrl.search}${sourceUrl.hash}`;
+    }
+  } catch {
+    return source;
+  }
+
+  return source;
+};
+
+const prepareCaptureImages = (node) => {
+  Array.from(node.querySelectorAll("img")).forEach((image) => {
+    const safeSource = getCaptureSafeImageUrl(image.currentSrc || image.src);
+    image.removeAttribute("srcset");
+    image.loading = "eager";
+    image.decoding = "sync";
+
+    if (safeSource && safeSource !== image.src) {
+      image.src = safeSource;
+    }
+  });
+};
+
+const waitForCaptureAssets = async (node) => {
+  await document.fonts?.ready?.catch(() => undefined);
+
+  const images = Array.from(node.querySelectorAll("img"));
+  await Promise.all(
+    images.map((image) => {
+      if (image.complete && image.naturalWidth > 0) return Promise.resolve();
+
+      return new Promise((resolve) => {
+        const timeoutId = window.setTimeout(resolve, 2500);
+        const finish = () => {
+          window.clearTimeout(timeoutId);
+          resolve();
+        };
+
+        image.addEventListener("load", finish, { once: true });
+        image.addEventListener("error", finish, { once: true });
+
+        if (image.src) {
+          const source = image.src;
+          image.src = "";
+          image.src = source;
+        }
+      });
+    }),
+  );
+};
+
 const withCaptureClone = async (node, callback) => {
   const { width } = node.getBoundingClientRect();
   const container = document.createElement("div");
   const clone = node.cloneNode(true);
 
   container.style.position = "fixed";
-  container.style.left = "-10000px";
+  container.style.left = "0";
   container.style.top = "0";
   container.style.width = `${width}px`;
   container.style.background = "transparent";
   container.style.pointerEvents = "none";
-  container.style.zIndex = "-1";
+  container.style.transform = "translateX(-200vw)";
+  container.style.zIndex = "0";
 
   clone.style.margin = "0";
   clone.style.width = `${width}px`;
   clone.style.maxWidth = "none";
   clone.style.backgroundColor = PROFILE_CAPTURE_BACKGROUND;
+  prepareCaptureImages(clone);
 
   container.appendChild(clone);
   document.body.appendChild(container);
@@ -57,6 +119,7 @@ const withCaptureClone = async (node, callback) => {
     await new Promise((resolve) => {
       requestAnimationFrame(() => requestAnimationFrame(resolve));
     });
+    await waitForCaptureAssets(clone);
     return await callback(clone);
   } finally {
     container.remove();

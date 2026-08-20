@@ -8,6 +8,7 @@ const options = ["다른 옵션", "착용 상담", "스타일링", "기타"];
 // Advisor 버튼을 눌렀을 때 뜨는 상담 요청창
 const SWIPE_CLOSE_DISTANCE = 72;
 const SHEET_CLOSE_ANIMATION_MS = 180;
+const DRAG_START_DISTANCE = 10;
 
 function AdvisorSheet({
   isOpen,
@@ -63,6 +64,7 @@ function AdvisorSheet({
 
     const preventBackgroundTouchMove = (event) => {
       if (!overlayRef.current?.contains(event.target)) return;
+      if (sheetRef.current?.contains(event.target)) return;
       event.preventDefault();
     };
 
@@ -112,8 +114,7 @@ function AdvisorSheet({
 
   const handlePointerDown = (event) => {
     if (!event.isPrimary) return;
-
-    event.currentTarget.setPointerCapture?.(event.pointerId);
+    if (hasSubmitted) return;
 
     dragStateRef.current = {
       pointerId: event.pointerId,
@@ -126,6 +127,7 @@ function AdvisorSheet({
 
   const handlePointerMove = (event) => {
     const dragState = dragStateRef.current;
+    if (hasSubmitted) return;
     if (!dragState.isDragging || dragState.pointerId !== event.pointerId || isClosing) return;
 
     const deltaX = event.clientX - dragState.startX;
@@ -135,6 +137,14 @@ function AdvisorSheet({
       setDragOffset(0);
       currentDragOffsetRef.current = 0;
       return;
+    }
+
+    if (!dragState.hasMoved && deltaY < DRAG_START_DISTANCE) {
+      return;
+    }
+
+    if (!dragState.hasMoved) {
+      event.currentTarget.setPointerCapture?.(event.pointerId);
     }
 
     event.preventDefault();
@@ -147,8 +157,11 @@ function AdvisorSheet({
 
   const handlePointerEnd = (event) => {
     if (isClosing) return;
+    if (hasSubmitted) return;
 
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    if (dragStateRef.current.hasMoved) {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    }
 
     if (currentDragOffsetRef.current >= SWIPE_CLOSE_DISTANCE) {
       handleClose();
@@ -182,7 +195,7 @@ function AdvisorSheet({
         }`}
         style={{
           overscrollBehavior: "contain",
-          touchAction: "none",
+          touchAction: hasSubmitted ? "pan-y" : "none",
           transform: dragOffset ? `translateY(${dragOffset}px)` : undefined,
           transition: dragOffset && !isClosing ? undefined : "transform 180ms ease-out",
           userSelect: dragOffset ? "none" : undefined,
