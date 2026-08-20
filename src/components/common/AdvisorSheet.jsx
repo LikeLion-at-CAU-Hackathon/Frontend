@@ -25,6 +25,7 @@ function AdvisorSheet({
   const [isClosing, setIsClosing] = useState(false);
   const overlayRef = useRef(null);
   const sheetRef = useRef(null);
+  const submittedScrollRef = useRef(null);
   const closeTimerRef = useRef(null);
   const currentDragOffsetRef = useRef(0);
   const dragStateRef = useRef({
@@ -132,6 +133,8 @@ function AdvisorSheet({
     };
   };
 
+  const getSubmittedScrollTop = () => submittedScrollRef.current?.scrollTop ?? 0;
+
   const handlePointerMove = (event) => {
     const dragState = dragStateRef.current;
     if (event.pointerType === "touch") return;
@@ -146,7 +149,7 @@ function AdvisorSheet({
       return;
     }
 
-    if (hasSubmitted && sheetRef.current?.scrollTop > 0) {
+    if (hasSubmitted && getSubmittedScrollTop() > 0) {
       return;
     }
 
@@ -207,7 +210,7 @@ function AdvisorSheet({
     touchDragStateRef.current = {
       startX: touch.clientX,
       startY: touch.clientY,
-      startScrollTop: sheetRef.current?.scrollTop ?? 0,
+      startScrollTop: hasSubmitted ? getSubmittedScrollTop() : 0,
       isDragging: true,
       hasMoved: false,
     };
@@ -225,7 +228,7 @@ function AdvisorSheet({
       return;
     }
 
-    const sheetScrollTop = sheetRef.current?.scrollTop ?? 0;
+    const sheetScrollTop = hasSubmitted ? getSubmittedScrollTop() : 0;
     const canDragSheet = !hasSubmitted || (dragState.startScrollTop <= 0 && sheetScrollTop <= 0);
 
     if (!canDragSheet) {
@@ -270,12 +273,11 @@ function AdvisorSheet({
       <section
         ref={sheetRef}
         className={`absolute bottom-0 left-0 w-full rounded-t-[16px] bg-[#fcfbf9] ${
-          hasSubmitted ? "max-h-[calc(100dvh-84px)] overflow-y-auto" : "min-h-[467px]"
+          hasSubmitted ? "flex max-h-[calc(100dvh-84px)] flex-col overflow-hidden" : "min-h-[467px]"
         }`}
         style={{
           overscrollBehavior: "contain",
           touchAction: hasSubmitted ? "pan-y" : "none",
-          WebkitOverflowScrolling: dragOffset ? "auto" : "touch",
           transform: dragOffset ? `translateY(${dragOffset}px)` : undefined,
           transition: dragOffset && !isClosing ? undefined : "transform 180ms ease-out",
           userSelect: dragOffset ? "none" : undefined,
@@ -295,7 +297,16 @@ function AdvisorSheet({
         </div>
 
         {hasSubmitted ? (
-          <SubmittedContent onClose={handleClose} selectedOption={submittedRequest} />
+          <div
+            ref={submittedScrollRef}
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+            style={{
+              WebkitOverflowScrolling: dragOffset ? "auto" : "touch",
+              touchAction: "pan-y",
+            }}
+          >
+            <SubmittedContent onClose={handleClose} selectedOption={submittedRequest} />
+          </div>
         ) : (
           <RequestContent
             product={displayProduct}
