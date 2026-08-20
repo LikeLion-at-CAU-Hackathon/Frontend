@@ -257,7 +257,7 @@ function RequestContent({
         <p className="text-[15px] font-medium leading-[31.5px] text-black">
           어떤 도움이 필요하신가요?
         </p>
-        <div className="mt-[8.5px] mb-[15px] grid grid-cols-4 gap-[10px]">
+        <div className="mt-[8.5px] mb-[15px] grid grid-cols-4 gap-[7px]">
           {options.map((option) => {
             const isSelected = selectedOption === option;
 
@@ -266,7 +266,7 @@ function RequestContent({
                 key={option}
                 type="button"
                 onClick={() => onSelect(option)}
-                className={`flex h-10 w-full min-w-0 items-center justify-center rounded-[5px] border-[1.5px] px-[10px] text-[15px] leading-[31.5px] text-black ${
+                className={`flex h-10 w-full min-w-0 items-center justify-center rounded-[5px] border-[1.5px] px-[4px] text-[13px] leading-[18px] whitespace-nowrap text-black ${
                   isSelected
                     ? "border-[#a88f78] bg-[#e6dac9]"
                     : "border-[#bcbab6] bg-transparent"
