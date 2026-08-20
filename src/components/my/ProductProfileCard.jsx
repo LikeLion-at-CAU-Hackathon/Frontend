@@ -33,7 +33,12 @@ function ProductSummary({ product, onUnsave }) {
     <section className="relative flex w-full items-center gap-[14px]">
       <div className="flex size-[112px] shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-[#ede8e2]">
         {product.image ? (
-          <img src={product.image} alt={product.name} className="size-full object-contain" />
+          <img
+            src={product.image}
+            alt={product.name}
+            crossOrigin="anonymous"
+            className="size-full object-contain"
+          />
         ) : (
           <span className="text-[12px] leading-[18px] text-[#8a8078]">Image</span>
         )}
@@ -99,6 +104,7 @@ function AiAnalysis({ analysis }) {
                     <img
                       src={look.image}
                       alt={look.name}
+                      crossOrigin="anonymous"
                       className="h-20 w-full object-cover"
                     />
                   ) : (

@@ -32,22 +32,50 @@ const downloadImageBlob = (blob, fileName) => {
   window.setTimeout(() => URL.revokeObjectURL(imageUrl), 1000);
 };
 
-const prepareCaptureImages = (node) => {
-  Array.from(node.querySelectorAll("img")).forEach((image) => {
-    const source = image.currentSrc || image.src;
-    image.removeAttribute("srcset");
-    image.loading = "eager";
-    image.decoding = "sync";
+const blobToDataUrl = (blob) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
-    if (source && !source.startsWith("data:") && !source.startsWith("blob:")) {
-      image.crossOrigin = "anonymous";
-    }
-
-    if (source) {
-      image.src = "";
-      image.src = source;
-    }
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
   });
+
+const inlineCaptureImages = async (node) => {
+  const images = Array.from(node.querySelectorAll("img"));
+
+  await Promise.all(
+    images.map(async (image) => {
+      const source = image.currentSrc || image.src;
+      image.removeAttribute("srcset");
+      image.loading = "eager";
+      image.decoding = "sync";
+
+      if (!source || source.startsWith("data:") || source.startsWith("blob:")) {
+        return;
+      }
+
+      try {
+        const response = await fetch(source, {
+          cache: "force-cache",
+          credentials: "omit",
+          mode: "cors",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Image request failed: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        image.removeAttribute("crossorigin");
+        image.src = await blobToDataUrl(blob);
+      } catch {
+        image.crossOrigin = "anonymous";
+        image.src = "";
+        image.src = source;
+      }
+    }),
+  );
 };
 
 const waitForCaptureAssets = async (node) => {
@@ -96,7 +124,6 @@ const withCaptureClone = async (node, callback) => {
   clone.style.width = `${width}px`;
   clone.style.maxWidth = "none";
   clone.style.backgroundColor = PROFILE_CAPTURE_BACKGROUND;
-  prepareCaptureImages(clone);
 
   container.appendChild(clone);
   document.body.appendChild(container);
@@ -105,6 +132,7 @@ const withCaptureClone = async (node, callback) => {
     await new Promise((resolve) => {
       requestAnimationFrame(() => requestAnimationFrame(resolve));
     });
+    await inlineCaptureImages(clone);
     await waitForCaptureAssets(clone);
     return await callback(clone);
   } finally {
@@ -116,7 +144,7 @@ const saveProfileImage = async (node, productId) => {
   const fileName = `mcm-${productId}-profile.png`;
   const blob = await withCaptureClone(node, (captureNode) =>
     toBlob(captureNode, {
-      cacheBust: true,
+      cacheBust: false,
       pixelRatio: 1.5,
       backgroundColor: PROFILE_CAPTURE_BACKGROUND,
       imagePlaceholder: TRANSPARENT_IMAGE_PLACEHOLDER,
