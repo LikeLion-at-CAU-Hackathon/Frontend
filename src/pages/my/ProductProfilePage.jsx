@@ -35,7 +35,7 @@ const saveProfileImage = async (node, productId) => {
   const fileName = `mcm-${productId}-profile.png`;
   const blob = await toBlob(node, {
     cacheBust: true,
-    pixelRatio: 2,
+    pixelRatio: 1.5,
     backgroundColor: "#fffdfb",
     imagePlaceholder: TRANSPARENT_IMAGE_PLACEHOLDER,
   });
@@ -67,6 +67,7 @@ function ProductProfilePage() {
   const captureRef = useRef(null);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isImageSaving, setIsImageSaving] = useState(false);
   const [shareStatus, setShareStatus] = useState("");
   const [productDetail, setProductDetail] = useState(null);
   const [savedAnalysis, setSavedAnalysis] = useState(null);
@@ -147,10 +148,14 @@ function ProductProfilePage() {
       }
 
       if (action === "image" && captureRef.current) {
+        setIsImageSaving(true);
+        setShareStatus("이미지를 생성하고 있습니다...");
         await saveProfileImage(captureRef.current, productId);
+        setIsImageSaving(false);
         setShareStatus("이미지를 저장했습니다.");
       }
     } catch (error) {
+      setIsImageSaving(false);
       setShareStatus(error instanceof Error ? error.message : "공유를 완료하지 못했습니다.");
     }
   };
@@ -203,6 +208,7 @@ function ProductProfilePage() {
             isOpen={isShareOpen}
             onClose={() => setIsShareOpen(false)}
             onSelect={handleShareSelect}
+            isBusy={isImageSaving}
             status={shareStatus}
           />
         </>

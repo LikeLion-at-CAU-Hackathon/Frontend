@@ -7,7 +7,7 @@ const shareOptions = [
   { key: "image", label: "이미지로 저장", Icon: Download },
 ];
 
-function ProductProfileShareSheet({ isOpen, onClose, onSelect, status }) {
+function ProductProfileShareSheet({ isOpen, onClose, onSelect, isBusy = false, status }) {
   useEffect(() => {
     if (!isOpen) return undefined;
     const handleKeyDown = (event) => {
@@ -41,8 +41,11 @@ function ProductProfileShareSheet({ isOpen, onClose, onSelect, status }) {
             <button
               key={key}
               type="button"
-              onClick={() => onSelect(key)}
-              className={`flex h-14 w-full items-center gap-3 px-5 text-[14px] text-[#0a0908] ${
+              onClick={() => {
+                if (!isBusy) onSelect(key);
+              }}
+              disabled={isBusy}
+              className={`flex h-14 w-full items-center gap-3 px-5 text-[14px] text-[#0a0908] disabled:cursor-wait disabled:opacity-55 ${
                 index ? "border-t border-[#e5e0da]" : ""
               }`}
             >
