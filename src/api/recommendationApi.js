@@ -38,24 +38,106 @@ const getProductPreview = async (productId) => {
   };
 };
 
-const normalizeLookProduct = (product) => ({
-  id: product?.product_id ?? product?.id,
-  name: product?.name ?? product?.product_name ?? "",
-  category: product?.category ?? product?.product_category ?? product?.item_type ?? "",
-  image: resolveImageUrl(product?.image),
-  price: product?.price ?? null,
-});
+const firstArray = (...values) => values.find(Array.isArray) ?? [];
 
-const normalizeLook = (look, detail) => {
-  const products = (detail?.products ?? look?.products ?? []).map(normalizeLookProduct);
+const normalizeLookProduct = (product) => {
+  if (product === null || product === undefined || typeof product !== "object") {
+    return {
+      id: product,
+      name: "",
+      category: "",
+      image: "",
+      price: null,
+    };
+  }
+
+  const nestedProduct = product.product && typeof product.product === "object" ? product.product : null;
+  const productId = product.product_id
+    ?? product.productId
+    ?? nestedProduct?.id
+    ?? product.id
+    ?? product.product;
+
+  return {
+    id: productId,
+    name: product.name ?? product.product_name ?? nestedProduct?.name ?? "",
+    category: product.category ?? product.product_category ?? product.item_type ?? nestedProduct?.category ?? "",
+    image: resolveImageUrl(
+      product.image
+        ?? product.image_url
+        ?? product.product_image
+        ?? product.thumbnail
+        ?? product.thumbnail_url
+        ?? nestedProduct?.image,
+    ),
+    price: product.price ?? nestedProduct?.price ?? null,
+  };
+};
+
+const getLookProducts = (look, detail) => firstArray(
+  detail?.products,
+  detail?.matched_products,
+  detail?.matchedProducts,
+  detail?.recommended_products,
+  detail?.recommendedProducts,
+  detail?.recommendation_products,
+  detail?.recommendationProducts,
+  detail?.items,
+  detail?.product_items,
+  detail?.productItems,
+  detail?.product_details,
+  detail?.productDetails,
+  detail?.product_ids,
+  detail?.productIds,
+  look?.products,
+  look?.matched_products,
+  look?.matchedProducts,
+  look?.recommended_products,
+  look?.recommendedProducts,
+  look?.recommendation_products,
+  look?.recommendationProducts,
+  look?.items,
+  look?.product_items,
+  look?.productItems,
+  look?.product_details,
+  look?.productDetails,
+  look?.product_ids,
+  look?.productIds,
+);
+
+const hydrateLookProduct = async (product) => {
+  const normalized = normalizeLookProduct(product);
+  if (!normalized.id || normalized.image) return normalized;
+
+  const preview = await getProductPreview(normalized.id);
+  return {
+    ...preview,
+    ...normalized,
+    name: normalized.name || preview.name,
+    category: normalized.category || preview.category,
+    image: normalized.image || preview.image,
+    price: normalized.price ?? preview.price,
+  };
+};
+
+const normalizeLook = async (look, detail) => {
+  const products = await Promise.all(getLookProducts(look, detail).map(hydrateLookProduct));
 
   return {
     id: look?.id,
-    name: look?.title ?? "",
+    name: look?.title ?? look?.name ?? look?.look_name ?? "",
     subtitle: look?.subtitle ?? "",
     description: look?.description ?? "",
     reason: look?.reason ?? "",
-    image: resolveImageUrl(look?.image) || products.find((product) => product.image)?.image || "",
+    image: resolveImageUrl(
+      look?.image
+        ?? look?.image_url
+        ?? look?.look_image
+        ?? look?.generated_image
+        ?? look?.generated_image_url
+        ?? look?.ai_image
+        ?? look?.ai_image_url,
+    ) || products.find((product) => product.image)?.image || "",
     products,
   };
 };
@@ -164,13 +246,17 @@ export const getRecommendationResult = async () => {
 
   if (!profile) return null;
 
-  const looks = profile.looks ?? [];
+  const looks = profile.looks
+    ?? profile.recommended_looks
+    ?? profile.recommendedLooks
+    ?? profile.recommendations
+    ?? [];
 
   return {
     id: profile.id,
     summary: profile.summary ?? profile.description ?? "",
     keywords: (profile.style_chips ?? []).map((chip) => chip.label ?? chip.name ?? chip),
-    looks: looks.map((look) => normalizeLook(look)),
+    looks: await Promise.all(looks.map((look) => normalizeLook(look))),
     todayItems: history,
   };
 };
