@@ -46,9 +46,7 @@ export const createProductProfile = (product) => {
 
   return {
     ...product,
-    aiAnalysis: mapAiAnalysisResponse(
-      product.aiAnalysis ?? mockProduct?.aiAnalysis,
-    ),
+    aiAnalysis: mapAiAnalysisResponse(product.aiAnalysis),
     brandStory: {
       design: designParagraphs,
       material:
