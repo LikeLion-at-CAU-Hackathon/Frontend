@@ -1,2 +1,2 @@
 ## 배포 링크
-https://frontend-zeta-eight-2ecx6xkvfm.vercel.app/
+https://frontend-cntjdus1.vercel.app/product/1
