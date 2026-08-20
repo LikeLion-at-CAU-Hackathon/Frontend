@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Share2 } from "lucide-react";
-import { toPng } from "html-to-image";
+import { toBlob } from "html-to-image";
 import { useNavigate, useParams } from "react-router-dom";
 import { getProductById } from "../../api/productApi";
 import {
@@ -16,6 +16,50 @@ import ProductProfileShareSheet from "../../components/my/ProductProfileShareShe
 import { createProductProfile } from "../../mocks/productProfiles";
 import useSavedProductsStore from "../../stores/useSavedProductsStore";
 import { shareProductWithKakao } from "../../utils/kakaoShare";
+
+const TRANSPARENT_IMAGE_PLACEHOLDER =
+  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+
+const downloadImageBlob = (blob, fileName) => {
+  const imageUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.download = fileName;
+  link.href = imageUrl;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(imageUrl), 1000);
+};
+
+const saveProfileImage = async (node, productId) => {
+  const fileName = `mcm-${productId}-profile.png`;
+  const blob = await toBlob(node, {
+    cacheBust: true,
+    pixelRatio: 2,
+    backgroundColor: "#fffdfb",
+    imagePlaceholder: TRANSPARENT_IMAGE_PLACEHOLDER,
+  });
+
+  if (!blob) {
+    throw new Error("이미지를 생성하지 못했습니다.");
+  }
+
+  const file = new File([blob], fileName, { type: "image/png" });
+
+  if (
+    navigator.share
+    && navigator.canShare
+    && navigator.canShare({ files: [file] })
+  ) {
+    await navigator.share({
+      files: [file],
+      title: "MCM TAP ATELIER",
+    });
+    return;
+  }
+
+  downloadImageBlob(blob, fileName);
+};
 
 function ProductProfilePage() {
   const { productId } = useParams();
@@ -103,15 +147,7 @@ function ProductProfilePage() {
       }
 
       if (action === "image" && captureRef.current) {
-        const dataUrl = await toPng(captureRef.current, {
-          cacheBust: true,
-          pixelRatio: 2,
-          backgroundColor: "#fffdfb",
-        });
-        const link = document.createElement("a");
-        link.download = `mcm-${productId}-profile.png`;
-        link.href = dataUrl;
-        link.click();
+        await saveProfileImage(captureRef.current, productId);
         setShareStatus("이미지를 저장했습니다.");
       }
     } catch (error) {
