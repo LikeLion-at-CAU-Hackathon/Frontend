@@ -225,15 +225,19 @@ function AdvisorSheet({
       return;
     }
 
-    if (hasSubmitted && (dragState.startScrollTop > 0 || (sheetRef.current?.scrollTop ?? 0) > 0)) {
+    const sheetScrollTop = sheetRef.current?.scrollTop ?? 0;
+    const canDragSheet = !hasSubmitted || (dragState.startScrollTop <= 0 && sheetScrollTop <= 0);
+
+    if (!canDragSheet) {
       return;
     }
+
+    event.preventDefault();
 
     if (!dragState.hasMoved && deltaY < DRAG_START_DISTANCE) {
       return;
     }
 
-    event.preventDefault();
     dragState.hasMoved = true;
 
     const nextOffset = Math.min(deltaY, window.innerHeight * 0.6);
@@ -271,6 +275,7 @@ function AdvisorSheet({
         style={{
           overscrollBehavior: "contain",
           touchAction: hasSubmitted ? "pan-y" : "none",
+          WebkitOverflowScrolling: dragOffset ? "auto" : "touch",
           transform: dragOffset ? `translateY(${dragOffset}px)` : undefined,
           transition: dragOffset && !isClosing ? undefined : "transform 180ms ease-out",
           userSelect: dragOffset ? "none" : undefined,
