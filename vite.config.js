@@ -5,12 +5,4 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: {
-    proxy: {
-      "/media": {
-        target: "https://mcm.p-e.kr",
-        changeOrigin: true,
-      },
-    },
-  },
 })

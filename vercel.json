@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/media/(.*)",
-      "destination": "https://mcm.p-e.kr/media/$1"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

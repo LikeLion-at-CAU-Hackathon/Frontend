@@ -19,7 +19,6 @@ import { shareProductWithKakao } from "../../utils/kakaoShare";
 
 const TRANSPARENT_IMAGE_PLACEHOLDER =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 const PROFILE_CAPTURE_BACKGROUND = "#fffdfb";
 
 const downloadImageBlob = (blob, fileName) => {
@@ -33,33 +32,20 @@ const downloadImageBlob = (blob, fileName) => {
   window.setTimeout(() => URL.revokeObjectURL(imageUrl), 1000);
 };
 
-const getCaptureSafeImageUrl = (source) => {
-  if (!source || source.startsWith("data:") || source.startsWith("blob:")) return source;
-  if (!API_BASE_URL || !/^https?:/.test(API_BASE_URL)) return source;
-
-  try {
-    const sourceUrl = new URL(source, window.location.origin);
-    const apiUrl = new URL(API_BASE_URL);
-
-    if (sourceUrl.origin === apiUrl.origin && sourceUrl.pathname.startsWith("/media/")) {
-      return `${sourceUrl.pathname}${sourceUrl.search}${sourceUrl.hash}`;
-    }
-  } catch {
-    return source;
-  }
-
-  return source;
-};
-
 const prepareCaptureImages = (node) => {
   Array.from(node.querySelectorAll("img")).forEach((image) => {
-    const safeSource = getCaptureSafeImageUrl(image.currentSrc || image.src);
+    const source = image.currentSrc || image.src;
     image.removeAttribute("srcset");
     image.loading = "eager";
     image.decoding = "sync";
 
-    if (safeSource && safeSource !== image.src) {
-      image.src = safeSource;
+    if (source && !source.startsWith("data:") && !source.startsWith("blob:")) {
+      image.crossOrigin = "anonymous";
+    }
+
+    if (source) {
+      image.src = "";
+      image.src = source;
     }
   });
 };
