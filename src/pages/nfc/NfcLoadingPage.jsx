@@ -4,6 +4,8 @@ import { getProductById } from "../../api/productApi";
 import useAppStore from "../../stores/useAppStore";
 import useRecommendationStore from "../../stores/useRecommendationStore";
 
+const NFC_LOADING_DELAY_MS = 1200;
+
 // NFC 태그로 진입한 제품 정보를 불러오는 화면
 function NfcLoadingPage() {
   const navigate = useNavigate();
@@ -18,12 +20,12 @@ function NfcLoadingPage() {
       const product = await getProductById(productId).catch(() => null);
 
       if (!product) {
-        await new Promise((resolve) => window.setTimeout(resolve, 1600));
+        await new Promise((resolve) => window.setTimeout(resolve, NFC_LOADING_DELAY_MS));
         if (!isCancelled) navigate("/nfc/failed", { replace: true });
         return;
       }
 
-      await new Promise((resolve) => window.setTimeout(resolve, 1600));
+      await new Promise((resolve) => window.setTimeout(resolve, NFC_LOADING_DELAY_MS));
       if (isCancelled) return;
 
       clearResult();
