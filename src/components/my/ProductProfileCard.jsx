@@ -36,7 +36,6 @@ function ProductSummary({ product, onUnsave }) {
           <img
             src={product.image}
             alt={product.name}
-            crossOrigin="anonymous"
             className="size-full object-contain"
           />
         ) : (
@@ -104,7 +103,6 @@ function AiAnalysis({ analysis }) {
                     <img
                       src={look.image}
                       alt={look.name}
-                      crossOrigin="anonymous"
                       className="h-20 w-full object-cover"
                     />
                   ) : (
