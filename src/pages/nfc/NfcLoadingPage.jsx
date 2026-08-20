@@ -42,8 +42,8 @@ function NfcLoadingPage() {
 
   return (
     <main className="relative flex min-h-[calc(100dvh_-_env(safe-area-inset-bottom))] items-center justify-center overflow-hidden bg-white px-[22px]">
-      <section className="flex w-[186px] -translate-y-[3px] flex-col items-center">
-        <h1 className="font-playfair-semibold text-[24px] leading-[18px] text-black">
+      <section className="flex w-full max-w-[320px] -translate-y-[3px] flex-col items-center">
+        <h1 className="font-playfair-semibold whitespace-nowrap text-center text-[24px] leading-[28px] text-black">
           MCM Tap Atelier
         </h1>
 
