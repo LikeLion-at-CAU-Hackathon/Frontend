@@ -1,10 +1,91 @@
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import BottomNav from "./components/common/BottomNav";
+import ErrorPage from "./pages/common/ErrorPage";
+import NfcFailedPage from "./pages/nfc/NfcFailedPage";
+import NfcLoadingPage from "./pages/nfc/NfcLoadingPage";
+import ProductExploreMorePage from "./pages/nfc/ProductExploreMorePage";
+import ProductDetailPage from "./pages/product/ProductDetailPage";
+import ProductSizeComparePage from "./pages/size/ProductSizeComparePage";
+import ProductSizeCompareResultPage from "./pages/size/ProductSizeCompareResultPage";
+import ProductStockPage from "./pages/stock/ProductStockPage";
+import ProductStoryPage from "./pages/story/ProductStoryPage";
+import AiLoadingPage from "./pages/ai/AiLoadingPage";
+import AIStyleProfilePage from "./pages/ai/AIStyleProfilePage";
+import LookDetailPage from "./pages/ai/LookDetailPage";
+import SavedProductsPage from "./pages/my/SavedProductsPage";
+import ProductProfilePage from "./pages/my/ProductProfilePage";
+import { DEFAULT_PRODUCT_ID } from "./mocks/products";
+
+const pages = [
+  { path: "/nfc", title: "NFC" },
+];
+
+function PlaceholderPage({ title }) {
+  return (
+    <main className="px-5 py-8">
+      <p className="text-sm font-medium text-[#8a8078]">Current tab</p>
+      <h1 className="mt-2 text-2xl font-semibold text-[#0a0908]">{title}</h1>
+    </main>
+  );
+}
+
+function AppContent() {
+  const { pathname } = useLocation();
+  const isFullScreenPage = pathname.startsWith("/nfc/");
+
+  return (
+    <div className="mx-auto flex h-dvh w-full max-w-[440px] flex-col overflow-hidden bg-[#f8f6f3]">
+      <div
+        className={`scrollbar-hidden min-h-0 flex-1 overflow-y-auto ${
+          isFullScreenPage ? "" : "pb-[calc(62px+env(safe-area-inset-bottom))]"
+        }`}
+      >
+        <Routes>
+          <Route path="/" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}`} replace />} />
+          <Route path="/product" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}`} replace />} />
+          <Route path="/story" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}/story`} replace />} />
+          <Route path="/product/stock" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}/stock`} replace />} />
+          <Route path="/product/explore-more" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}/explore-more`} replace />} />
+          <Route path="/product/size-compare" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}/size-compare`} replace />} />
+          <Route path="/product/size-compare/result" element={<Navigate to={`/product/${DEFAULT_PRODUCT_ID}/size-compare/result`} replace />} />
+          <Route path="/product/:productId" element={<ProductDetailPage />} />
+          <Route path="/product/:productId/story" element={<ProductStoryPage />} />
+          <Route path="/product/:productId/stock" element={<ProductStockPage />} />
+          <Route path="/product/:productId/explore-more" element={<ProductExploreMorePage />} />
+          <Route path="/product/:productId/size-compare" element={<ProductSizeComparePage />} />
+          <Route path="/product/:productId/size-compare/result" element={<ProductSizeCompareResultPage />} />
+          <Route path="/error" element={<ErrorPage />} />
+          <Route path="/nfc/:productId" element={<NfcLoadingPage />} />
+          <Route path="/nfc/loading" element={<NfcLoadingPage />} />
+          <Route path="/nfc/failed" element={<NfcFailedPage />} />
+          <Route path="/nfc/staff-called" element={<NfcFailedPage isStaffCalled />} />
+          <Route path="/ai" element={<AiLoadingPage />} />
+          <Route path="/ai/style-profile" element={<AIStyleProfilePage />} />
+          <Route path="/my" element={<SavedProductsPage />} />
+          <Route
+            path="/my/saved-products/:productId"
+            element={<ProductProfilePage />}
+          />
+          <Route path="/ai/style-recommendation/:lookId" element={<LookDetailPage />} />
+          {pages.map((page) => (
+            <Route
+              key={page.path}
+              path={page.path}
+              element={<PlaceholderPage title={page.title} />}
+            />
+          ))}
+        </Routes>
+      </div>
+      {!isFullScreenPage && <BottomNav className="max-w-[440px]" />}
+    </div>
+  );
+}
+
 function App() {
   return (
-    <main>
-      <h1>2026 멋사 해커톤</h1>
-      <p>프론트엔드 초기 세팅 ㅎㅎ</p>
-      <p>지연 지수 서연 성은 예은 지윤 화이팅~</p>
-    </main>
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }
 

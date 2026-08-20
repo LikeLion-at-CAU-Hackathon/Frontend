@@ -1,0 +1,423 @@
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import AdvisorSheet from "../../components/common/AdvisorSheet";
+import Button from "../../components/common/Button";
+import useProduct from "../../hooks/useProduct";
+
+const labels = {
+  compareSizes: "Compare Sizes",
+  current: "현재 선택",
+  request: "두 제품 실물 비교 요청",
+  backToProduct: "제품으로 돌아가기",
+};
+
+const defaultCompareFields = [
+  { label: "크기", valueKey: "dimensions", format: "dimensions" },
+  { label: "스트랩", valueKey: "strap", format: "dash" },
+  { label: "수납", valueKey: "storage", format: "storage" },
+  { label: "가격", valueKey: "price", format: "price" },
+  { label: "재고", valueKey: "stock", format: "stock" },
+];
+
+const ignoredSpecLabels = new Set(["STYLE NO."]);
+const defaultCompareValueKeys = new Set(defaultCompareFields.map((field) => field.valueKey));
+const specLabelMap = {
+  DIMENSIONS: "크기",
+  STRAP: "스트랩",
+  STORAGE: "수납",
+  PRICE: "가격",
+  STOCK: "재고",
+  CLOSURE: "잠금 방식",
+};
+const specFormatMap = {
+  DIMENSIONS: "dimensions",
+  STRAP: "dash",
+  STORAGE: "storage",
+  PRICE: "price",
+  STOCK: "stock",
+};
+const sizeMeasurementsSpecLabel = "SIZE MEASUREMENTS";
+const specPartValueKeyPrefix = "spec-part:";
+
+const formatPrice = (price) => {
+  const numericPrice = Number(price);
+
+  return Number.isFinite(numericPrice) ? `₩${numericPrice.toLocaleString("ko-KR")}` : "-";
+};
+const formatStorage = (value) => value.replaceAll(" / ", " · ");
+const formatStockCount = (quantity) => `${quantity}개`;
+const formatCurrentStoreStock = (quantity) =>
+  quantity > 0 ? `${formatStockCount(quantity)} (현재 매장)` : "재고 없음";
+const formatStock = (value) => {
+  const numericValue = Number(value);
+  return Number.isNaN(numericValue) ? String(value) : formatCurrentStoreStock(numericValue);
+};
+const formatDimension = (value) => String(value).replace(/^약\s+/, "").replaceAll(" x ", " × ");
+const formatStrap = (value) => {
+  const text = String(value).replaceAll("-", "–").replace(/\s*~\s*/g, "–");
+  const measurement = text.match(
+    /\d+(?:\.\d+)?\s*cm\s*–\s*\d+(?:\.\d+)?\s*cm|\d+(?:\.\d+)?\s*–\s*\d+(?:\.\d+)?\s*cm/,
+  )?.[0];
+
+  if (!measurement) return text;
+
+  return measurement
+    .replace(/\s*cm\s*–\s*/i, "–")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+const formatCompareValue = (value, field) => {
+  if (value === undefined || value === null || value === "") return "-";
+
+  switch (field.format) {
+    case "dimensions":
+      return formatDimension(value);
+    case "dash":
+      return formatStrap(value);
+    case "storage":
+      return formatStorage(String(value)).replace(" · AirPods", " ·\nAirPods");
+    case "price":
+      return formatPrice(value);
+    case "stock":
+      return formatStock(value);
+    case "availability": {
+      const numericValue = Number(value);
+      return Number.isNaN(numericValue) ? String(value) : numericValue > 0 ? "유" : "무";
+    }
+    default:
+      return String(value);
+  }
+};
+
+const parseSpecParts = (value) => {
+  if (!value) return new Map();
+
+  return String(value)
+    .split(/\s*\/\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .reduce((parts, part) => {
+      const match = part.match(/^([^:：]+)\s*[:：]\s*(.+)$/);
+      if (!match) return parts;
+
+      parts.set(match[1].trim(), match[2].trim());
+      return parts;
+    }, new Map());
+};
+
+const getSpecValue = (productSize, specLabel) =>
+  productSize?.specs?.find((spec) => spec.label === specLabel)?.value;
+
+const getSpecCompareValue = (productSize, field) => {
+  if (field.valueKey?.startsWith(specPartValueKeyPrefix)) {
+    const [specLabel, partLabel] = field.valueKey
+      .slice(specPartValueKeyPrefix.length)
+      .split("::");
+
+    return parseSpecParts(getSpecValue(productSize, specLabel)).get(partLabel);
+  }
+
+  if (!field.valueKey?.startsWith("spec:")) return productSize?.[field.valueKey];
+
+  const specLabel = field.valueKey.slice("spec:".length);
+  return getSpecValue(productSize, specLabel);
+};
+
+const hasCompareValue = (value) => value !== undefined && value !== null && value !== "";
+
+const normalizeForCompare = (value, field) => {
+  return formatCompareValue(value, field).replace(/\s+/g, " ").trim();
+};
+
+const hasDifferentCompareValue = (currentProduct, compareProduct, field) => {
+  const currentValue = getSpecCompareValue(currentProduct, field);
+  const compareValue = getSpecCompareValue(compareProduct, field);
+
+  if (!hasCompareValue(currentValue) && !hasCompareValue(compareValue)) return false;
+
+  return normalizeForCompare(currentValue, field) !== normalizeForCompare(compareValue, field);
+};
+
+const hasAnyCompareValue = (currentProduct, compareProduct, field) => {
+  const currentValue = getSpecCompareValue(currentProduct, field);
+  const compareValue = getSpecCompareValue(compareProduct, field);
+
+  return hasCompareValue(currentValue) || hasCompareValue(compareValue);
+};
+
+const buildCompareFields = (currentProduct, compareProduct, product) => {
+  const specs = [
+    ...(currentProduct?.specs ?? []),
+    ...(compareProduct?.specs ?? []),
+    ...(product?.specs ?? []),
+  ];
+  const compareFields = defaultCompareFields
+    .filter((field) => !["price", "stock"].includes(field.valueKey))
+    .filter((field) => hasAnyCompareValue(currentProduct, compareProduct, field));
+  const seenLabels = new Set();
+
+  specs.forEach((spec) => {
+    if (!spec?.label || ignoredSpecLabels.has(spec.label) || seenLabels.has(spec.label)) return;
+
+    const normalizedLabel = spec.label.toUpperCase();
+
+    if (normalizedLabel === sizeMeasurementsSpecLabel) {
+      const measurementLabels = [
+        ...new Set([
+          ...parseSpecParts(getSpecValue(currentProduct, spec.label)).keys(),
+          ...parseSpecParts(getSpecValue(compareProduct, spec.label)).keys(),
+        ]),
+      ];
+
+      measurementLabels.forEach((measurementLabel) => {
+        const field = {
+          label: measurementLabel,
+          valueKey: `${specPartValueKeyPrefix}${spec.label}::${measurementLabel}`,
+          format: "text",
+        };
+
+        if (!hasAnyCompareValue(currentProduct, compareProduct, field)) return;
+
+        compareFields.push(field);
+      });
+
+      seenLabels.add(spec.label);
+      return;
+    }
+
+    const mappedKey = normalizedLabel.toLowerCase().replaceAll(" ", "_");
+    if (defaultCompareValueKeys.has(mappedKey)) return;
+
+    const field = {
+      label: specLabelMap[normalizedLabel] ?? spec.label,
+      valueKey: `spec:${spec.label}`,
+      format: specFormatMap[normalizedLabel] ?? "text",
+    };
+
+    if (!hasDifferentCompareValue(currentProduct, compareProduct, field)) return;
+
+    seenLabels.add(spec.label);
+    compareFields.push(field);
+  });
+
+  return [
+    ...compareFields,
+    { label: "가격", valueKey: "price", format: "price" },
+    { label: "재고", valueKey: "stock", format: "stock" },
+  ];
+};
+
+function ProductCard({
+  productName,
+  productSize,
+  isCurrent = false,
+  isDropdownOpen,
+  onToggleDropdown,
+  onSelectSize,
+  selectableSizes,
+}) {
+  return (
+    <article
+      className={`relative aspect-[159/160] min-h-[136px] w-full overflow-visible rounded-[12px] border px-[9px] py-[7px] ${
+        isCurrent ? "border-[#6b3f1f]" : "border-[rgba(107,63,31,0.12)]"
+      }`}
+    >
+      <div className="relative z-10">
+        <p className="text-[11px] font-semibold leading-[16.5px] text-[#0a0908]">
+          {productName}
+        </p>
+        {isCurrent ? (
+          <>
+            <p className="mt-[2px] text-[11px] leading-[16.5px] text-black">
+              {productSize.size}
+            </p>
+            <p className="mt-[1px] text-[10px] leading-[15px] text-[#8a8078]">
+              {labels.current}
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="relative mt-[2px] h-[18px] w-[54px]">
+              <button
+                type="button"
+                onClick={onToggleDropdown}
+                className="relative flex h-full w-full items-center rounded-[8px] border border-[#bcbab6] bg-[#faf8f5] pl-[5px] pr-[15px] text-left !text-[11px] !leading-[16.5px] text-black"
+              >
+                {productSize.size}
+                <span className="absolute right-[5px] top-[4px] size-[9px]" aria-hidden="true">
+                  <span className="absolute left-[1px] top-[1px] size-[6px] rotate-45 border-b border-r border-black" />
+                </span>
+              </button>
+              {isDropdownOpen && (
+                <div className="absolute left-0 top-[18px] z-30 w-full overflow-hidden rounded-b-[8px] border-x border-b border-[#bcbab6] bg-white">
+                  {selectableSizes.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => onSelectSize(size)}
+                      className="block h-[17px] w-full border-b border-[#bcbab6] bg-white text-center !text-[11px] !leading-[16.5px] text-black last:border-b-0"
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+      <div className="absolute bottom-0 left-0 h-[64%] w-full overflow-hidden rounded-b-[12px] bg-[#f7f5f2]">
+        {productSize.image && (
+          <img
+            src={productSize.image}
+            alt={`${productName} ${productSize.size}`}
+            className="size-full object-contain"
+          />
+        )}
+      </div>
+    </article>
+  );
+}
+
+function CompareCell({ label, value, strong = false }) {
+  return (
+    <div className="flex flex-col items-center gap-0 text-center">
+      <p className="text-[9px] leading-[13.5px] tracking-[1.26px] text-[#6f6f6f]">
+        {label}
+      </p>
+      <p
+        className={`whitespace-pre-line text-[12px] leading-[18px] ${
+          strong ? "font-medium text-[#0a0908]" : "text-[#3d3530]"
+        }`}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function CompareRow({ label, currentValue, compareValue }) {
+  return (
+    <div className="grid grid-cols-2 gap-[10px]">
+      <CompareCell label={label} value={currentValue} strong />
+      <CompareCell label={label} value={compareValue} />
+    </div>
+  );
+}
+
+function ProductSizeCompareResultPage() {
+  const { productId } = useParams();
+  const [searchParams] = useSearchParams();
+  const { product, productSizes, isLoading, errorMessage } = useProduct(productId);
+  const currentProduct = productSizes.find((item) => item.isCurrent) ?? productSizes[0];
+  const initialCompareProduct =
+    productSizes.find((item) => item.size !== currentProduct?.size) ?? currentProduct;
+  const selectableSizes = useMemo(() => productSizes.map((item) => item.size), [productSizes]);
+  const sizeInfoBySize = useMemo(
+    () => Object.fromEntries(productSizes.map((item) => [item.size, item])),
+    [productSizes],
+  );
+  const requestedSize = searchParams.get("size");
+  const defaultCompareSize = selectableSizes.includes(requestedSize)
+    ? requestedSize
+    : initialCompareProduct?.size ?? "";
+  const [compareSize, setCompareSize] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+
+  useEffect(() => {
+    if (!defaultCompareSize) return undefined;
+
+    let isCancelled = false;
+    queueMicrotask(() => {
+      if (isCancelled) return;
+      setCompareSize((prevSize) =>
+        selectableSizes.includes(prevSize) ? prevSize : defaultCompareSize,
+      );
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [defaultCompareSize, selectableSizes]);
+
+  if (isLoading) {
+    return (
+      <main className="min-h-[734px] bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a8078]">
+        Loading product...
+      </main>
+    );
+  }
+
+  if (errorMessage || !product || !currentProduct) {
+    return (
+      <main className="min-h-[734px] bg-[#faf8f5] px-[22px] py-20 text-center text-[12px] text-[#8a3d2f]">
+        {errorMessage || "Product not found."}
+      </main>
+    );
+  }
+
+  const compareProduct = sizeInfoBySize[compareSize] ?? initialCompareProduct;
+  const compareFields = product.sizeCompareFields ?? buildCompareFields(currentProduct, compareProduct, product);
+
+  return (
+    <main className="min-h-[734px] overflow-x-hidden bg-[#faf8f5] px-[22px] pt-4">
+      <p className="text-[10px] font-medium uppercase leading-[15px] tracking-[1.6px] text-[#b9824c]">
+        {labels.compareSizes}
+      </p>
+
+      <section className="mt-[49px] grid grid-cols-2 gap-5">
+        <ProductCard
+          productName={product.name}
+          productSize={currentProduct}
+          selectableSizes={selectableSizes}
+          isCurrent
+        />
+        <ProductCard
+          productName={product.name}
+          productSize={compareProduct}
+          selectableSizes={selectableSizes}
+          isDropdownOpen={isDropdownOpen}
+          onToggleDropdown={() => setIsDropdownOpen((prev) => !prev)}
+          onSelectSize={(size) => {
+            setCompareSize(size);
+            setIsDropdownOpen(false);
+          }}
+        />
+      </section>
+
+      <section className="mt-[28px] flex flex-col gap-[24px]">
+        {compareFields.map((field) => (
+          <CompareRow
+            key={`${field.label}-${field.valueKey}`}
+            label={field.label}
+            currentValue={formatCompareValue(getSpecCompareValue(currentProduct, field), field)}
+            compareValue={formatCompareValue(getSpecCompareValue(compareProduct, field), field)}
+          />
+        ))}
+      </section>
+
+      <section className="mt-[29px] flex flex-col gap-[9px] pb-6">
+        <Button onClick={() => setIsAdvisorOpen(true)}>{labels.request}</Button>
+        <Button
+          to={`/product/${product.id}`}
+          variant="outline"
+          className="!border-[1.5px] font-normal tracking-[0px]"
+        >
+          {labels.backToProduct}
+        </Button>
+      </section>
+
+      <AdvisorSheet
+        isOpen={isAdvisorOpen}
+        product={product}
+        initialSubmitted
+        initialRequest="실물 비교 요청"
+        onClose={() => setIsAdvisorOpen(false)}
+      />
+    </main>
+  );
+}
+
+export default ProductSizeCompareResultPage;
