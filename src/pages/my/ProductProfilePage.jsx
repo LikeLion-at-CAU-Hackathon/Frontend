@@ -19,6 +19,7 @@ import { shareProductWithKakao } from "../../utils/kakaoShare";
 
 const TRANSPARENT_IMAGE_PLACEHOLDER =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+const PROFILE_CAPTURE_BACKGROUND = "#fffdfb";
 
 const downloadImageBlob = (blob, fileName) => {
   const imageUrl = URL.createObjectURL(blob);
@@ -31,14 +32,51 @@ const downloadImageBlob = (blob, fileName) => {
   window.setTimeout(() => URL.revokeObjectURL(imageUrl), 1000);
 };
 
+const withCaptureClone = async (node, callback) => {
+  const { width } = node.getBoundingClientRect();
+  const container = document.createElement("div");
+  const clone = node.cloneNode(true);
+
+  container.style.position = "fixed";
+  container.style.left = "-10000px";
+  container.style.top = "0";
+  container.style.width = `${width}px`;
+  container.style.background = "transparent";
+  container.style.pointerEvents = "none";
+  container.style.zIndex = "-1";
+
+  clone.style.margin = "0";
+  clone.style.width = `${width}px`;
+  clone.style.maxWidth = "none";
+  clone.style.backgroundColor = PROFILE_CAPTURE_BACKGROUND;
+
+  container.appendChild(clone);
+  document.body.appendChild(container);
+
+  try {
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+    return await callback(clone);
+  } finally {
+    container.remove();
+  }
+};
+
 const saveProfileImage = async (node, productId) => {
   const fileName = `mcm-${productId}-profile.png`;
-  const blob = await toBlob(node, {
-    cacheBust: true,
-    pixelRatio: 1.5,
-    backgroundColor: "#fffdfb",
-    imagePlaceholder: TRANSPARENT_IMAGE_PLACEHOLDER,
-  });
+  const blob = await withCaptureClone(node, (captureNode) =>
+    toBlob(captureNode, {
+      cacheBust: true,
+      pixelRatio: 1.5,
+      backgroundColor: PROFILE_CAPTURE_BACKGROUND,
+      imagePlaceholder: TRANSPARENT_IMAGE_PLACEHOLDER,
+      style: {
+        backgroundColor: PROFILE_CAPTURE_BACKGROUND,
+        margin: "0",
+      },
+    }),
+  );
 
   if (!blob) {
     throw new Error("이미지를 생성하지 못했습니다.");
