@@ -22,6 +22,7 @@ function AdvisorSheet({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isClosing, setIsClosing] = useState(false);
+  const overlayRef = useRef(null);
   const sheetRef = useRef(null);
   const closeTimerRef = useRef(null);
   const currentDragOffsetRef = useRef(0);
@@ -37,6 +38,48 @@ function AdvisorSheet({
   useEffect(() => {
     return () => window.clearTimeout(closeTimerRef.current);
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const scrollY = window.scrollY;
+    const bodyStyle = document.body.style;
+    const htmlStyle = document.documentElement.style;
+    const previousBodyPosition = bodyStyle.position;
+    const previousBodyTop = bodyStyle.top;
+    const previousBodyWidth = bodyStyle.width;
+    const previousBodyOverflow = bodyStyle.overflow;
+    const previousBodyOverscrollBehavior = bodyStyle.overscrollBehavior;
+    const previousHtmlOverflow = htmlStyle.overflow;
+    const previousHtmlOverscrollBehavior = htmlStyle.overscrollBehavior;
+
+    bodyStyle.position = "fixed";
+    bodyStyle.top = `-${scrollY}px`;
+    bodyStyle.width = "100%";
+    bodyStyle.overflow = "hidden";
+    bodyStyle.overscrollBehavior = "none";
+    htmlStyle.overflow = "hidden";
+    htmlStyle.overscrollBehavior = "none";
+
+    const preventBackgroundTouchMove = (event) => {
+      if (!overlayRef.current?.contains(event.target)) return;
+      event.preventDefault();
+    };
+
+    document.addEventListener("touchmove", preventBackgroundTouchMove, { passive: false });
+
+    return () => {
+      document.removeEventListener("touchmove", preventBackgroundTouchMove);
+      bodyStyle.position = previousBodyPosition;
+      bodyStyle.top = previousBodyTop;
+      bodyStyle.width = previousBodyWidth;
+      bodyStyle.overflow = previousBodyOverflow;
+      bodyStyle.overscrollBehavior = previousBodyOverscrollBehavior;
+      htmlStyle.overflow = previousHtmlOverflow;
+      htmlStyle.overscrollBehavior = previousHtmlOverscrollBehavior;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
 
   if (!isOpen) {
     return null;
@@ -125,6 +168,7 @@ function AdvisorSheet({
 
   return (
     <div
+      ref={overlayRef}
       className="fixed inset-y-0 left-1/2 z-[60] w-full max-w-[440px] -translate-x-1/2 bg-[rgba(10,9,8,0.42)] backdrop-blur-[2px]"
       style={{ overscrollBehavior: "contain" }}
       role="dialog"
