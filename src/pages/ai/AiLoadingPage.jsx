@@ -13,6 +13,7 @@ import useRecommendationStore from "../../stores/useRecommendationStore";
 const loadingSteps = [
   { progress: 28, duration: 4300 },
   { progress: 52, duration: 5500 },
+  { progress: 78, duration: 5500 },
   { progress: 100, duration: 0 },
 ];
 
@@ -20,6 +21,7 @@ const messages = [
   "오늘 태그 및 저장한 제품 확인 중",
   "제품의 공통 컬러, 스타일 분석 중",
   "스타일 성향을 정리하고 있어요",
+  "스타일 분석에는 약 2~3분 정도 소요됩니다.",
 ];
 
 const analysisRequests = new Map();
