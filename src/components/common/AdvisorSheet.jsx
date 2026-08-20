@@ -34,6 +34,13 @@ function AdvisorSheet({
     isDragging: false,
     hasMoved: false,
   });
+  const touchDragStateRef = useRef({
+    startX: 0,
+    startY: 0,
+    startScrollTop: 0,
+    isDragging: false,
+    hasMoved: false,
+  });
   const displayProduct = product ?? getMockProductById(currentProductId ?? DEFAULT_PRODUCT_ID);
 
   useEffect(() => {
@@ -114,7 +121,7 @@ function AdvisorSheet({
 
   const handlePointerDown = (event) => {
     if (!event.isPrimary) return;
-    if (hasSubmitted) return;
+    if (event.pointerType === "touch") return;
 
     dragStateRef.current = {
       pointerId: event.pointerId,
@@ -127,7 +134,7 @@ function AdvisorSheet({
 
   const handlePointerMove = (event) => {
     const dragState = dragStateRef.current;
-    if (hasSubmitted) return;
+    if (event.pointerType === "touch") return;
     if (!dragState.isDragging || dragState.pointerId !== event.pointerId || isClosing) return;
 
     const deltaX = event.clientX - dragState.startX;
@@ -136,6 +143,10 @@ function AdvisorSheet({
     if (Math.abs(deltaX) > Math.abs(deltaY) || deltaY <= 0) {
       setDragOffset(0);
       currentDragOffsetRef.current = 0;
+      return;
+    }
+
+    if (hasSubmitted && sheetRef.current?.scrollTop > 0) {
       return;
     }
 
@@ -157,7 +168,7 @@ function AdvisorSheet({
 
   const handlePointerEnd = (event) => {
     if (isClosing) return;
-    if (hasSubmitted) return;
+    if (event.pointerType === "touch") return;
 
     if (dragStateRef.current.hasMoved) {
       event.currentTarget.releasePointerCapture?.(event.pointerId);
@@ -177,6 +188,70 @@ function AdvisorSheet({
       isDragging: false,
       hasMoved: false,
     };
+  };
+
+  const resetTouchDragState = () => {
+    touchDragStateRef.current = {
+      startX: 0,
+      startY: 0,
+      startScrollTop: 0,
+      isDragging: false,
+      hasMoved: false,
+    };
+  };
+
+  const handleTouchStart = (event) => {
+    if (isClosing || event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+    touchDragStateRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      startScrollTop: sheetRef.current?.scrollTop ?? 0,
+      isDragging: true,
+      hasMoved: false,
+    };
+  };
+
+  const handleTouchMove = (event) => {
+    const dragState = touchDragStateRef.current;
+    if (!dragState.isDragging || isClosing || event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - dragState.startX;
+    const deltaY = touch.clientY - dragState.startY;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) || deltaY <= 0) {
+      return;
+    }
+
+    if (hasSubmitted && (dragState.startScrollTop > 0 || (sheetRef.current?.scrollTop ?? 0) > 0)) {
+      return;
+    }
+
+    if (!dragState.hasMoved && deltaY < DRAG_START_DISTANCE) {
+      return;
+    }
+
+    event.preventDefault();
+    dragState.hasMoved = true;
+
+    const nextOffset = Math.min(deltaY, window.innerHeight * 0.6);
+    currentDragOffsetRef.current = nextOffset;
+    setDragOffset(nextOffset);
+  };
+
+  const handleTouchEnd = () => {
+    if (isClosing) return;
+
+    if (touchDragStateRef.current.hasMoved && currentDragOffsetRef.current >= SWIPE_CLOSE_DISTANCE) {
+      handleClose();
+    } else {
+      setDragOffset(0);
+      currentDragOffsetRef.current = 0;
+    }
+
+    resetTouchDragState();
   };
 
   return (
@@ -205,6 +280,10 @@ function AdvisorSheet({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
         onPointerCancel={handlePointerEnd}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
         <div className="flex justify-center pt-3">
           <span className="h-1 w-9 rounded-[2px] bg-[#e5e0da]" />
