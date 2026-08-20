@@ -13,20 +13,7 @@ import useRecommendationStore from "../../stores/useRecommendationStore";
 const ANALYSIS_PROGRESS_DURATION_MS = 180000;
 const MAX_PENDING_PROGRESS = 96;
 const PROGRESS_TICK_MS = 250;
-
-const loadingSteps = [
-  { progress: 28 },
-  { progress: 52 },
-  { progress: 78 },
-  { progress: 100 },
-];
-
-const getLoadingStep = (progress) => {
-  return loadingSteps.reduce(
-    (currentStep, loadingStep, index) => (progress >= loadingStep.progress ? index : currentStep),
-    0,
-  );
-};
+const MESSAGE_STEP_INTERVAL_MS = 1800;
 
 const messages = [
   "오늘 태그 및 저장한 제품 확인 중",
@@ -74,8 +61,15 @@ function AiLoadingPage() {
       );
 
       setProgress(nextProgress);
-      setStep(getLoadingStep(nextProgress));
     }, PROGRESS_TICK_MS);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setStep((currentStep) => (currentStep + 1) % messages.length);
+    }, MESSAGE_STEP_INTERVAL_MS);
 
     return () => window.clearInterval(timer);
   }, []);
@@ -94,7 +88,7 @@ function AiLoadingPage() {
         if (isCancelled) return;
 
         setProgress(100);
-        setStep(loadingSteps.length - 1);
+        setStep(messages.length - 1);
         setResult(result);
         await new Promise((resolve) => window.setTimeout(resolve, 450));
         if (isCancelled) return;
@@ -144,18 +138,15 @@ function AiLoadingPage() {
 
         <div className="mt-6 flex w-[152px] flex-col items-center gap-3">
           {messages.map((message, index) => {
-            const isComplete = index <= step;
-            const isNext = index === step + 1;
+            const isActive = index === step;
 
             return (
               <p
                 key={message}
                 className={`whitespace-nowrap text-center text-[11px] font-normal leading-[16.5px] transition-colors duration-500 ${
-                  isComplete
+                  isActive
                     ? "text-[#1a1208]"
-                    : isNext
-                      ? "text-[#8b7355]"
-                      : "text-[#8b7355]/30"
+                    : "text-[#8b7355]/30"
                 }`}
               >
                 {message}
