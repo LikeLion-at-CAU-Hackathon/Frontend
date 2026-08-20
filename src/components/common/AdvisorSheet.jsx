@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import advisorCheckIcon from "../../assets/images/figma/product-detail/advisor-check.svg";
 import { DEFAULT_PRODUCT_ID, getMockProductById } from "../../mocks/products";
 import useAppStore from "../../stores/useAppStore";
@@ -6,6 +6,8 @@ import Button from "./Button";
 
 const options = ["다른 옵션", "착용 상담", "스타일링", "기타"];
 // Advisor 버튼을 눌렀을 때 뜨는 상담 요청창
+const SWIPE_CLOSE_DISTANCE = 72;
+
 function AdvisorSheet({
   isOpen,
   onClose,
@@ -17,6 +19,13 @@ function AdvisorSheet({
   const [selectedOption, setSelectedOption] = useState("");
   const [requestText, setRequestText] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const sheetRef = useRef(null);
+  const dragStateRef = useRef({
+    startX: 0,
+    startY: 0,
+    isDragging: false,
+  });
   const displayProduct = product ?? getMockProductById(currentProductId ?? DEFAULT_PRODUCT_ID);
 
   if (!isOpen) {
@@ -34,7 +43,44 @@ function AdvisorSheet({
     setSelectedOption("");
     setRequestText("");
     setIsSubmitted(false);
+    setDragOffset(0);
     onClose();
+  };
+
+  const handleTouchStart = (event) => {
+    const touch = event.touches[0];
+    const sheet = sheetRef.current;
+
+    dragStateRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      isDragging: !sheet || sheet.scrollTop <= 0,
+    };
+  };
+
+  const handleTouchMove = (event) => {
+    if (!dragStateRef.current.isDragging) return;
+
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - dragStateRef.current.startX;
+    const deltaY = touch.clientY - dragStateRef.current.startY;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) || deltaY <= 0) {
+      setDragOffset(0);
+      return;
+    }
+
+    setDragOffset(Math.min(deltaY, 140));
+  };
+
+  const handleTouchEnd = () => {
+    if (dragOffset >= SWIPE_CLOSE_DISTANCE) {
+      handleClose();
+    } else {
+      setDragOffset(0);
+    }
+
+    dragStateRef.current.isDragging = false;
   };
 
   return (
@@ -45,10 +91,16 @@ function AdvisorSheet({
       onClick={handleClose}
     >
       <section
+        ref={sheetRef}
         className={`absolute bottom-0 left-0 w-full rounded-t-[16px] bg-[#fcfbf9] ${
           hasSubmitted ? "max-h-[calc(100dvh-84px)] overflow-y-auto" : "min-h-[467px]"
         }`}
+        style={{ transform: dragOffset ? `translateY(${dragOffset}px)` : undefined }}
         onClick={(event) => event.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
         <div className="flex justify-center pt-3">
           <span className="h-1 w-9 rounded-[2px] bg-[#e5e0da]" />
@@ -94,7 +146,7 @@ function RequestContent({
             <img
               src={product.image}
               alt=""
-              className="size-full scale-[1.4] -translate-y-[10px] rounded-[5px] object-contain"
+              className="size-full scale-[1.3] rounded-[5px] object-contain"
             />
           )}
         </div>
