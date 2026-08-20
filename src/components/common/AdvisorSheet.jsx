@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import advisorCheckIcon from "../../assets/images/figma/product-detail/advisor-check.svg";
 import { DEFAULT_PRODUCT_ID, getMockProductById } from "../../mocks/products";
 import useAppStore from "../../stores/useAppStore";
@@ -7,6 +7,7 @@ import Button from "./Button";
 const options = ["다른 옵션", "착용 상담", "스타일링", "기타"];
 // Advisor 버튼을 눌렀을 때 뜨는 상담 요청창
 const SWIPE_CLOSE_DISTANCE = 72;
+const SHEET_CLOSE_ANIMATION_MS = 180;
 
 function AdvisorSheet({
   isOpen,
@@ -20,13 +21,22 @@ function AdvisorSheet({
   const [requestText, setRequestText] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
+  const [isClosing, setIsClosing] = useState(false);
   const sheetRef = useRef(null);
+  const closeTimerRef = useRef(null);
+  const currentDragOffsetRef = useRef(0);
   const dragStateRef = useRef({
+    pointerId: null,
     startX: 0,
     startY: 0,
     isDragging: false,
+    hasMoved: false,
   });
   const displayProduct = product ?? getMockProductById(currentProductId ?? DEFAULT_PRODUCT_ID);
+
+  useEffect(() => {
+    return () => window.clearTimeout(closeTimerRef.current);
+  }, []);
 
   if (!isOpen) {
     return null;
@@ -40,52 +50,83 @@ function AdvisorSheet({
       : selectedOption || requestText.trim() || "재고 문의";
 
   const handleClose = () => {
-    setSelectedOption("");
-    setRequestText("");
-    setIsSubmitted(false);
-    setDragOffset(0);
-    onClose();
+    if (isClosing) return;
+
+    window.clearTimeout(closeTimerRef.current);
+    setIsClosing(true);
+    setDragOffset(window.innerHeight);
+
+    closeTimerRef.current = window.setTimeout(() => {
+      setSelectedOption("");
+      setRequestText("");
+      setIsSubmitted(false);
+      setDragOffset(0);
+      currentDragOffsetRef.current = 0;
+      setIsClosing(false);
+      onClose();
+    }, SHEET_CLOSE_ANIMATION_MS);
   };
 
-  const handleTouchStart = (event) => {
-    const touch = event.touches[0];
-    const sheet = sheetRef.current;
+  const handlePointerDown = (event) => {
+    if (!event.isPrimary) return;
+
+    event.currentTarget.setPointerCapture?.(event.pointerId);
 
     dragStateRef.current = {
-      startX: touch.clientX,
-      startY: touch.clientY,
-      isDragging: !sheet || sheet.scrollTop <= 0,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      isDragging: true,
+      hasMoved: false,
     };
   };
 
-  const handleTouchMove = (event) => {
-    if (!dragStateRef.current.isDragging) return;
+  const handlePointerMove = (event) => {
+    const dragState = dragStateRef.current;
+    if (!dragState.isDragging || dragState.pointerId !== event.pointerId || isClosing) return;
 
-    const touch = event.touches[0];
-    const deltaX = touch.clientX - dragStateRef.current.startX;
-    const deltaY = touch.clientY - dragStateRef.current.startY;
+    const deltaX = event.clientX - dragState.startX;
+    const deltaY = event.clientY - dragState.startY;
 
     if (Math.abs(deltaX) > Math.abs(deltaY) || deltaY <= 0) {
       setDragOffset(0);
+      currentDragOffsetRef.current = 0;
       return;
     }
 
-    setDragOffset(Math.min(deltaY, 140));
+    event.preventDefault();
+    dragState.hasMoved = true;
+
+    const nextOffset = Math.min(deltaY, window.innerHeight * 0.6);
+    currentDragOffsetRef.current = nextOffset;
+    setDragOffset(nextOffset);
   };
 
-  const handleTouchEnd = () => {
-    if (dragOffset >= SWIPE_CLOSE_DISTANCE) {
+  const handlePointerEnd = (event) => {
+    if (isClosing) return;
+
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+
+    if (currentDragOffsetRef.current >= SWIPE_CLOSE_DISTANCE) {
       handleClose();
     } else {
       setDragOffset(0);
+      currentDragOffsetRef.current = 0;
     }
 
-    dragStateRef.current.isDragging = false;
+    dragStateRef.current = {
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      isDragging: false,
+      hasMoved: false,
+    };
   };
 
   return (
     <div
       className="fixed inset-y-0 left-1/2 z-[60] w-full max-w-[440px] -translate-x-1/2 bg-[rgba(10,9,8,0.42)] backdrop-blur-[2px]"
+      style={{ overscrollBehavior: "contain" }}
       role="dialog"
       aria-modal="true"
       onClick={handleClose}
@@ -95,12 +136,18 @@ function AdvisorSheet({
         className={`absolute bottom-0 left-0 w-full rounded-t-[16px] bg-[#fcfbf9] ${
           hasSubmitted ? "max-h-[calc(100dvh-84px)] overflow-y-auto" : "min-h-[467px]"
         }`}
-        style={{ transform: dragOffset ? `translateY(${dragOffset}px)` : undefined }}
+        style={{
+          overscrollBehavior: "contain",
+          touchAction: "none",
+          transform: dragOffset ? `translateY(${dragOffset}px)` : undefined,
+          transition: dragOffset && !isClosing ? undefined : "transform 180ms ease-out",
+          userSelect: dragOffset ? "none" : undefined,
+        }}
         onClick={(event) => event.stopPropagation()}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
       >
         <div className="flex justify-center pt-3">
           <span className="h-1 w-9 rounded-[2px] bg-[#e5e0da]" />
