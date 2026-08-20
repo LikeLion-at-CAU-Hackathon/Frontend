@@ -8,6 +8,16 @@ import TodayItems from "../../components/ai/TodayItems";
 import { getRecommendationResult } from "../../api/recommendationApi";
 import useRecommendationStore from "../../stores/useRecommendationStore";
 
+const getLatestTodayItem = (items) => {
+  if (!items.length) return null;
+
+  const sortedItems = [...items].sort(
+    (first, second) => (Number(first.sequence) || 0) - (Number(second.sequence) || 0),
+  );
+
+  return sortedItems[sortedItems.length - 1] ?? items[items.length - 1];
+};
+
 function AIStyleProfilePage() {
   const navigate = useNavigate();
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
@@ -46,6 +56,7 @@ function AIStyleProfilePage() {
   };
 
   const todayItems = result?.todayItems ?? [];
+  const advisorProduct = getLatestTodayItem(todayItems);
   const styleKeywords = result?.keywords ?? [];
   const looks = result?.looks ?? [];
 
@@ -84,7 +95,11 @@ function AIStyleProfilePage() {
       </section>
 
       <AdvisorButton onClick={() => setIsAdvisorOpen(true)} />
-      <AdvisorSheet isOpen={isAdvisorOpen} onClose={() => setIsAdvisorOpen(false)} />
+      <AdvisorSheet
+        isOpen={isAdvisorOpen}
+        product={advisorProduct}
+        onClose={() => setIsAdvisorOpen(false)}
+      />
     </main>
   );
 }
